@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>JS Fun</title>
+<meta charset="UTF-8">
+
+<script src="https://code.createjs.com/easeljs-0.8.1.min.js"></script>
+
+<script>
+
+// CreateJS / easelJS Referenece Doc:
+// http://www.createjs.com/getting-started
+
+
+// Start the Object Declare ( Parent & Child )
+// Start the Render
+
+var _renderFrequency = 200; // 1000 = 1 sec.
+
+
+// -----------------------------------------------------------------
+// -- Classes --------------
+
+
+// Todo:
+//		- Add boundary bounce
+//		- Life indicator number show
+//		- Life span (grow and die & rebirth) (or baby offspring)
+//		- Collision action
+//		- Click action
+//		- Code by 'State' - 'Action'.  States: Stand/Walk/Run, Fight/Follow
+
+
+// prototype the classes for inheritance..
+function Kid()
+{
+	var me = this;
+
+	me.age = 0;
+	me.movement = 0;
+	me.velocity;
+	me.direction;
+	me.collision;
+	me.printStatus = false;
+
+
+	me.addEventListener( "click", function()
+	{
+		console.log( 'click test' );
+	});
+
+
+	me.performNext = function()
+	{
+		me.moveNext();
+		//me.grow();
+	}
+
+	me.moveNext = function()
+	{
+		// Calculate where to move..		
+
+		me.x += me.movement;
+
+		if ( me.printStatus )
+		{
+			console.log( 'moved: x ' + me.movement ); 
+		}
+	}
+}
+
+Kid.prototype = new createjs.Shape();
+
+
+//createjs.Shape.prototype.moveOne = function() { this.x += 3; };
+
+function init() 
+{
+	var stage = new createjs.Stage( "demoCanvas" );
+
+	var kids = new Array();
+
+	// Create objects and Add to Stages
+	var kid1 = new Kid(); //createjs.Shape();
+	kid1.graphics = new createjs.Graphics();
+	kid1.graphics.beginFill( "Yellow" ).drawCircle( 0, 0, 30 );
+	kid1.x = 100;
+	kid1.y = 100;
+	kid1.movement = 3;
+
+	var kid2 = new Kid(); //createjs.Shape();
+	kid2.graphics = new createjs.Graphics();
+	kid2.graphics.beginFill( "Blue" ).drawCircle( 0, 0, 30 );
+	kid2.x = 200;
+	kid2.y = 200;
+	kid2.movement = -1;
+
+	kids.push( kid1 );
+	kids.push( kid2 );
+
+	stage.addChild( kid1 );
+	stage.addChild( kid2 );
+
+
+	setInterval( function() 
+	{
+		stage.update();
+
+		for ( i = 0; i < kids.length; i++ )
+		{
+			kids[i].performNext();
+		}
+
+	}, _renderFrequency );
+
+}
+
+
+</script>
+
+
+</head>
+
+<body onload="init();">
+
+  <canvas id="demoCanvas" width="700" height="500" style="background-color: #FDD;"></canvas>
+
+</body>
+
+</html>

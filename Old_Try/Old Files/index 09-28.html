@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>JS Fun</title>
+<meta charset="UTF-8">
+
+<script src="https://code.createjs.com/easeljs-0.8.1.min.js"></script>
+<!--<script type="text/javascript" src="js/easeljs-0.8.1.min.js"></script>-->
+
+<script>
+
+// CreateJS / easelJS Referenece Doc:
+// http://www.createjs.com/getting-started
+
+// ------------------------------------------
+// -- Overall Design / Psudo Code
+// ------------------------------------------
+//
+// init()
+// {
+//	 Setups ( Stage/Objects )
+//
+//   Render ( all by time interval )
+// }
+//
+// ------------------------------------------
+
+
+// Todo:
+//		- Add boundary bounce
+//		- Life indicator number show
+//		- Life span (grow and die & rebirth) (or baby offspring)
+//		- Collision action
+//		- Click action
+//		- Code by 'State' - 'Action'.  States: Stand/Walk/Run, Fight/Follow
+
+
+// -----------------------------------------
+
+var keycode_w = 87;
+var keycode_a = 65;
+var keycode_s = 83;
+var keycode_d = 68;
+
+var bStop = false;
+
+var _stage;
+var _canvasBounds; 
+
+function init() 
+{
+	// -- Setup Stage and Objects
+	var stage = setUp_StageAndObjects();
+
+	// -- Render Objects In Stage
+	setUp_Rendering( stage );
+
+
+	setUpKeyDownAction( stage );
+
+
+	outputMsgAdd( "Key: 's' to stop/start, 'a' to add new kid" );
+}
+
+// -----------------------------------------
+
+
+// ---------------------------------------------------
+// -- Setups: Setup Stage and Objects, Setup Rendering
+
+function setUp_StageAndObjects()
+{
+	var stage = new createjs.Stage( "demoCanvas" );
+
+	var kid1 = createContainer( Kid, stage, "kid1", 30, "Yellow", 100, 100, 4);
+	var kid2 = createContainer( Kid, stage, "kid2", 40, "Blue", 200, 200, -3);
+
+	stage.addChild( kid1 );
+	stage.addChild( kid2 );
+
+	return stage;
+}
+
+function setUp_Rendering( stage )
+{
+	createjs.Ticker.framerate = 10;
+
+	createjs.Ticker.addEventListener( "tick", handleRender );
+
+	function handleRender( event ) 
+	{
+		if ( !bStop )
+		{
+			//createjs.Ticker.setPause( false );
+			//createjs.Ticker.setPaused( true );
+
+			for ( i = 0; i < stage.numChildren; i++ )
+			{
+				stage.getChildAt( i ).performNext();
+				//stage.getChildAt( i ).x += 3;
+			}
+
+			stage.update();
+		}
+	}
+}
+
+
+
+function setUpKeyDownAction( stage )
+{
+	window.onkeydown = function( event )
+	{
+		handleKeyDown( event, stage );	
+	};
+}
+
+
+// Handle Key Down Function
+function handleKeyDown( event, stage ) 
+{
+    switch( event.keyCode ) 
+	{
+        case keycode_s: 
+			
+			bStop = !bStop;
+
+			var msg = ( bStop ) ? "Stopped" : "Started";
+			//createjs.Ticker.setPaused( bStop );
+			outputMsgAdd( msg );
+
+			return false;
+		case keycode_a:
+			
+			addKid( stage );
+			
+			return false;
+    }
+}
+
+function addKid( stage )
+{
+	var newKidName = "kid" + ( stage.numChildren + 1 );
+
+	var newKid = createContainer( Kid, stage, newKidName, 40, "Blue", 200, 200, -3);
+
+	stage.addChild( newKid );
+
+	outputMsgAdd( "Added " + newKidName );
+}
+
+function outputMsgAdd( msg )
+{
+	var outputDiv = document.getElementById( "divMsg" );
+	
+	outputDiv.innerHTML = msg + "<br>" + outputDiv.innerHTML;
+}
+
+// -- Setups: Setup Stage and Objects, Setup Rendering
+// ---------------------------------------------------
+
+
+// --------------------------------------
+// -- Kids Class
+function Kid( stage, name, size, color, locationX, locationY, speed )
+{
+	var me = this;
+
+	me.canvasBoundsX = stage.canvas.width;
+	me.canvasBoundsY = stage.canvas.height;
+
+	me.name = name;
+	me.size = size;  // radius
+	me.color = color;
+	me.locationX = locationX;
+	me.locationY = locationY;
+	me.speed = speed;
+	me.movementX;
+	me.movementY;
+
+	me.tickCount = 0;
+	me.age = 0;
+	me.collision;
+	me.printStatus = false;
+
+	// --------------------
+	// Object Layer
+	me.label = new createjs.Text( name, "normal 14px Arial", "White");
+	me.shape = new createjs.Shape();
+
+	// id, name
+
+	// ----------------------------------------------
+	// -- Events
+
+	me.setUpClick = function()
+	{
+		//me.addEventListener( "click", me.performClick );
+		//me.label.addEventListener( "click", me.performClick );
+		me.shape.addEventListener( "click", me.performClick );
+	}
+
+	me.performClick = function()
+	{
+		console.log( 'click test: ' + me.name );
+
+		if ( me.shape.graphics !== undefined )
+		{
+			me.shape.graphics.beginFill( "Red" ).drawCircle( 0, 0, me.size );
+		}
+
+		me.label.font = "bold 15px Arial";
+
+		me.setDirection_Random( me.speed );
+	}
+
+	// -----------------------------------
+	// --- Actions
+
+	me.performNext = function()
+	{
+		me.tickCount++;
+
+		me.setLabelChange( me.tickCount );
+		me.moveNext();
+		//me.grow();
+	}
+
+
+	me.setLabelChange = function( tickCount )
+	{
+		me.label.text = me.name + "\n[age:" + Math.floor( tickCount / 10 ) + "]";
+	}
+
+	// ----------------------------------
+	// ---- Movement Related -----
+
+
+	me.setDirection_Random = function( speed )
+	{
+		var angle = Math.random() * Math.PI * 2;
+
+		me.movementX = Math.cos( angle ) * speed;
+		me.movementY = Math.sin( angle ) * speed;
+	}
+
+	me.setDirection_Bounce = function( bounceDirection )
+	{
+		if ( bounceDirection == "x" )
+		{
+			me.movementX = -me.movementX;
+		}
+		else if ( bounceDirection == "y" )
+		{
+			me.movementY = -me.movementY;
+		}
+	}
+
+	me.moveNext = function()
+	{
+		me.setLocation( me.x + me.movementX, me.y + me.movementY );
+	}
+
+
+	me.setLocation = function( locX, locY )
+	{
+		if ( locX !== undefined )
+		{
+			me.x = locX;
+
+			if ( ( me.x - me.size ) <= 0 
+				|| ( me.x + me.size ) >= me.canvasBoundsX )
+			{
+				me.setDirection_Bounce( "x" );
+			}
+		}
+
+		if ( locY !== undefined )
+		{
+			me.y = locY;
+
+			if ( ( me.y - me.size ) <= 0 
+				|| ( me.y + me.size ) >= me.canvasBoundsY )
+			{
+				me.setDirection_Bounce( "y" );
+			}
+		}
+	}
+
+
+	// -----------------------------------------
+	// ---- Setup Methods -----
+
+	me.setUpLabel = function()
+	{
+		me.label.textAlign = "center";
+		me.label.textBaseline = "middle";
+	}
+
+
+	me.setUpShape = function()
+	{
+		if ( me.shape.graphics !== undefined )
+		{
+			me.shape.graphics.beginFill( me.color ).drawCircle( 0, 0, me.size );
+		}
+	}
+
+
+	// -----------------------------------------
+
+	me.initializeObj = function()
+	{
+		me.setUpShape();
+		me.setUpLabel();
+
+		me.addChild( me.shape, me.label );
+
+		me.setLocation( me.locationX, me.locationY );
+
+		me.setDirection_Random( me.speed );
+
+		me.setUpClick();
+	}
+
+	me.initializeObj();
+}
+
+
+// --------------------------------------
+// -- Util Methods
+
+/*
+function create( name, childClass, parent ) 
+{
+  //var F = function() {};
+  childClass.prototype = parent;
+  return new childClass( name );
+}
+*/
+
+function createContainer( childClass, stage, name, size, color, locationX, locationY, movement ) 
+{
+  childClass.prototype = new createjs.Container();
+  return new childClass( stage, name, size, color, locationX, locationY, movement );
+}
+
+// -- Util Methods
+// --------------------------------------
+
+
+</script>
+
+
+</head>
+
+<body onload="init();">
+
+  <canvas id="demoCanvas" width="700" height="500" style="background-color: #FDD;"></canvas>
+  <div id="divMsg" style="border: 1px solid #555;">
+  </div>
+
+</body>
+
+</html>

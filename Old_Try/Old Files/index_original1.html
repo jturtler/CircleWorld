@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>JS Fun</title>
+<meta charset="UTF-8">
+
+<!--<script src="https://code.createjs.com/easeljs-0.8.1.min.js"></script>-->
+<script type="text/javascript" src="js/easeljs-0.8.1.min.js"></script>
+
+<script>
+
+// CreateJS / easelJS Referenece Doc:
+// http://www.createjs.com/getting-started
+
+// ------------------------------------------
+// -- Overall Design / Psudo Code
+// ------------------------------------------
+//
+// init()
+// {
+//	 Setups ( Stage/Objects )
+//
+//   Render ( all by time interval )
+// }
+//
+// ------------------------------------------
+
+
+// Todo:
+//		- Add boundary bounce
+//		- Life indicator number show
+//		- Life span (grow and die & rebirth) (or baby offspring)
+//		- Collision action
+//		- Click action
+//		- Code by 'State' - 'Action'.  States: Stand/Walk/Run, Fight/Follow
+
+
+// -----------------------------------------
+
+function init() 
+{
+	// -- Setup Stage and Objects
+	var stage = setUp_StageAndObjects();
+
+
+	// -- Render Objects In Stage
+	setUp_Rendering( stage );
+}
+
+// -----------------------------------------
+
+
+// ---------------------------------------------------
+// -- Setups: Setup Stage and Objects, Setup Rendering
+
+function setUp_StageAndObjects()
+{
+	var stage = new createjs.Stage( "demoCanvas" );
+
+	var kid1 = createShape( Kid );
+	kid1.setShape( 30, "Yellow", 100, 100, 3);
+
+	var kid2 = createShape( Kid );
+	kid2.setShape( 40, "Blue", 200, 200, -1);
+
+	var kid3 = create( Kid, new Button( 'tester', "#F00", 40 ) );
+	kid3.setShape( undefined, undefined, 300, 300, -0.5 );
+
+
+	stage.addChild( kid1 );
+	stage.addChild( kid2 );
+	stage.addChild( kid3 );
+
+
+	return stage;
+}
+
+
+function setUp_Rendering( stage )
+{
+	createjs.Ticker.framerate = 10;
+
+	createjs.Ticker.addEventListener( "tick", handleRender );
+
+
+	function handleRender( event ) {
+
+		for ( i = 0; i < stage.numChildren; i++ )
+		{
+			stage.getChildAt( i ).performNext();
+		}
+
+		stage.update();
+	}
+}
+
+// -- Setups: Setup Stage and Objects, Setup Rendering
+// ---------------------------------------------------
+
+
+// --------------------------------------
+// -- Kids Class
+function Kid()
+{
+	var me = this;
+
+	me.age = 0;
+	me.movement = 0;
+	me.velocity;
+	me.direction;
+	me.collision;
+	me.printStatus = false;
+
+	// id, name
+
+	// ----------------------------------------------
+
+	me.setShape = function( size, color, locationX, locationY, movement )
+	{
+		if ( me.graphics !== undefined )
+		{
+			me.graphics.beginFill( color ).drawCircle( 0, 0, size );
+		}
+
+		me.x = locationX;	
+		me.y = locationY;	
+		me.movement = movement;
+	}
+
+
+	// 
+	me.addEventListener( "click", function()
+	{
+		console.log( 'click test' );
+	});
+
+
+	me.performNext = function()
+	{
+		me.moveNext();
+		//me.grow();
+	}
+
+	me.moveNext = function()
+	{
+		// Calculate where to move..		
+
+		me.x += me.movement;
+
+		if ( me.printStatus )
+		{
+			console.log( 'moved: x ' + me.movement ); 
+		}
+	}
+}
+
+
+// ----------------------------------------
+// -- Button Class extending Container..
+
+( function() {
+
+	function Button( label, color, size ) {
+		this.Container_constructor();
+		
+		this.color = color;
+		this.label = label;
+		this.size = size;
+		
+		this.setup();
+	}
+
+	var p = createjs.extend(Button, createjs.Container);
+
+	p.setup = function() 
+	{
+		var text = new createjs.Text( this.label, "20px Arial", "#000" );
+		text.textBaseline = "middle";
+		text.textAlign = "center";
+		
+		//var width = text.getMeasuredWidth()+30;
+		//var height = text.getMeasuredHeight()+20;
+		
+		//text.x = width/2;
+		//text.y = 10;
+		
+		var background = new createjs.Shape();
+		//background.graphics.beginFill(this.color).drawRoundRect(0,0,width,height,10);
+		background.graphics.beginFill( this.color ).drawCircle( 0, 0, this.size );
+
+		this.addChild(background, text); 
+		this.on("click", this.handleClick);
+		this.on("rollover", this.handleRollOver);
+		this.on("rollout", this.handleRollOver);
+		this.cursor = "pointer";
+
+		this.mouseChildren = false;
+		
+		this.offset = Math.random()*10;
+		this.count = 0;
+	};
+
+	p.handleClick = function (event) {
+		alert( "You clicked on a button: " + this.label );
+	} ;
+
+	p.handleRollOver = function(event) {       
+		this.alpha = event.type == "rollover" ? 0.4 : 1;
+	};
+
+	window.Button = createjs.promote(Button, "Container");
+}());
+
+// -- Button Class extending Container..
+// ----------------------------------------
+
+
+// --------------------------------------
+// -- Util Methods
+
+function create( childClass, parent ) 
+{
+  //var F = function() {};
+  childClass.prototype = parent;
+  return new childClass();
+}
+
+function createShape( childClass ) 
+{
+  childClass.prototype = new createjs.Shape( );
+  return new childClass();
+}
+
+// -- Util Methods
+// --------------------------------------
+
+
+</script>
+
+
+</head>
+
+<body onload="init();">
+
+  <canvas id="demoCanvas" width="700" height="500" style="background-color: #FDD;"></canvas>
+
+</body>
+
+</html>
