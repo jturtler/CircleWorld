@@ -1,0 +1,19 @@
+
+.divNoteItem {
+  background-color: #f5f5f5;
+  display: inline-block; 
+  margin: 3px; 
+  padding: 3px; 
+  border: 1px solid #BBB;
+  cursor: pointer;
+}
+
+.divNoteItem:hover {
+  background-color: #fbfbfb;
+  color: #555;
+}
+
+.itemMarked {
+  background-color: orange;
+  font-weight: bold;
+}

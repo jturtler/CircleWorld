@@ -1,0 +1,30 @@
+{
+  "name": "PNA",
+  "short_name": "PNA",
+  "description": "PWA Note App",  
+  "version": "1.0.3",
+  "theme_color": "#ffc61d",
+  "background_color": "#ffc61d",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "start_url": "/PwaBasicApp/",
+  "scope": "/PwaBasicApp/",  
+  "icons": [{
+    "src": "images/icons/Connect_144px.png",
+    "sizes": "144x144",
+    "type": "image/png"
+  }, {
+    "src": "images/icons/Connect_152px.png",
+    "sizes": "152x152",
+    "type": "image/png"
+  }, {
+    "src": "images/icons/Connect_192px.png",
+    "sizes": "192x192",
+    "type": "image/png"
+  },{
+    "src": "images/icons/Connect_512px.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }],
+  "splash_pages": null
+}

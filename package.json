@@ -1,0 +1,14 @@
+{
+  "name": "sw_build",
+  "version": "1.0.0",
+  "description": "PWA service worker build",
+  "author": "James Chang",
+  "scripts": {
+    "build": "node cws_sw_build.js"
+  },
+  "dependencies": {
+    "workbox-build": "^6.3.0",    
+    "workbox-webpack-plugin": "^6.3.0",
+    "workbox-window": "^6.3.0"    
+  }
+}
