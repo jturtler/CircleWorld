@@ -5,7 +5,7 @@ function WorldRender( canvasWidth, canvasHeight )
 {
   var me = this;
 
-  me.canvas_width = (canvasWidth) ? canvasWidth: 700; // must match the '<canvas>' tag width
+  me.canvas_width = (canvasWidth) ? canvasWidth: 700; // If not provided, the default width is 700
   me.canvas_height = (canvasHeight) ? canvasHeight: 500;
 
   me._bStop = false;
@@ -177,26 +177,7 @@ function WorldRender( canvasWidth, canvasHeight )
 
   me.tickRender = function (stageObj) 
   {
-    me.chaingMin = me.chaingMin + 1;
-    count10 = count10 + 1;
-
-
-    //console.log( new Date().toString() );
-    var timeVar = new Date().getTime();
-    var frameTimeStr = new Date().toString().substr( 0, 24 );
-    
-    var remainder = timeVar % 2;
-
-   
-    if ( count10 >= 10 ) {
-      count10 = 0;
-
-      var color = '#' + me.getRandomColor();
-      $( '#demoCanvas').css( 'background-color', color );  
-    }
-
-    $( '#divInfo' ).text( 'Frame: ' + frameTimeStr + ' / COLOR: ' + color + ' / [창민숫자: ' + me.chaingMin + '] [count10: ' + count10 + ']' );
-
+    //$( '#divInfo' ).text( '' ); 
 
     if ( !me._bStop ) 
     {
@@ -218,9 +199,11 @@ function WorldRender( canvasWidth, canvasHeight )
       });
       */
 
-      if ( me.shape1.x >= 700 ) me.shape1_x_dir = 'minus';
-      else if ( me.shape1.x <= 0 ) me.shape1_x_dir = 'plus';
 
+      // Simple Bouncing right and left
+      //    - shape1 width is 120..
+      if ( me.shape1.x >= me.canvas_width - 120 ) me.shape1_x_dir = 'minus';
+      else if ( me.shape1.x <= 0 ) me.shape1_x_dir = 'plus';
 
       me.shape1.x += ( me.shape1_x_dir === 'minus' ) ? -10: 10;
       me.shape1_label1.x += ( me.shape1_x_dir === 'minus' ) ? -10: 10;

@@ -21,7 +21,7 @@ generateSW({
       }
     }
   ]
-
+ 
 }).then(({count, size}) => {
   console.log(`Generated new service worker with ${count} precached files, totaling ${size} bytes.`);
 }).catch(console.error);
