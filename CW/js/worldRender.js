@@ -1,5 +1,3 @@
-var count10 = 0;
-
 //	- WorldRender Class - Main World Rendering Class, Starting point
 function WorldRender( canvasWidth, canvasHeight ) 
 {
@@ -31,17 +29,28 @@ function WorldRender( canvasWidth, canvasHeight )
 
   // -------------------
 
-  // 창민
-  me.chaingMin = 0;
   me.shape1;
   me.shape1_label1;
   me.shape1_x_dir = 'plus';  
 
   me.obj1;  // me.char = { ----}
 
+  me.resizeStage = function()
+  {
+    // _canvasStage
+  };
+
+
   me.startUp = function () 
   {
     // -- Setup Stage and Objects
+
+    // TODO: Create a 'stageObj' global one <-- class, and place createjs.Stage in it..
+    // Put the size in there as well.. + some other physics calculation in here??
+
+    // Then, how is it difference from 'WorldRender'?  vs 'stage'?
+
+
     me.stageObj = new createjs.Stage('demoCanvas'); //me.setUp_StageObj();
   
     me.shape1 = new createjs.Shape();
