@@ -35,7 +35,14 @@
 
 	<link rel="icon" type="image/png" href="icons/icon-144x144.png">
 
-
+	<style>
+		body {
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+			display: block;
+		}
+	</style>
 	
 	<script src="js/easeljs.min.js"></script>
 	<script src="js/jquery-3.4.1.min.js"></script>
@@ -66,60 +73,99 @@
 </head>
 
 <body>
+	<canvas id="demoCanvas" style="background-color: #FDD; margin: 0px; vertical-align: middle; text-align: top;"></canvas>
 
-	<canvas id="demoCanvas" width="700" height="500" style="background-color: #FDD;"></canvas>
-	<div id="commands" style="margin: 5px;">
+	<div id="commands" style="margin: 3px;">
 		<!--button id="btnStartStop">Stop</button> 
     <button id="btnAddKid" style="margin-left: 7px;">Add Kid</button-->
+		<button id="btnReload">Reload App</button>
 		<input id="inputFramerate" readonly style="margin-left: 7px; width: 20px; background-color: #eee;" />
 		<button id="btnFramerateUp" style="margin-left: 3px;">+</button>
 		<button id="btnFramerateDown">-</button>
+		<span id="divInfo" style="border: 1px solid #bbbbbb; margin: 5px;"></span>
 	</div>
-	<div id="divInfo" style="border: 1px solid #bbbbbb; margin: 5px;"></div>
 	<div id="divMsg" style="border: 1px solid #bbbbbb;"></div>
 
 	<script>
+
+		var OFFSET_WIDTH = 10;
+		var OFFSET_HEIGHT = 40;
+		
+		// Service Worker Start When Browser Opens/Refreshes..
 		serviceWorkerStart();
 
-		$(document).ready(function () {
-			var _canvasStage = new WorldRender();
+		// When all the HTML is finished loading, start the JQuery Commands.
+		$(document).ready(function () 
+		{
+			var canvasTag = $( '#demoCanvas');
+			var winTag = $( window );
+
+			// 1. Setup Reload Button
+			$( '#btnReload' ).click( () => { window.location.reload(); });
+
+			// 2. Set the canvas size to fit width/height of browser
+			fitCanvas( canvasTag, winTag );
+
+			// 3. Start the app stage.
+			var _canvasStage = new WorldRender( $( window ).width(), $( window ).height() );
 			_canvasStage.startUp();
+
+			
+			// Resize will be an headache - since we need to restart the stage with diff value?
+			//$( window ).on( "resize", function() {  fitCanvas( canvasTag, winTag );  });
 		});
 
+		
+		function fitCanvas( canvasTag, winTag ) 
+		{
+			var cTag = canvasTag[0];
+			cTag.width = winTag.width() - OFFSET_WIDTH;
+			cTag.height = winTag.height() - OFFSET_HEIGHT;
+
+			console.log( 'canvasTag Dimension: ' + canvasTag.width() + ', ' + canvasTag.height());
+
+			// TODO: Floating (optional on/off) Info Window with this!!
+			// Controllerable location change and opacity change..
+			
+		}
 
 		// ============================================
+		// Size of browser viewport --> $(window).height(); $(window).width();
+		// Size of HTML document --> $(document).height(); $(document).width();
+		// For screen size (screen obj): --> window.screen.height; window.screen.width;
 
-		function serviceWorkerStart() {
-			//window.isUpdateAvailable = new Promise(function(resolve, reject) {
+
+
+		// TODO: Improve below ServiceWorker Update Process
+		function serviceWorkerStart() 
+		{
 			// lazy way of disabling service workers while developing
-			if ('serviceWorker' in navigator )
-			//&& ['localhost', '127'].indexOf(location.hostname) === -1
+			if ('serviceWorker' in navigator ) //&& ['localhost', '127'].indexOf(location.hostname) === -1
 			{
 				// register service worker file
 				navigator.serviceWorker.register('service-worker.js')
-					.then(reg => {
-						reg.onupdatefound = () => {
-							const installingWorker = reg.installing;
-							installingWorker.onstatechange = () => {
-								switch (installingWorker.state) {
-									case 'installed':
-										if (navigator.serviceWorker.controller) {
-											// new update available
-											console.log( 'Update Found.' );
-											//resolve(true);
-										} else {
-											// no update available
-											console.log( 'No Update Found.' );
-											//resolve(false);
-										}
-										break;
-								}
-							};
+				.then(reg => {
+					reg.onupdatefound = () => {
+						const installingWorker = reg.installing;
+						installingWorker.onstatechange = () => {
+							switch (installingWorker.state) {
+								case 'installed':
+									if (navigator.serviceWorker.controller) {
+										// new update available
+										console.log( 'Update Found.' );
+										//resolve(true);
+									} else {
+										// no update available
+										console.log( 'No Update Found.' );
+										//resolve(false);
+									}
+									break;
+							}
 						};
-					})
-					.catch(err => console.error('[SW ERROR]', err));
-			}
-			//});		
+					};
+				})
+				.catch(err => console.error('[SW ERROR]', err));
+			}	
 		};		
 
 	</script>
