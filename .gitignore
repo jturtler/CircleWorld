@@ -1,6 +1,5 @@
 # Custom
-*/service-worker*
-
+CW/service-worker.*
 
 # Logs
 logs

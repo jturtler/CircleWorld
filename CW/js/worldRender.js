@@ -24,15 +24,22 @@ WorldRender.startUp = function ()
 
 	WorldRender.framerateChange_Setup();
 
-	// Resize event
-
-					// Events - browser resizing handling
-				//AppUtil.setResizeEventHandler( () => { WorldRender.resizeCanvas(); } );
-
-	// callOnlyOnce
+	WorldRender.browserResize_Setup();
 };
 
 // ------------------------
+
+
+WorldRender.browserResize_Setup = function()
+{
+	$( window ).on( "resize", () => 
+	{
+		AppUtil.callOnlyOnce( { waitTimeMs: 1000 }, () => {
+			WorldRender.resizeCanvas();
+		}); 		
+	});
+};
+
 
 WorldRender.resizeCanvas = function () 
 {

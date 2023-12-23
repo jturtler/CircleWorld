@@ -1,7 +1,7 @@
 //	- WorldRender Class - Main World Rendering Class, Starting point
 function StageManager() {};
 
-StageManager.framerate = 1;
+StageManager.framerate = 5;
 StageManager.stage;
 
 // ---------------------
@@ -25,9 +25,15 @@ StageManager.startUp = function( infoJson, options )
 
 };
 
+// ---------------------------------------------
+
+StageManager.setSize = function( infoJson )
+{
+
+};
 
 // 'addStageContainer'?
-StageManager.addStageObject = function ( obj )
+StageManager.addStageObject = function( obj )
 {
   var shape = new createjs.Shape();
   shape.graphics.beginFill('green').drawCircle(0, 0, 30);
