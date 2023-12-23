@@ -3,6 +3,12 @@
 
 function AppUtil() {}
 
+AppUtil.OFFSET_WIDTH = 20;
+AppUtil.OFFSET_HEIGHT = 40; // For bottom control space
+
+AppUtil.appReloading = false;  
+AppUtil.callOnlyOnce_timeoutId;
+
 // ============================================
 // Size of browser viewport --> $(window).height(); $(window).width();
 // Size of HTML document --> $(document).height(); $(document).width();
@@ -10,7 +16,6 @@ function AppUtil() {}
 
 // Browser refresh/reload
 // Set this before refreshing, thus, sw state event not display the update message.
-AppUtil.appReloading = false;  
 
 // ==== Methods ======================
 
@@ -20,7 +25,7 @@ AppUtil.appReloadWtMsg = function( msg, option )
 	if ( !option ) option = {};
 	
 	// MsgManager.msgAreaShowOpt( msg, { cssClasses: 'notifCBlue', closeOthers: true } );
-	$( '.divInfo' ).text( msg );
+	$( '#spanInfo' ).text( msg );
 
 	AppUtil.appReloading = true;
 
@@ -28,11 +33,21 @@ AppUtil.appReloadWtMsg = function( msg, option )
 };
 
 		
-AppUtil.fitCanvasSize = function( canvasTag, winTag ) 
+AppUtil.fitCanvasSize = function( infoJson )
 {
-	var cTag = canvasTag[0];
-	cTag.width = winTag.width() - OFFSET_WIDTH;
-	cTag.height = winTag.height() - OFFSET_HEIGHT;
+	infoJson.canvasTagHtml.width = infoJson.winTag.width() - AppUtil.OFFSET_WIDTH;
+	infoJson.canvasTagHtml.height = infoJson.winTag.height() - AppUtil.OFFSET_HEIGHT;
+};
 
-	console.log( 'canvasTagHTML Dimension: ' + cTag.width + ', ' + cTag.height );
+
+AppUtil.callOnlyOnce = function( option, callBack ) 
+{
+	var waitTimeMs = ( option && option.waitTimeMs ) ? option.waitTimeMs: 1000;
+
+	clearTimeout( AppUtil.callOnlyOnce_timeoutId );
+
+	AppUtil.callOnlyOnce_timeoutId = setTimeout( () => {
+		if ( callBack ) callBack();
+	}, waitTimeMs );
+
 };

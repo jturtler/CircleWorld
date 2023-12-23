@@ -50,27 +50,19 @@
 
 	<script src="js/helpers/builder.js"></script>
 	<script src="js/helpers/kidsBuilder.js"></script>
+	<script src="js/helpers/stageObjectBuilder.js"></script>
+
 	<script src="js/helpers/physicsHandler.js"></script>
 
 	<script src="js/swManager.js"></script>
 	<script src="js/kid.js"></script>
+	<script src="js/stageManager.js"></script>
 	<script src="js/worldRender.js"></script>
-
-	<!--
-	// CreateJS / easelJS Referenece Doc: http://www.createjs.com/getting-started
-	//		Google Doc:	https://docs.google.com/document/d/11620kT9Nmc5_p4mYg3t4ClwXM5KSLKS2xj474nmeRqs/edit?ts=5ff9203f
-	// Classes:
-	//	- CanvasStage Class - Main Stage Class, Starting point
-	//  - Kids Class 		- Kids object...
-	//	- KidsBuilder Class - Builder class for Kids Object
-	//	- Builder Class 	- Util For Attribtue & Location generator class
-	//	- PhysicsHandler	- Class to manage physical related decision/detection -- collision with something..  detect bounds..
-	//						- Based on each object location..
-	-->
-
 </head>
 
 <body>
+	<!-- Notes Placed in 'about.html' -->
+
 	<canvas id="demoCanvas" style="background-color: #FDD; margin: 0px; vertical-align: middle; text-align: top;"></canvas>
 
 	<div id="commands" style="margin: 3px;">
@@ -78,48 +70,26 @@
     <button id="btnAddKid" style="margin-left: 7px;">Add Kid</button-->
 		<button id="btnReload">Reload App</button>
 		<input id="inputFramerate" readonly style="margin-left: 7px; width: 20px; background-color: #eee;" />
-		<button id="btnFramerateUp" style="margin-left: 3px;">+</button>
-		<button id="btnFramerateDown">-</button>
-		<span id="divInfo" style="border: 1px solid #bbbbbb; margin: 5px;"></span>
+		<button id="btnFramerateUp" style="margin-left: 3px; width: 25px;">+</button>
+		<button id="btnFramerateDown" style="margin-left: 3px; width: 25px;">-</button>
+		<span style="color: #bbbbbb; margin: 0px 10px; font-size: 12px;">|</span>
+		<span id="spanInfo" style="color: #777; font-size: 12px;"></span>
 	</div>
 	<div id="divMsg" style="border: 1px solid #bbbbbb;"></div>
 
 	<script>
-
-		var OFFSET_WIDTH = 20;
-		var OFFSET_HEIGHT = 40; // For bottom control space
-
-		var _worldRenderObj;
 		
 		// When all the HTML is finished loading, start the JQuery Commands.
 		$(document).ready(function () 
 		{
-			var canvasTag = $( '#demoCanvas');
-			var winTag = $( window );
-
 			SwManager.initialSetup( () => 
 			{
 				SwManager.checkAppUpdate( '[AppUpdateCheck] - App startUp' );
 
-				// 1. Set the canvas size to fit width/height of browser
-				var convasTagHtml = AppUtil.fitCanvasSize( canvasTag, winTag );
-
-				//_worldRenderObj = new WorldRender( convasTagHtml.width, convasTagHtml.height );
-				//_worldRenderObj.startUp();
-
+				// StartUp WorldRender - the main class.
+				WorldRender.setInfoJson( { canvasName: 'demoCanvas', winTag: $( window ) } );
+				WorldRender.startUp();
 			});
-
-			window.addEventListener('resize', function(event) {
-				// Only call resize and restart after 1 seconds stability?
-				AppUtil.fitCanvasSize( canvasTag, winTag );
-			}, true);
-
-			// Setup Reload Button <-- move to other class..
-			// $( '#btnReload' ).click( () => { window.location.reload(); });
-
-			// 3. Start the app stage.
-			//_worldRenderObj = new WorldRender( convasTagHtml.width, convasTagHtml.height );
-			//_worldRenderObj.startUp();
 		});
 
 	</script>
