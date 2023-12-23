@@ -19,8 +19,8 @@ WorldRender.startUp = function ()
 {
 	AppUtil.fitCanvasSize(WorldRender.infoJson); // Adjust Canvas Size to fit the browser size
 
-	var startingStageObjs = StageObjectBuilder.createStageObjs_Samples(1);
-	WorldRender.stage = StageManager.startUp(WorldRender.infoJson, { startingStageObjs: startingStageObjs });
+	var startingObjs = StageObjectBuilder.createSampleObjs(1);
+	WorldRender.stage = StageManager.startUp(WorldRender.infoJson, { startingObjs: startingObjs });
 
 	WorldRender.framerateChange_Setup();
 
