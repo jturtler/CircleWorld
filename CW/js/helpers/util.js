@@ -1,7 +1,7 @@
 
 function Util() { }
 
-Util.getRandNumBtw = function (start, end) 
+Util.getRandomInRange = function (start, end) 
 {
 	var range = end - start;
 
@@ -10,17 +10,23 @@ Util.getRandNumBtw = function (start, end)
 	return start + randRange;
 };
 
+Util.getRandomInList = function (list) 
+{
+	var randIndex = Util.getRandomInRange(0, list.length - 1);
+
+	return list[randIndex];
+};
+
+Util.getRandomColorHex = function () 
+{
+	return '#' + Math.floor(Math.random()*16777215).toString(16);
+};
+
 Util.cutDecimalPlace = function ( input, decimalPlace ) 
 {
 	return parseFloat( input.toFixed( decimalPlace ) );
 };
 
-Util.getRandFromList = function (list) 
-{
-	var randIndex = Util.getRandNumBtw(0, list.length - 1);
-
-	return list[randIndex];
-};
 
 Util.outputMsgAdd = function (msg, durationSec) 
 {

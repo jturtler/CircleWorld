@@ -22,9 +22,6 @@ WorldRender.startUp = function ()
 	var startingObjs = StageObjectBuilder.createSampleObjs(1);
 	WorldRender.stage = StageManager.startUp(WorldRender.infoJson, { startingObjs: startingObjs });
 
-	WorldRender.framerateChange_Setup();
-
-	WorldRender.browserResize_Setup();
 
 	// SetUp Events - 'Add Obj', 'Add Portal', 'Show/Hide Info Panel'
 	WorldRender.setUp_Events();
@@ -34,21 +31,51 @@ WorldRender.startUp = function ()
 
 WorldRender.setUp_Events = function()
 {
+	WorldRender.framerateChange_Setup();
+
 	$( '#btnAddObj' ).click( function() 
 	{
-		StageManager.insertToStage( StageObjectBuilder.createObj( { objType: 'circle' } ) );
+		StageManager.addNewItem();
 	});
-};
 
+	$( '#btnStopStart' ).click( function() 
+	{
+		if ( !createjs.Ticker.paused )
+		{			
+			createjs.Ticker.paused = true;
+			$( '#spanStopStart' ).text( 'tart' );
+			$( '#spanInfo' ).text( 'Stopped.. ' );
+		}
+		else
+		{
+			createjs.Ticker.paused = false;
+			$( '#spanStopStart' ).text( 'top' );
+			$( '#spanInfo' ).text( 'Started Again.. ' );
+		}
+	});
 
-WorldRender.browserResize_Setup = function()
-{
+	// browserResize_Setup
 	$( window ).on( "resize", () => 
 	{
 		AppUtil.callOnlyOnce( { waitTimeMs: 1000 }, () => {
 			WorldRender.resizeCanvas();
 		}); 		
 	});
+
+	window.onkeydown = function( e )
+	{
+		switch ( e.keyCode ) 
+		{
+			case 83: //_keycode_s:
+			case 32: //_keycode space:
+				$( '#btnStopStart' ).click();
+				return false;
+
+			case 65: //_keycode_a:
+				$( '#btnAddObj' ).click();
+				return false;
+		}
+	};
 };
 
 
@@ -82,8 +109,6 @@ WorldRender.framerateChange_Setup = function ()
 
 		createjs.Ticker.framerate = StageManager.framerate;
 	});
-
-
 };
 
 
@@ -115,17 +140,6 @@ WorldRender.framerateChange_Setup = function ()
 	 // Setup HTML Tag related
   };
 
-  // ---------------------------------------------------
-  // -- Setups: Setup Stage and Objects, Setup Rendering
-
-	 // btn clicks handle
-	 $('#btnStartStop').click(me.stopStart);
-	 $('#btnAddKid').click(function () {
-		me.kidsBuilder.createKid();
-	 });
-
-	 Util.outputMsgAdd("Key: 's' to stop/start, 'a' to add new kid");
-  };
 
   // Handle Key Down Function
   me.handleKeyDown = function (event, stageObj) {

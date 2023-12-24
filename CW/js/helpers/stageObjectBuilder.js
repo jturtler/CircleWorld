@@ -7,38 +7,40 @@ function StageObjectBuilder() {};
 
 StageObjectBuilder.createSampleObjs = function( objNum )
 {
-  var stageObjs = [];
+  var objs = [];
 
-  for (var i = 0; i < objNum; i++) {
-    stageObjs.push( StageObjectBuilder.createObj( { objType: 'circle' } ) );
-  }
+  for (var i = 0; i < objNum; i++) {  objs.push( StageObjectBuilder.createObj( { objType: 'circle' } ) );  }
 
-  return stageObjs;
+  return objs;
 };
 
 
 StageObjectBuilder.createObj = function( option )
 {
-  var stageObj = {};
+  var obj = {};
   
   var OBJ_COLOR_LIST = ['#7C9AFC', '#A0DE8F', '#F0F58C', 'Orange'];
 
-  if ( option.objType ) stageObj.objType = option.objType;
+  if ( option.objType ) obj.objType = option.objType;
 
-  stageObj.name = 'Mark';  // 'team color name' + 1/2/3..
-  stageObj.speed = Util.getRandNumBtw(5, 8);  // TODO: 'Sample' obj should be used later..
-  stageObj.size = Util.getRandNumBtw(4, 7); // radius
-  stageObj.color = Util.getRandFromList( OBJ_COLOR_LIST );
+  obj.name = 'Mark';  // 'team color name' + 1/2/3..
+  obj.speed = Util.getRandomInRange(5, 8);  // TODO: 'Sample' obj should be used later..
+  obj.size = Util.getRandomInRange(8, 13); //Util.getRandomInRange(4, 7); // radius
+  obj.color = Util.getRandomInList( OBJ_COLOR_LIST );
 
-  stageObj.x = 100; // Portal location?  Set as Dynamic in later time
-  stageObj.y = 100;
+  obj.x = 100; // Portal location?  Set as Dynamic in later time
+  obj.y = 100;
 
-  stageObj.angle = Util.getRandNumBtw( 0, 360 );
-  // movementX, movementY; <-- can be calculated by speed, position, angle.
+  obj.angle = Util.getRandomInRange( 0, 360 );  // movementX, movementY; <-- can be calculated by speed, angle.
+  // console.log( 'angle: ' + obj.angle );
 
-  console.log( 'angle: ' + stageObj.angle );
+  // subObj
+  obj.subObj = {
+    size: 4,
+    color: Util.getRandomColorHex()
+  };
 
-  return stageObj;
+  return obj;
 };
 
 

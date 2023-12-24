@@ -7,9 +7,9 @@ Builder.OBJ_COLOR_LIST = ['#7C9AFC', '#A0DE8F', '#F0F58C', 'Orange'];
 Builder.newAttribute = function () {
   var attrJson = {};
 
-  attrJson.speed = Util.getRandNumBtw(5, 8);
-  attrJson.size = Util.getRandNumBtw(4, 20); // radius
-  attrJson.color = Util.getRandFromList(Builder.OBJ_COLOR_LIST);
+  attrJson.speed = Util.getRandomInRange(5, 8);
+  attrJson.size = Util.getRandomInRange(4, 20); // radius
+  attrJson.color = Util.getRandomInList(Builder.OBJ_COLOR_LIST);
 
   return attrJson;
 };
@@ -17,7 +17,7 @@ Builder.newAttribute = function () {
 Builder.newLocationXY = function (canvasWidth, canvasHeight) {
   var offset = 10;
   return {
-    locX: Util.getRandNumBtw(offset, canvasWidth - offset),
-    locY: Util.getRandNumBtw(offset, canvasHeight - offset),
+    locX: Util.getRandomInRange(offset, canvasWidth - offset),
+    locY: Util.getRandomInRange(offset, canvasHeight - offset),
   };
 };

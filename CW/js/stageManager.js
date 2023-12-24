@@ -1,8 +1,12 @@
 //	- WorldRender Class - Main World Rendering Class, Starting point
 function StageManager() { };
 
-StageManager.framerate = 5;
+StageManager.framerate = 20;
+
 StageManager.stage;
+
+StageManager.selectedContainer;
+StageManager.selectedContainer_highlightShape;
 
 // ---------------------
 
@@ -17,7 +21,7 @@ StageManager.startUp = function (infoJson, options)
 
 	// 2. add 'stageObj' starting ones
 	if (options.startingObjs) options.startingObjs.forEach(item => { StageManager.insertToStage(item); });
-	StageManager.stage.update(); // 1st update/show after objects are setup
+	//StageManager.stage.update(); // 1st update/show after objects are setup
 
 
 	// 3. setUp the rendering of frames..
@@ -36,29 +40,92 @@ StageManager.setSize = function (infoJson)
 	// No Need!!!  <-- Have the 'frame renderer' to use the global info for wall bounding
 };
 
+StageManager.addNewItem = function ()
+{
+	var item = StageObjectBuilder.createObj( { objType: 'circle' } );
+	StageManager.insertToStage( item );
+};
 
 // 'addStageContainer'?
 StageManager.insertToStage = function (item) 
 {
+	var subShape;
+
 	var shape = new createjs.Shape();
-	//shape.graphics.beginFill('green').drawCircle(0, 0, 20); // should be based on the fiels..
 	shape.graphics.beginFill(item.color).drawCircle(0, 0, item.size);
 
-	var label = new createjs.Text(item.name, 'normal 11px Arial', 'White');
-	label.textAlign = 'center';
-	label.textBaseline = 'middle';
+	//var label = new createjs.Text(item.name, 'normal 10px Arial', 'White');
+	//label.textAlign = 'center';
+	//label.textBaseline = 'middle';
 
+	if ( item.subObj )
+	{
+		subShape = new createjs.Shape();
+		subShape.graphics.beginFill(item.subObj.color).drawCircle(0, 0, item.subObj.size);
+	}
+
+	// container - grouping of 
 	var container = new createjs.Container();
-
 	container.itemData = item;
 
 	container.x = item.x;
 	container.y = item.y;
 
-	container.addChild(shape, label);
+
+	// Add to 'container
+	container.addChild( shape );
+	if ( subShape ) container.addChild( subShape );
+	//container.addChild( shapeRect );
+
+
+	container.addEventListener("click", StageManager.clickObjectEvent );
+	
 
 	// Add 'container' to 'createjs' stage
 	StageManager.stage.addChild(container);
+
+
+	// Immediately show the object/container/item added
+	StageManager.stage.update();
+};
+
+
+StageManager.clickObjectEvent = function ( e ) 
+{
+	var container = e.currentTarget;
+
+	if ( container.itemData ) 
+	{
+		var item = container.itemData;
+		console.log( item );
+
+		// Clear other selections..
+		StageManager.clearPrevSelection();
+
+
+		StageManager.selectedContainer = container;
+		
+		var offset = 4;
+		var size = item.size + offset;
+		var widthHeight = size * 2;
+
+		var shape = new createjs.Shape();
+		shape.graphics.setStrokeStyle(1).beginStroke("green").drawRect( -size, -size, widthHeight, widthHeight );	
+		container.addChild( shape );
+
+		StageManager.selectedContainer_highlightShape = shape;
+
+
+		StageManager.stage.update();
+	}
+};
+
+StageManager.clearPrevSelection = function () 
+{
+	if ( StageManager.selectedContainer && StageManager.selectedContainer_highlightShape )
+	{
+		StageManager.selectedContainer.removeChild( StageManager.selectedContainer_highlightShape );
+	}
 };
 
 
@@ -70,14 +137,17 @@ StageManager.setFramerate_Event = function (framerate)
 };
 
 
-StageManager.frameRender = function () 
+StageManager.frameRender = function ( e ) 
 {
-	StageManager.stage.children.forEach(container => 
+	if ( !e.paused )
 	{
-		StageManager.moveNext(container);
-	});
+		StageManager.stage.children.forEach(container => 
+		{
+			StageManager.moveNext(container);
+		});
 
-	StageManager.stage.update();
+		StageManager.stage.update();		
+	}
 };
 
 
