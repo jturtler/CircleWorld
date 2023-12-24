@@ -36,6 +36,8 @@ StageObjectBuilder.createObj = function( option )
   stageObj.angle = Util.getRandNumBtw( 0, 360 );
   // movementX, movementY; <-- can be calculated by speed, position, angle.
 
+  console.log( 'angle: ' + stageObj.angle );
+
   return stageObj;
 };
 
