@@ -66,7 +66,9 @@ SwManager.createInstallAndStateChangeEvents = function (swRegObj) //, callBack )
 		// an event handler fired whenever a controllerchange event occurs 
 		//  — when the document's associated ServiceWorkerRegistration acquires a new active worker.
 		console.log(SwManager._swStage3 + '3. ControllerChange DETECTED');
-
+		$( '#spanInfo' ).text( '[UPDATES] DETECTED!' );
+		alert( 'Update Detected' );
+		
 		// App is in process of reloading/refersh/restarting.  No need to perform restart
 		// if (AppUtil.appReloading) console.log(SwManager._swStage3 + 'App Intentional Reloading -> DISGARDING THIS MANUAL UPDATE CALL.');
 
@@ -87,6 +89,7 @@ SwManager.createInstallAndStateChangeEvents = function (swRegObj) //, callBack )
 			// If Not logged in, perform App Reload to show the app update - [?] add 'autoLogin' flag before triggering page reload with below 'appReloadWtMsg'.
 			var newMsg = 'App Reloading - New Update Installed.';
 			console.log(SwManager._swStage3 + newMsg);
+			$( '#spanInfo' ).text( 'RELOADING APP - For UPDATES!' );
 			AppUtil.appReloadWtMsg(newMsg);
 		}
 	});

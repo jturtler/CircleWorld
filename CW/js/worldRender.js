@@ -2,7 +2,7 @@
 function WorldRender() { };
 
 WorldRender.stage;
-WorldRender.infoJson = {};  // canvasName, canvasTag, canvasTagHtml, winTag, etc..
+WorldRender.infoJson = {};  // canvasName, canvasTag, canvasHtml, winTag, etc..
 
 // ------------------------
 
@@ -10,18 +10,19 @@ WorldRender.setInfoJson = function (inputJson)
 {
 	WorldRender.infoJson.canvasName = inputJson.canvasName;
 	WorldRender.infoJson.canvasTag = $('#' + inputJson.canvasName);
-	WorldRender.infoJson.canvasTagHtml = WorldRender.infoJson.canvasTag[0];
+	WorldRender.infoJson.canvasHtml = WorldRender.infoJson.canvasTag[0];
 	WorldRender.infoJson.winTag = inputJson.winTag;
 };
 
+// ------------------------
 
 WorldRender.startUp = function () 
 {
-	AppUtil.fitCanvasSize(WorldRender.infoJson); // Adjust Canvas Size to fit the browser size
+	AppUtil.fitCanvasSize( WorldRender.infoJson ); // Adjust Canvas Size to fit the browser size
 
-	var startingObjs = StageObjectBuilder.createSampleObjs(1);
-	WorldRender.stage = StageManager.startUp(WorldRender.infoJson, { startingObjs: startingObjs });
+	StageManager.startUp( WorldRender.infoJson );
 
+	StageManager.startPlan( { plan: 'Portal' } );
 
 	// SetUp Events - 'Add Obj', 'Add Portal', 'Show/Hide Info Panel'
 	WorldRender.setUp_Events();
@@ -31,11 +32,18 @@ WorldRender.startUp = function ()
 
 WorldRender.setUp_Events = function()
 {
-	WorldRender.framerateChange_Setup();
-
+	// Add Circle
 	$( '#btnAddObj' ).click( function() 
 	{
-		StageManager.addNewItem();
+		var dataInfo = {
+			color: Util.getRandomInList( StageManager.portalTeamColors ), 
+			position: { 
+				x: Util.getRandomInRange(0, WorldRender.infoJson.canvasHtml.width ), 
+				y: Util.getRandomInRange(0, WorldRender.infoJson.canvasHtml.height ) 
+			} 
+		};
+
+		CircleManager.createCircleItem( dataInfo );
 	});
 
 	$( '#btnStopStart' ).click( function() 
@@ -62,6 +70,11 @@ WorldRender.setUp_Events = function()
 		}); 		
 	});
 
+
+	WorldRender.framerateChange_Setup( $('#inputFramerate'), $('#btnFramerateUp'), $('#btnFramerateDown') );
+
+
+	// KeyDown ShortCut to other function/feature
 	window.onkeydown = function( e )
 	{
 		switch ( e.keyCode ) 
@@ -79,29 +92,30 @@ WorldRender.setUp_Events = function()
 };
 
 
+// -------------------------------
+// --- Event Related Methods
+
 WorldRender.resizeCanvas = function () 
 {
 	AppUtil.fitCanvasSize(WorldRender.infoJson);
-	StageManager.setSize(WorldRender.infoJson);
+	StageManager.adjustCanvasSize( WorldRender.infoJson );
 };
 
 
-WorldRender.framerateChange_Setup = function () 
+WorldRender.framerateChange_Setup = function ( inputFramerateTag, btnFramerateUpTag, btnFramerateDownTag ) 
 {
 	var framerateChangeRate = 5;
 
-	var inputFramerateTag = $('#inputFramerate');
 	inputFramerateTag.val(StageManager.framerate);
 
-	$('#btnFramerateUp').click( () => {
+	btnFramerateUpTag.click( () => {
 		StageManager.framerate += framerateChangeRate;
 		inputFramerateTag.val( StageManager.framerate );
 
 		createjs.Ticker.framerate = StageManager.framerate;
-		// StageManager.setFramerate_Event();
 	});
 
-	$('#btnFramerateDown').click( () => {
+	btnFramerateDownTag.click( () => {
 		StageManager.framerate -= framerateChangeRate;
 		if (StageManager.framerate < 1) StageManager.framerate = 1;
 
@@ -113,52 +127,3 @@ WorldRender.framerateChange_Setup = function ()
 
 
 
-
-
-/*
-  me._bStop = false;
-
-  // -------------------
-	 // --- Initial Kids Build using 'KidsBuilder' class.
-	 //me.physicsHandler = new PhysicsHandler( me.stageObj, me.canvas_width, me.canvas_height );
-
-	 // TODO: 
-	 //    1. Circle Create with name?  <-- Affected by html (size, speed, name?)
-	 //    2. Make all these things configurable <--- matching Item dropdown in ControlDiv?
-	 //    2. Circle moving with arrow?
-	 //    3. Bouncing?  With wall detection line?  <-- make this configurable?  
-	 //    4. STOP check --> But stage.update() whenever there is a change?  <-- no movements, but affects some things in UI..
-
-
-	 //    [** All these should be placed on HTML DIV and can be moved to config file?]
-
-	 //    A. Make the canvas background color change checkboxable
-	 //    B. CleanUp the Info/Control Div  (Or Config)
-	 //    C. 'Variable' concept, Object concept, Number vs String concept?
-
-	 // ----------------------
-	 // Setup HTML Tag related
-  };
-
-
-  // Handle Key Down Function
-  me.handleKeyDown = function (event, stageObj) {
-	 switch (event.keyCode) {
-		case 83: //_keycode_s:
-		case 32: //_keycode space:
-		  me.stopStart();
-		  return false;
-
-		case 65: //_keycode_a:
-		  var kidObj = me.kidsBuilder.createKid();
-		  return false;
-	 }
-  };
-
-  me.stopStart = function () {
-	 me._bStop = !me._bStop;
-	 var msg = me._bStop ? 'Stopped' : 'Started';
-	 Util.outputMsgAdd(msg, 4);
-  };
-}
-*/

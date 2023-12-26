@@ -35,8 +35,8 @@ AppUtil.appReloadWtMsg = function( msg, option )
 		
 AppUtil.fitCanvasSize = function( infoJson )
 {
-	infoJson.canvasTagHtml.width = infoJson.winTag.width() - AppUtil.OFFSET_WIDTH;
-	infoJson.canvasTagHtml.height = infoJson.winTag.height() - AppUtil.OFFSET_HEIGHT;
+	infoJson.canvasHtml.width = infoJson.winTag.width() - AppUtil.OFFSET_WIDTH;
+	infoJson.canvasHtml.height = infoJson.winTag.height() - AppUtil.OFFSET_HEIGHT;
 };
 
 
