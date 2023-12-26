@@ -36,7 +36,7 @@ WorldRender.setUp_Events = function()
 	$( '#btnAddObj' ).click( function() 
 	{
 		var dataInfo = {
-			color: Util.getRandomInList( StageManager.portalTeamColors ), 
+			color: Util.getRandomInList( PortalManager.portalTeamColors ), 
 			position: { 
 				x: Util.getRandomInRange(0, WorldRender.infoJson.canvasHtml.width ), 
 				y: Util.getRandomInRange(0, WorldRender.infoJson.canvasHtml.height ) 

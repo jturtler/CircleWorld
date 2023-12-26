@@ -52,6 +52,9 @@ PortalManager.createPortalItem = function ()
 				CircleManager.createCircleItem( { color: itemData.color, position: { x: container.x, y: container.y } } );
 				itemData.remainSpawnNum--;
 
+				// Label change
+				if ( container.ref_Label ) container.ref_Label.text = itemData.remainSpawnNum;
+
 				PortalManager.highlightSeconds( container, { color: 'yellow', timeoutSec: 2 } );
 			}
 		}
@@ -63,25 +66,30 @@ PortalManager.createPortalItem = function ()
 
 PortalManager.createStagePortalItem = function ( item, position ) 
 {
+	var container = new createjs.Container();
+
+	// 'Portal' Shape Add
 	var shape = new createjs.Shape();
 	shape.graphics.beginFill(item.color).drawRect( -(item.size/2), -item.size, item.size, item.size * 2 );
+	container.ref_Shape = shape;
+	container.addChild( shape );
+
+	// 'Portal' Label Add
+	var label = new createjs.Text( item.remainSpawnNum, 'normal 10px Arial', 'White');
+	label.textAlign = 'center';
+	label.textBaseline = 'middle';
+	container.ref_Label = label;
+	container.addChild( label );
 
 
 	// container - grouping of 
-	var container = new createjs.Container();
 	container.itemData = item;
-
 	container.x = position.x;
 	container.y = position.y;
 
 
-	// Add to 'container
-	container.addChild( shape );
-	// if ( subShape ) container.addChild( subShape );
-	//container.addChild( shapeRect );
+	// container.addEventListener( "click", function() { } );
 
-
-	// container.addEventListener("click", PortalManager.clickObjectEvent );
 	container.canvasSizeChanged = () =>
 	{
 		if ( container && container.itemData && container.itemData.portalTypeData )
@@ -97,7 +105,7 @@ PortalManager.createStagePortalItem = function ( item, position )
 	// -------------------
 	StageManager.stage.addChild(container);
 
-	StageManager.stage.update();
+	//StageManager.stage.update();
 };
 
 
@@ -120,24 +128,24 @@ PortalManager.highlightSeconds = function( container, option )
 		highlightShape.graphics.setStrokeStyle(1).beginStroke( option.color ).drawRect( -size, -sizeDouble, sizeDouble, sizeDouble * 2 );	
 		
 		container.addChild( highlightShape );
-		StageManager.stage.update();
+		//StageManager.stage.update();
 		
-		container.highlightShape = highlightShape;	
+		container.ref_highlightShape = highlightShape;	
 
 	
-		container.timeoutCall = ( container ) => {
-			if ( container.highlightShape )
+		container.highlight_removal_timeoutCall = ( container ) => {
+			if ( container.ref_highlightShape )
 			{
-				container.removeChild( container.highlightShape );
-				delete container.highlightShape;
-				StageManager.stage.update();
+				container.removeChild( container.ref_highlightShape );
+				delete container.ref_highlightShape;
+				//StageManager.stage.update();
 			}
 		};
 	
 		setTimeout( () => {
-			if ( container.timeoutCall ) {
-				container.timeoutCall( container );
-				delete container.timeoutCall;
+			if ( container.highlight_removal_timeoutCall ) {
+				container.highlight_removal_timeoutCall( container );
+				delete container.highlight_removal_timeoutCall;
 			}
 		}, option.timeoutSec * 1000 );
 	

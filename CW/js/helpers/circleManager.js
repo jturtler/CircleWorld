@@ -12,41 +12,43 @@ CircleManager.createCircleItem = function ( dataJson )
 	if ( !dataJson ) dataJson = {};
 	if ( !dataJson.position ) dataJson.position = { x: 100, y: 100 };
 
-	var item = StageObjectBuilder.createCircle( dataJson );
+	var item = {};  
 
+	item.objType = 'circle'; 
+	item.name = 'Mark';  // 'team color name' + 1/2/3..
+	item.speed = Util.getRandomInRange(5, 8);  // TODO: 'Sample' item should be used later..
+	item.size = Util.getRandomInRange(8, 13); //Util.getRandomInRange(4, 7); // radius	
+	item.color = ( dataJson.color ) ? dataJson.color: "black"; 
+	item.angle = Util.getRandomInRange( 0, 360 );  // movementX, movementY; <-- can be calculated by speed, angle. 
+	item.innerCircle = { size: 4, color: Util.getRandomColorHex() };
+
+	item.runAction = ( container, itemData ) => MovementHelper.moveNext(container);
+	
 	CircleManager.createCircleStageItem( item, dataJson.position );
 };
 
 
 CircleManager.createCircleStageItem = function (item, position) 
 {
-	var subShape;
+	var container = new createjs.Container();
 
 	var shape = new createjs.Shape();
 	shape.graphics.beginFill(item.color).drawCircle(0, 0, item.size);
+	container.ref_Shape = shape;
+	container.addChild( shape );
 
-	//var label = new createjs.Text(item.name, 'normal 10px Arial', 'White');
-	//label.textAlign = 'center';
-	//label.textBaseline = 'middle';
-
-	if ( item.subObj )
+	if ( item.innerCircle )
 	{
-		subShape = new createjs.Shape();
-		subShape.graphics.beginFill(item.subObj.color).drawCircle(0, 0, item.subObj.size);
+		var innerCircleShape = new createjs.Shape();
+		innerCircleShape.graphics.beginFill( item.innerCircle.color ).drawCircle(0, 0, item.innerCircle.size );
+		container.ref_innerCircleShape = innerCircleShape;
+		container.addChild( innerCircleShape );
 	}
 
-	// container - grouping of 
-	var container = new createjs.Container();
-	container.itemData = item;
 
+	container.itemData = item;
 	container.x = position.x;
 	container.y = position.y;
-
-
-	// Add to 'container
-	container.addChild( shape );
-	if ( subShape ) container.addChild( subShape );
-	//container.addChild( shapeRect );
 
 
 	container.addEventListener("click", CircleManager.clickObjectEvent );
@@ -55,9 +57,8 @@ CircleManager.createCircleStageItem = function (item, position)
 	// Add 'container' to 'createjs' stage
 	StageManager.stage.addChild(container);
 
-
 	// Immediately show the object/container/item added
-	StageManager.stage.update();
+	// StageManager.stage.update();
 };
 
 
@@ -70,6 +71,7 @@ CircleManager.clickObjectEvent = function ( e )
 		var item = container.itemData;
 		console.log( item );
 
+
 		// Clear other selections..
 		CircleManager.clearPrevSelection();
 
@@ -80,11 +82,11 @@ CircleManager.clickObjectEvent = function ( e )
 		var size = item.size + offset;
 		var widthHeight = size * 2;
 
-		var shape = new createjs.Shape();
-		shape.graphics.setStrokeStyle(1).beginStroke( CircleManager.highlightColor ).drawRect( -size, -size, widthHeight, widthHeight );	
-		container.addChild( shape );
+		var highlightShape = new createjs.Shape();
+		highlightShape.graphics.setStrokeStyle(1).beginStroke( CircleManager.highlightColor ).drawRect( -size, -size, widthHeight, widthHeight );	
+		container.addChild( highlightShape );
 
-		CircleManager.selectedContainer_highlightShape = shape;
+		CircleManager.selectedContainer_highlightShape = highlightShape;
 
 
 		StageManager.stage.update();
