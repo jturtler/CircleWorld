@@ -30,18 +30,18 @@ PortalManager.createPortalItem = function ()
 	// Create a portal item
 	var position = PortalManager.getPortalPosition( portalTypeData, WorldRender.infoJson.canvasHtml );
 
-	var item = { };  //  x: position.x, y: position.y - Only used once when adding to stage..  Will be changed afterwards..
+	var itemData = { };  //  x: position.x, y: position.y - Only used once when adding to stage..  Will be changed afterwards..
 	
-	item.color = portalTypeData.color;
-	item.size = 14;
-	item.spawnFreqency = PortalManager.portalSpawnFrequency; // every 3 tick, create new item..
-	item.objType = 'portal';
-	item.name = 'portal_' + portalTypeData.color;
-	item.portalIdx = PortalManager.portalTypeIdx;
-	item.portalTypeData = portalTypeData;
-	item.remainSpawnNum = PortalManager.remainSpawnNum;
+	itemData.color = portalTypeData.color;
+	itemData.width_half = 6; // [MANDATORY]
+	itemData.spawnFreqency = PortalManager.portalSpawnFrequency; // every 3 tick, create new itemData..
+	itemData.objType = 'portal';
+	itemData.name = 'portal_' + portalTypeData.color;
+	itemData.portalIdx = PortalManager.portalTypeIdx;
+	itemData.portalTypeData = portalTypeData;
+	itemData.remainSpawnNum = PortalManager.remainSpawnNum;
 
-	item.runAction = ( container, itemData ) => 
+	itemData.runAction = ( container, itemData ) => 
 	{
 		if ( ( StageManager.frameCount % itemData.spawnFreqency ) === 0 )
 		{
@@ -49,33 +49,35 @@ PortalManager.createPortalItem = function ()
 			{
 				// Spawn Circle Item/Object <-- every 3 frame?  <-- Need global frame count..
 				// PortalManager.spawnCircle( itemData, position );
-				CircleManager.createCircleItem( { color: itemData.color, position: { x: container.x, y: container.y } } );
+				CircleManager.createCircleItem( { color: itemData.color, position: { x: container.x, y: container.y }, collisionExceptions: [ { target: container, turns: 4 } ] } );
 				itemData.remainSpawnNum--;
 
 				// Label change
 				if ( container.ref_Label ) container.ref_Label.text = itemData.remainSpawnNum;
 
-				PortalManager.highlightSeconds( container, { color: 'yellow', timeoutSec: 2 } );
+				CommonObjManager.highlightSeconds( container, { color: 'yellow', timeoutSec: 1, shape: 'rect', sizeRate: 1.5 } );
 			}
 		}
 	};
 
-	PortalManager.createStagePortalItem( item, position );
+	PortalManager.createStagePortalItem( itemData, position );
 };
 
 
-PortalManager.createStagePortalItem = function ( item, position ) 
+PortalManager.createStagePortalItem = function ( itemData, position ) 
 {
 	var container = new createjs.Container();
 
+	var width_full = itemData.width_half * 2;
+
 	// 'Portal' Shape Add
 	var shape = new createjs.Shape();
-	shape.graphics.beginFill(item.color).drawRect( -(item.size/2), -item.size, item.size, item.size * 2 );
+	shape.graphics.beginFill(itemData.color).drawRect( -itemData.width_half, -width_full, width_full, width_full * 2 );
 	container.ref_Shape = shape;
 	container.addChild( shape );
 
 	// 'Portal' Label Add
-	var label = new createjs.Text( item.remainSpawnNum, 'normal 10px Arial', 'White');
+	var label = new createjs.Text( itemData.remainSpawnNum, 'normal 10px Arial', 'White');
 	label.textAlign = 'center';
 	label.textBaseline = 'middle';
 	container.ref_Label = label;
@@ -83,7 +85,7 @@ PortalManager.createStagePortalItem = function ( item, position )
 
 
 	// container - grouping of 
-	container.itemData = item;
+	container.itemData = itemData; // [MANDATORY]
 	container.x = position.x;
 	container.y = position.y;
 
@@ -106,51 +108,6 @@ PortalManager.createStagePortalItem = function ( item, position )
 	StageManager.stage.addChild(container);
 
 	//StageManager.stage.update();
-};
-
-
-// Should be common method?
-PortalManager.highlightSeconds = function( container, option )
-{
-	try
-	{
-		if ( !option ) option = {};
-		if ( !option.color ) option.color = 'yellow';
-		if ( !option.timeoutSec ) option.timeoutSec = 2;
-		// shape: 'circle/rect/etc..', timeout
-	
-		var item = container.itemData;
-	
-		var size = item.size;
-		var sizeDouble = size * 2;
-	
-		var highlightShape = new createjs.Shape();
-		highlightShape.graphics.setStrokeStyle(1).beginStroke( option.color ).drawRect( -size, -sizeDouble, sizeDouble, sizeDouble * 2 );	
-		
-		container.addChild( highlightShape );
-		//StageManager.stage.update();
-		
-		container.ref_highlightShape = highlightShape;	
-
-	
-		container.highlight_removal_timeoutCall = ( container ) => {
-			if ( container.ref_highlightShape )
-			{
-				container.removeChild( container.ref_highlightShape );
-				delete container.ref_highlightShape;
-				//StageManager.stage.update();
-			}
-		};
-	
-		setTimeout( () => {
-			if ( container.highlight_removal_timeoutCall ) {
-				container.highlight_removal_timeoutCall( container );
-				delete container.highlight_removal_timeoutCall;
-			}
-		}, option.timeoutSec * 1000 );
-	
-	}
-	catch( errMsg ) {  console.error( 'ERROR in PortalManager.highlightSeconds, ' + errMsg ); }
 };
 
 

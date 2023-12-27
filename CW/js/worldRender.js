@@ -35,15 +35,15 @@ WorldRender.setUp_Events = function()
 	// Add Circle
 	$( '#btnAddObj' ).click( function() 
 	{
-		var dataInfo = {
-			color: Util.getRandomInList( PortalManager.portalTeamColors ), 
-			position: { 
-				x: Util.getRandomInRange(0, WorldRender.infoJson.canvasHtml.width ), 
-				y: Util.getRandomInRange(0, WorldRender.infoJson.canvasHtml.height ) 
-			} 
-		};
+		var middlePosX = Math.floor( WorldRender.infoJson.canvasHtml.width / 2 );
+		var middlePosY = Math.floor( WorldRender.infoJson.canvasHtml.height / 2 );
+		// Util.getRandomInList( PortalManager.portalTeamColors ),  // Util.getRandomInRange(0, WorldRender.infoJson.canvasHtml.width ), 
+		var dataInfo = { color: 'black', position: { x: middlePosX, y: middlePosY } };
 
 		CircleManager.createCircleItem( dataInfo );
+
+		// If the stage is paused, show the added circle right away by updating stage.
+		if ( createjs.Ticker.paused ) StageManager.stage.update();
 	});
 
 	$( '#btnStopStart' ).click( function() 

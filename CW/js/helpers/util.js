@@ -68,6 +68,67 @@ Util.getFromList = function (list, propertyName, value) {
 };
 
 
+Util.sortByKey = function (array, key, noCase, order, emptyStringLast) 
+{
+	try 
+	{
+		if (array && key) 
+		{
+			if (array.length == 0 || array[0][key] === undefined) return array;
+			else 
+			{
+
+				// NOTE: no need to 'return' <-- this makes changes on the array itself!!!
+				return array.sort(function (a, b) 
+				{
+					var x = a[key];
+					var y = b[key];
+
+					if (x === undefined) x = "";
+					if (y === undefined) y = "";
+
+					if ( noCase ) {
+						x = x.toLowerCase();
+						y = y.toLowerCase();
+					}
+
+					if (emptyStringLast !== undefined && emptyStringLast && (x == "" || y == "")) {
+						if (x == "" && y == "") return 0;
+						else if (x == "") return 1;
+						else if (y == "") return -1;
+					}
+					else 
+					{
+						if (order === undefined || order === "asc" || order === "Acending" || order === "Ascending" ) return Util.sortCompare(x, y);
+						else if ( order === "desc" || order === "Decending" || order === "Descending" ) return Util.sortCompare(y, x);
+					}
+				});
+			}
+		}
+		else return array;
+	}
+	catch (errMsg) {
+		console.log('ERROR in Util.sortByKey, ' + errMsg);
+		return array;
+	}
+};
+
+
+// For reverse or decending order, call param reversed: Util.sortCompare( y, x )
+Util.sortCompare = function (x, y) {
+	var returnVal = 0;
+
+	try {
+		if (x < y) returnVal = -1;
+		else if (x > y) returnVal = 1;
+		else returnVal = 0;
+	}
+	catch (errMsg) {
+		console.log('ERROR in Util.sortCompare, ' + errMsg);
+	}
+
+	return returnVal;
+};
 
 // ----------------------------------
 // JSON Deep Copy Related
