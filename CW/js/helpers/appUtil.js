@@ -51,3 +51,24 @@ AppUtil.callOnlyOnce = function( option, callBack )
 	}, waitTimeMs );
 
 };
+
+// -------------------------------------------------------
+
+AppUtil.getPosition_Center = function()
+{
+	return { 
+		x: Math.floor( WorldRender.infoJson.canvasHtml.width / 2 ),
+		y: Math.floor( WorldRender.infoJson.canvasHtml.height / 2 )
+	};
+};
+
+
+AppUtil.getPosition_Random = function()
+{
+	var offset = 20; // considering the width_half of object, the position should consider it.
+	return { 
+		x: Util.getRandomInRange( offset, WorldRender.infoJson.canvasHtml.width - offset ),
+		y: Util.getRandomInRange( offset, WorldRender.infoJson.canvasHtml.height - offset )
+	};
+};
+

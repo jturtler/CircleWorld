@@ -5,6 +5,57 @@ CommonObjManager.selectedContainer;
 CommonObjManager.selectedContainer_highlightShape;
 CommonObjManager.selectedColor = 'yellow';
 
+CommonObjManager.containerList = []; // Keep all the created containers here..
+
+CommonObjManager.itemJsonDefault = {
+	startPosition: { x: 200, y: 200 }, // position can change afterwards if obj is not in stationary one.
+	name: "cmnObj",
+	width_half: 8,
+	color: 'green',
+	speed: 5,
+	angle: 90,
+	age: 1
+};
+
+// ------------------------------------
+
+CommonObjManager.clearData = function()
+{
+	CommonObjManager.containerList = [];
+};
+
+
+CommonObjManager.createItem = function ( inputJson )
+{
+	// 'itemData' create - combine/merge with 'inputJson' data.
+	if ( !inputJson ) inputJson = {};
+	var itemData = Util.cloneJson( CommonObjManager.itemJsonDefault );
+	Util.mergeJson( itemData, inputJson );
+
+
+	// Create 'container' (children of 'stage') with 'itemData' in it.
+	var container = CommonObjManager.createStageItem( itemData ); // return 'container'
+	CommonObjManager.containerList.push( container );
+
+	return container; // 'itemData' is part of 'container.
+};
+
+
+CommonObjManager.createStageItem = function (itemData) 
+{
+	var container = new createjs.Container();
+
+	container.itemData = itemData; // [MANDATORY]
+	container.x = itemData.startPosition.x;
+	container.y = itemData.startPosition.y;
+
+	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
+	
+	StageManager.stage.addChild( container );
+
+	return container;
+};
+
 
 // ------------------------------------
 
@@ -39,22 +90,12 @@ CommonObjManager.highlightSeconds = function( container, option )
 		
 		container.ref_highlightShape = highlightShape;	
 
-		/*
-		container.highlight_removal_timeoutCall = ( container ) => {
-			if ( container.ref_highlightShape )
-			{
-				container.removeChild( container.ref_highlightShape );
-				delete container.ref_highlightShape;
-			}
-		};
-		*/
-		
-		setTimeout( () => {
 
+		setTimeout( () => 
+		{
 			if ( container.ref_highlightShape )
 			{
-				container.removeChild( container.ref_highlightShape );
-				// delete container.ref_highlightShape;
+				container.removeChild( container.ref_highlightShape );  // delete container.ref_highlightShape;
 			}
 		}, option.timeoutSec * 1000 );
 	

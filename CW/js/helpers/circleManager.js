@@ -1,40 +1,59 @@
 
 function CircleManager() { };
 
+CircleManager.containerList = []; // Keep all the created containers here..
+
 // -----------------------------
 
-CircleManager.createCircleItem = function ( dataJson )
+CircleManager.clearData = function()
 {
-	if ( !dataJson ) dataJson = {};
-	if ( !dataJson.position ) dataJson.position = { x: 100, y: 100 };
-	if ( !dataJson.collisionExceptions ) dataJson.collisionExceptions = [];
+	CircleManager.containerList = [];
+};
 
-	var itemData = {};  
+CircleManager.createCircleItem = function ( inputJson )
+{
+	if ( !inputJson ) inputJson = {};
+ 
+	// Circle related 'itemData' default - overwritten by 'inputJson' is has any of the properties..
+	var circleItemData = {
+		name: 'circle_' + CommonObjManager.containerList.length, // Could be, ideally, set like 'circle_blue_1'
+		speed: Util.getRandomInRange(5, 8),
+		width_half: Util.getRandomInRange(8, 13),
+		angle: Util.getRandomInRange( 0, 360 ),
+		// innerCircle: { width_half: 4, color: Util.getRandomColorHex() },
+		behaviors: {			
+			collectDistances: true,
+			onCollision: 'bounce',
+			protectedAgeUpTo: 30
+		}
+	};
+	Util.mergeJson( circleItemData, inputJson );
 
-	itemData.objType = 'circle'; 
-	itemData.name = 'Mark';  // 'team color name' + 1/2/3..
-	itemData.speed = Util.getRandomInRange(5, 8);  // TODO: 'Sample' itemData should be used later..
-	itemData.width_half = Util.getRandomInRange(8, 13); // radius..  // [MANDATORY]
-	itemData.color = ( dataJson.color ) ? dataJson.color: "black"; 
-	itemData.angle = Util.getRandomInRange( 0, 360 );  // movementX, movementY; <-- can be calculated by speed, angle. 
-	itemData.innerCircle = { width_half: 4, color: Util.getRandomColorHex() };
-	itemData.behaviors = {
-		collectDistances: true,
-		onCollision: 'bounce'
-	}
 
-	itemData.collisionExceptions = dataJson.collisionExceptions; //: [ { target: container, count: 1 } ]
+	// With above 'inputJson', 'circleJson' merged, have 'CommonObjManager.createItem' create 'itemData' & 'container'
+	var container = CommonObjManager.createItem( circleItemData );
 
+	var itemData = container.itemData;
+	itemData.objType = 'circle';
 
-	itemData.runAction = ( container, itemData ) => MovementHelper.moveNext( container );
+	// Default 'circle' event handler ('onFrameMove', 'onClick' )
+	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => MovementHelper.moveNext( container );
+	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
+
+	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
 	
-	CircleManager.createCircleStageItem( itemData, dataJson.position );
+	// More 'circle' related shapes & etc created/added to 'container'
+	CircleManager.setCircleContainer( container );
+
+	CircleManager.containerList.push( container );
+
+	return container;
 };
 
 
-CircleManager.createCircleStageItem = function (itemData, position) 
+CircleManager.setCircleContainer = function ( container )
 {
-	var container = new createjs.Container();
+	var itemData = container.itemData;
 
 	var shape = new createjs.Shape();
 	shape.graphics.beginFill(itemData.color).drawCircle(0, 0, itemData.width_half);
@@ -48,20 +67,6 @@ CircleManager.createCircleStageItem = function (itemData, position)
 		container.ref_innerCircleShape = innerCircleShape;
 		container.addChild( innerCircleShape );
 	}
-
-	container.itemData = itemData; // [MANDATORY]
-	container.x = position.x;
-	container.y = position.y;
-
-
-	container.addEventListener("click", CommonObjManager.clickObjectEvent );
-	
-
-	// Add 'container' to 'createjs' stage
-	StageManager.stage.addChild(container);
-
-	// Immediately show the object/container/item added
-	// StageManager.stage.update();
 };
 
 

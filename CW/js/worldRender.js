@@ -12,6 +12,7 @@ WorldRender.setInfoJson = function (inputJson)
 	WorldRender.infoJson.canvasTag = $('#' + inputJson.canvasName);
 	WorldRender.infoJson.canvasHtml = WorldRender.infoJson.canvasTag[0];
 	WorldRender.infoJson.winTag = inputJson.winTag;
+	WorldRender.infoJson.appModeConfig = '';  // Set when appMode dropdown is selected - from config.json
 };
 
 // ------------------------
@@ -19,26 +20,23 @@ WorldRender.setInfoJson = function (inputJson)
 WorldRender.startUp = function () 
 {
 	AppUtil.fitCanvasSize( WorldRender.infoJson ); // Adjust Canvas Size to fit the browser size
-
+	
 	StageManager.startUp( WorldRender.infoJson );
 
-	StageManager.startPlan( { plan: 'Portal' } );
-
 	// SetUp Events - 'Add Obj', 'Add Portal', 'Show/Hide Info Panel'
-	WorldRender.setUp_Events();
+	WorldRender.setUp_Tag_Events();
 };
 
 // ------------------------
 
-WorldRender.setUp_Events = function()
+WorldRender.setUp_Tag_Events = function()
 {
+	WorldRender.appModeTag_PopulateNSetupEvents( $( '#selAppMode' ), INFO.configJson );
+
 	// Add Circle
 	$( '#btnAddObj' ).click( function() 
 	{
-		var middlePosX = Math.floor( WorldRender.infoJson.canvasHtml.width / 2 );
-		var middlePosY = Math.floor( WorldRender.infoJson.canvasHtml.height / 2 );
-		// Util.getRandomInList( PortalManager.portalTeamColors ),  // Util.getRandomInRange(0, WorldRender.infoJson.canvasHtml.width ), 
-		var dataInfo = { color: 'black', position: { x: middlePosX, y: middlePosY } };
+		var dataInfo = { color: 'black', startPosition: AppUtil.getPosition_Center() };
 
 		CircleManager.createCircleItem( dataInfo );
 
@@ -106,24 +104,87 @@ WorldRender.framerateChange_Setup = function ( inputFramerateTag, btnFramerateUp
 {
 	var framerateChangeRate = 5;
 
-	inputFramerateTag.val(StageManager.framerate);
+	inputFramerateTag.val( createjs.Ticker.framerate );  // Load this value from 'config'
 
 	btnFramerateUpTag.click( () => {
-		StageManager.framerate += framerateChangeRate;
-		inputFramerateTag.val( StageManager.framerate );
-
-		createjs.Ticker.framerate = StageManager.framerate;
+		createjs.Ticker.framerate += framerateChangeRate;
+		inputFramerateTag.val( createjs.Ticker.framerate );
 	});
 
 	btnFramerateDownTag.click( () => {
-		StageManager.framerate -= framerateChangeRate;
-		if (StageManager.framerate < 1) StageManager.framerate = 1;
-
-		inputFramerateTag.val( StageManager.framerate );
-
-		createjs.Ticker.framerate = StageManager.framerate;
+		createjs.Ticker.framerate -= framerateChangeRate;
+		if (createjs.Ticker.framerate < 1) createjs.Ticker.framerate = 1;
+		inputFramerateTag.val( createjs.Ticker.framerate );
 	});
+};
+
+// -------------------------------------
+
+WorldRender.appModeTag_PopulateNSetupEvents = function( selAppModeTag, configJson )
+{
+	var appModeList = [];
+	configJson.appModes.forEach( appMode => {  appModeList.push( { text: appMode.modeName, value: appMode.modeName } );  } );
+
+	Util.populateSelect( selAppModeTag, '[AppMode]', appModeList );
+
+	// On select event..
+	selAppModeTag.off( 'change' ).change( e => WorldRender.switchAppMode( e ) );
+
+	// If initial selection is empty, set background as 'tomato' to attract attention..
+	if ( !selAppModeTag.val() ) selAppModeTag.css( 'background-color', 'tomato' );
 };
 
 
 
+WorldRender.switchAppMode = function( e )
+{
+	var selAppModeTag = $( '#selAppMode' ); // SET THIS ON TOP?
+
+
+	// Pause before making changes
+	createjs.Ticker.paused = true;
+
+	WorldRender.resetAppData();
+
+	// This is called from 'appMode' select..
+	var appModeName = selAppModeTag.val();
+	var appModeConfig = Util.getFromList( INFO.configJson.appModes, 'modeName', appModeName );
+
+	if ( appModeConfig )
+	{
+		WorldRender.infoJson.appModeConfig = appModeConfig;
+
+		if ( appModeConfig.onStartRunEval ) Util.evalTryCatch( appModeConfig.onStartRunEval );
+
+		// On stage 'tick' set it..
+	}
+
+
+	// If empty selection, display 'tomato' color for attention.
+	if ( !appModeName ) selAppModeTag.css( 'background-color', 'tomato' );
+	else selAppModeTag.css( 'background-color', '' );
+
+
+	// Un-Pause ticker
+	createjs.Ticker.paused = false;
+};
+
+
+WorldRender.resetAppData = function( )
+{
+	// 1. Clear the 'containerList' array
+	CircleManager.clearData();
+	PortalManager.clearData();
+	CommonObjManager.clearData();
+
+	// 2. Remove all stage containers
+	StageManager.removeStageObjs();
+
+	// 3. curr appModeConfig json reset
+	WorldRender.infoJson.appModeConfig = '';
+
+	// 4. reset 'INFO' all - except 'configJson'
+	var tempConfigJson = INFO.configJson;
+	INFO = {};
+	INFO.configJson = tempConfigJson;
+};

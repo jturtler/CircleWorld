@@ -44,6 +44,7 @@
 	<script src="js/libraries/jquery-3.4.1.min.js"></script>
 
 	<script src="js/helpers/util.js"></script>
+	<script src="js/helpers/configManager.js"></script>
 	<script src="js/helpers/appUtil.js"></script>
 	<script src="js/helpers/movementHelper.js"></script>
 	<script src="js/helpers/commonObjManager.js"></script>
@@ -61,18 +62,22 @@
 	<canvas id="demoCanvas" style="background-color: #FDD; margin: 0px; vertical-align: middle; text-align: top;"></canvas>
 
 	<div id="commands" style="margin: 3px;">
+		<select id="selAppMode"></select>
+		<span style="color: #bbbbbb; margin: 0px 5px; font-size: 12px;">|</span>
 		<button id="btnAddObj"><b>[A]</b>dd Obj</button>
 		<button id="btnStopStart"><b>[S]</b><span id="spanStopStart">top</span></button>
-		<span style="color: #bbbbbb; margin: 0px 10px; font-size: 12px;">|</span>
+		<span style="color: #bbbbbb; margin: 0px 5px; font-size: 12px;">|</span>
 		<input id="inputFramerate" readonly style="margin-left: 7px; width: 20px; background-color: #eee;" />
 		<button id="btnFramerateUp" style="margin-left: 3px; width: 25px;">+</button>
 		<button id="btnFramerateDown" style="margin-left: 3px; width: 25px;">-</button>
-		<span style="color: #bbbbbb; margin: 0px 10px; font-size: 12px;">|</span>
+		<span style="color: #bbbbbb; margin: 0px 5px; font-size: 12px;">|</span>
 		<span id="spanInfo" style="color: #777; font-size: 12px;"></span>
 	</div>
 	<div id="divMsg" style="border: 1px solid #bbbbbb;"></div>
 
 	<script>
+		
+		var INFO = {};  // Global 'INFO' json variable - for storing/checking values.
 		
 		// When all the HTML is finished loading, start the JQuery Commands.
 		$(document).ready(function () 
@@ -81,9 +86,16 @@
 			{
 				SwManager.checkAppUpdate( '[AppUpdateCheck] - App startUp' );
 
-				// StartUp WorldRender - the main class.
 				WorldRender.setInfoJson( { canvasName: 'demoCanvas', winTag: $( window ) } );
-				WorldRender.startUp();
+
+
+				ConfigManager.loadConfigFile( 'config.json', ( configJson ) => 
+				{
+					INFO.configJson = configJson; // Set 'configJson' under 'INFO' for global access.
+
+					// StartUp WorldRender - the main class.
+					WorldRender.startUp();
+				});
 			});
 		});
 

@@ -1,5 +1,54 @@
 
-function Util() { }
+function Util() { };
+
+// ---------------------------
+// GET & CHECK Variable Types Check
+
+Util.isTypeObject = function (obj) {
+	// Array is also 'object' type, thus, check to make sure this is not array.
+	if (Util.isTypeArray(obj)) return false;
+	else return (obj !== undefined && typeof (obj) === 'object');
+};
+
+Util.isTypeArray = function (obj) {
+	return (obj !== undefined && Array.isArray(obj));
+};
+
+Util.isTypeString = function (obj) {
+	return (obj !== undefined && typeof (obj) === 'string');
+};
+
+// ---------------------------
+
+Util.evalTryCatch = function( inputVal )
+{
+	try
+	{
+		inputVal = Util.getEvalStr(inputVal); // Handle array into string joining
+		if (inputVal) eval(inputVal);
+	}
+	catch( errMsg ) { console.error( 'ERROR in Util.evalTryCatch, ' + errMsg ); }
+};
+
+
+Util.getEvalStr = function (evalObj) 
+{
+	var evalStr = '';
+
+	try {
+		if ( evalObj )
+		{
+			if (Util.isTypeString(evalObj)) evalStr = evalObj;
+			else if (Util.isTypeArray(evalObj)) evalStr = evalObj.join('\r\n');	
+		}
+	}
+	catch (errMsg) {  console.log('ERROR in Util.getEvalStr, errMsg: ' + errMsg);  }
+
+	return evalStr;
+};
+
+
+// ---------------------------
 
 Util.getRandomInRange = function (start, end) 
 {
@@ -27,6 +76,7 @@ Util.cutDecimalPlace = function ( input, decimalPlace )
 	return parseFloat( input.toFixed( decimalPlace ) );
 };
 
+// --------------------------------
 
 Util.outputMsgAdd = function (msg, durationSec) 
 {
@@ -130,6 +180,26 @@ Util.sortCompare = function (x, y) {
 	return returnVal;
 };
 
+// --------------------------
+
+Util.populateSelect = function ( selectTag, selectText, jsonArr ) 
+{
+	selectTag.empty();
+	selectTag.append('<option value="">' + selectText + '</option>');
+
+	if ( jsonArr ) 
+	{
+		jsonArr.forEach( item => 
+		{
+			var option = $( '<option></option>' );
+
+			option.attr( "value", item.value ).text( item.text );
+
+			selectTag.append( option );
+		});
+	}
+};
+
 // ----------------------------------
 // JSON Deep Copy Related
 
@@ -149,5 +219,39 @@ Util.cloneJson = function (jsonObj) {
 	return newJsonObj;
 };
 
-// JSON Deep Copy Related
 // ----------------------------------
+// JSON Merge Related
+
+Util.mergeJson = function (destObj, srcObj) {
+	if (srcObj) {
+		for (var key in srcObj) {
+			destObj[key] = srcObj[key];
+		}
+	}
+
+	return destObj;
+};
+
+
+Util.mergeDeep = function (dest, obj, option) 
+{
+	if ( !option ) option = {};
+
+	Object.keys(obj).forEach(key => {
+
+		var dVal = dest[key];
+		var oVal = obj[key];
+
+		if (Util.isTypeArray(dVal) && Util.isTypeArray(oVal)) {
+			if (option && option.arrOverwrite && oVal.length > 0) dest[key] = oVal;
+			else Util.mergeArrays(dVal, oVal);
+		}
+		else if (Util.isTypeObject(dVal) && Util.isTypeObject(oVal)) {
+			Util.mergeDeep(dVal, oVal, option);
+		}
+		else {
+			if (option && option.keepTargetVal && dest[key] ) { } // with Option, keep original if both exists
+			else dest[key] = oVal;
+		}
+	});
+};

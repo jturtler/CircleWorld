@@ -7,7 +7,9 @@ MovementHelper.moveNext = function (container)
 
 	var movement = MovementHelper.getMovementCalc( itemData.angle, itemData.speed );
 
-	if ( itemData.behaviors && itemData.behaviors.collectDistances ) MovementHelper.collectDistances( container, StageManager.stage.children );
+	var behaviors = itemData.behaviors;
+
+	if ( behaviors && behaviors.collectDistances ) MovementHelper.collectDistances( container, StageManager.stage.children );
 
 	// CHECK 1. collision with any other object
 	//		- Rather than each object checking all other object, we can reduce this list
@@ -15,20 +17,43 @@ MovementHelper.moveNext = function (container)
 	//		- 
 	if ( !movementCaseMet )
 	{
-		var obj_inCollision = MovementHelper.checkCollision( container );
-
-		if ( obj_inCollision && itemData.behaviors && itemData.behaviors.onCollision === 'bounce' )
+		if ( behaviors && behaviors.onCollision )
 		{
-			// TODO: this is not exactly right...  We should minus the difference of distance/collision..
-			movement.x = -movement.x;
-			movement.y = -movement.y;
+			if ( behaviors.protectedAgeUpTo && behaviors.protectedAgeUpTo > itemData.age ) { } // ignore since still in protected mode
+			else if ( behaviors.onCollision === 'bounce' )
+			{
+				// TODO: ALSO, if in collision when the age is turned on just now, also ignore it for a while?
 
-			itemData.angle = MovementHelper.getAngle_fromMovement( movement );
+				var obj_inCollision = MovementHelper.checkCollision( container );
 
-			// Highlight with circle
-			CommonObjManager.highlightSeconds( container, { color: 'red', timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } );
+				if ( !itemData.collisionCheckCount ) itemData.collisionCheckCount = 1;
+				else itemData.collisionCheckCount++;
 
-			movementCaseMet = true;
+				if ( obj_inCollision )
+				{
+					if ( itemData.collisionCheckCount === 1 ) itemData.collisionWhileInBeginning = true;
+
+					if ( itemData.collisionWhileInBeginning ) { } // We should ignore collision if the collision check started while in collision with other object..
+					else
+					{
+						// TODO: this is not right...  Need proper Vector collision bounce calculation
+						//		- Override expression in Config Eval? - if exists..
+						movement.x = -movement.x;
+						movement.y = -movement.y;
+
+						itemData.angle = MovementHelper.getAngle_fromMovement( movement );
+
+						// Highlight with circle
+						CommonObjManager.highlightSeconds( container, { color: 'red', timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } );
+
+						movementCaseMet = true;
+					}
+				}
+				else
+				{
+					if ( itemData.collisionWhileInBeginning ) itemData.collisionWhileInBeginning = false;
+				}
+			}
 		}
 	}
 
@@ -183,7 +208,7 @@ MovementHelper.checkCollision = function( container )
 			var otherItemDistance = itemData.distances[i];
 
 			// If exists in 'collisionExceptions', do not check the 'targetInTouch'/collision
-			if ( itemData.collisionExceptions.find( item => item.target === otherItemDistance.ref_target ) ) { }
+			if ( itemData.collisionExceptions && itemData.collisionExceptions.find( item => item.target === otherItemDistance.ref_target ) ) { }
 			else if ( itemData.color === otherItemDistance.ref_target.itemData.color ) { }  // Same color, no collision..
 			else if ( MovementHelper.targetInTouch( otherItemDistance.distance, itemData.width_half, otherItemDistance.ref_target.itemData.width_half ) )
 			{

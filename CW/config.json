@@ -1,0 +1,78 @@
+{
+	"appModes":
+	[
+		{
+			"modeName": "circleSpawn",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 15; ",
+				" INFO.maxCircleNum = 40; "				
+			],
+			"onFrameMoveEval": [
+				" /* This gets called on every frame/tick - create circle.. */ ",
+				" if ( INFO.frameCount === undefined ) INFO.frameCount = 0; ",
+				" else INFO.frameCount++; ",
+				" ",
+				" var colorTeamList = [ 'blue', 'red', 'gray', 'green' ]; ",
+				" ",
+				" if ( ( StageManager.stage.children.length <= INFO.maxCircleNum ) && ( INFO.frameCount % 30 ) === 0 ) { ",
+				"   var propJson = { ",
+				"     color: Util.getRandomInList( colorTeamList ), ",
+				"     innerCircle: { width_half: 4, color: Util.getRandomColorHex() }, ",
+				"     startPosition: AppUtil.getPosition_Center() ",
+				"   };  ",
+				"   ",
+				"   CircleManager.createCircleItem( propJson ); ",
+				" } "
+			]	
+		},
+		{
+			"modeName": "portalTwo",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 15; ",
+				" ",
+				" for( var i = 0; i < 2; i++ ) PortalManager.createPortalItem(); "
+			],
+			"onFrameMoveEval": [ ]	
+		}
+	],
+	"structureNotes":
+	{
+		"circle_Example": 
+		{
+			"container":
+			{
+				"x": 300,
+				"y": 200,
+				"itemData": {
+					"width_half": 8,
+					"color": "blue",
+					"speed": 5,
+					"name": "circle_blue_1",
+					"angle": 127,
+					"innerCircle": { "width_half": 4, "color": "black" },
+					"behaviors": { "collectDistances": true, "onCollision": "bounce", "bounceLogic": { } }
+				},
+				"children": [],
+				"ref_Shape": "",
+				"ref_innerCircleShape": ""
+			}
+		},
+		"portal_Example": 
+		{
+			"container":
+			{
+				"x": 300,
+				"y": 200,
+				"itemData": {
+					"width_half": 7,
+					"color": "blue",
+					"name": "portal_blue_1",
+					"spawnFreqency": 3,
+					"remainSpawnNum": 15,
+					"positionFixed": false					
+				},
+				"children": []
+			}
+		}
+	}
+}
