@@ -60,14 +60,23 @@ CircleManager.setCircleContainer = function ( container )
 	container.ref_Shape = shape;
 	container.addChild( shape );
 
-	if ( itemData.innerCircle )
-	{
-		var innerCircleShape = new createjs.Shape();
-		innerCircleShape.graphics.beginFill( itemData.innerCircle.color ).drawCircle(0, 0, itemData.innerCircle.width_half );
-		container.ref_innerCircleShape = innerCircleShape;
-		container.addChild( innerCircleShape );
-	}
+	if ( itemData.innerCircle ) CircleManager.addInnerCircle( container, itemData.innerCircle );
 };
 
 
+CircleManager.addInnerCircle = function( container, innerCircleJson )
+{
+	var innerCircleShape = new createjs.Shape();
+	innerCircleShape.graphics.beginFill( innerCircleJson.color ).drawCircle(0, 0, innerCircleJson.width_half );
+	container.ref_innerCircleShape = innerCircleShape;
+	container.addChild( innerCircleShape );
+};
+
+
+CircleManager.addInnerCircle_setInItemData = function( container, innerCircleJson )
+{
+	container.itemData.innerCircle = innerCircleJson;
+
+	CircleManager.addInnerCircle( container, innerCircleJson );
+};
 // ---------------------------------

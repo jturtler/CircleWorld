@@ -2,7 +2,7 @@
 function StageManager() { };
 
 // Default 'interval' for TICK is 0.05 Seconds.  Thus, Default 'framerate' is 20? (20 FPS - 20 frames per seconds).  
-StageManager.framerate = 20; // On 1 Tick, how many frames we like to render..   
+// StageManager.framerate = 20; // On 1 Tick, how many frames we like to render..   
 StageManager.frameCount = 1;  // 0 if wants to spawn right away..  reset to 0 if reaches 1000000
 StageManager.frameCountResetMax = 1000000;
 
@@ -42,11 +42,16 @@ StageManager.frameMove = function ( e )
 {
 	if ( !e.paused )
 	{
+		var aged = ( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;
+		if ( aged ) console.log( 'aged.. ' );	
+		console.log( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) );
+
+		
 		// 1. Each children 'container' changes/renders
 		StageManager.stage.children.forEach(container => 
 		{
 			try {
-				if ( container.itemData.age ) container.itemData.age++;
+				if ( container.itemData.age && aged ) container.itemData.age++;	// TODO: <-- Should age on every framerate?  1 seconds?
 				if ( container.itemData.onFrameMove ) container.itemData.onFrameMove( container );	
 			}
 			catch( errMsg ) {  console.error( 'ERROR in StageManager.frameMove, in children container onFrameMove, ' + errMsg ); }

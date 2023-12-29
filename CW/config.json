@@ -17,11 +17,14 @@
 				" if ( ( StageManager.stage.children.length <= INFO.maxCircleNum ) && ( INFO.frameCount % 30 ) === 0 ) { ",
 				"   var propJson = { ",
 				"     color: Util.getRandomInList( colorTeamList ), ",
-				"     innerCircle: { width_half: 4, color: Util.getRandomColorHex() }, ",
 				"     startPosition: AppUtil.getPosition_Center() ",
 				"   };  ",
 				"   ",
-				"   CircleManager.createCircleItem( propJson ); ",
+				"   var container = CircleManager.createCircleItem( propJson ); ",
+				"   container.itemData.onFrameMove = container => { ", 
+				"     if ( !container.itemData.innerCircle && container.itemData.age > 10 ) CircleManager.addInnerCircle_setInItemData( container, { width_half: 4, color: Util.getRandomColorHex() } ); ",
+				"     MovementHelper.moveNext( container ); ",
+				"   } ",				
 				" } "
 			]	
 		},
