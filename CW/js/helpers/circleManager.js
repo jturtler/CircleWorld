@@ -24,7 +24,7 @@ CircleManager.createCircleItem = function ( inputJson )
 		behaviors: {			
 			collectDistances: true,
 			onCollision: 'bounce',
-			protectedAgeUpTo: 30
+			protectedAgeUpTo: 4
 		}
 	};
 	Util.mergeJson( circleItemData, inputJson );

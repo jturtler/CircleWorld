@@ -104,15 +104,15 @@ WorldRender.framerateChange_Setup = function ( inputFramerateTag, btnFramerateUp
 {
 	var framerateChangeRate = 5;
 
-	inputFramerateTag.val( createjs.Ticker.framerate );  // Load this value from 'config'
+	inputFramerateTag.val( Math.round( createjs.Ticker.framerate ) );  // Load this value from 'config'
 
 	btnFramerateUpTag.click( () => {
-		createjs.Ticker.framerate += framerateChangeRate;
+		createjs.Ticker.framerate = Math.round( createjs.Ticker.framerate + framerateChangeRate );
 		inputFramerateTag.val( createjs.Ticker.framerate );
 	});
 
 	btnFramerateDownTag.click( () => {
-		createjs.Ticker.framerate -= framerateChangeRate;
+		createjs.Ticker.framerate = Math.round( createjs.Ticker.framerate - framerateChangeRate );
 		if (createjs.Ticker.framerate < 1) createjs.Ticker.framerate = 1;
 		inputFramerateTag.val( createjs.Ticker.framerate );
 	});
@@ -156,9 +156,8 @@ WorldRender.switchAppMode = function( e )
 
 		if ( appModeConfig.onStartRunEval ) Util.evalTryCatch( appModeConfig.onStartRunEval );
 
-		// On stage 'tick' set it..
+		$('#inputFramerate').val( Math.round( createjs.Ticker.framerate ) );  // Load this value from 'config'
 	}
-
 
 	// If empty selection, display 'tomato' color for attention.
 	if ( !appModeName ) selAppModeTag.css( 'background-color', 'tomato' );
@@ -172,6 +171,8 @@ WorldRender.switchAppMode = function( e )
 
 WorldRender.resetAppData = function( )
 {
+	createjs.Ticker.framerate = 20;
+
 	// 1. Clear the 'containerList' array
 	CircleManager.clearData();
 	PortalManager.clearData();
