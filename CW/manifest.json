@@ -7,8 +7,8 @@
   "background_color": "#ffc61d",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "start_url": "/CW/",
-  "scope": "/CW/",  
+  "start_url": "/?utm_source=standalone&utm_medium=circle",
+  "scope": "/",  
   "icons": [{
     "src": "icons/icon-144x144.png",
     "sizes": "144x144",

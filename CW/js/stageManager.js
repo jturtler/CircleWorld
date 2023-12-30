@@ -43,9 +43,6 @@ StageManager.frameMove = function ( e )
 	if ( !e.paused )
 	{
 		var aged = ( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;
-		if ( aged ) console.log( 'aged.. ' );	
-		console.log( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) );
-
 		
 		// 1. Each children 'container' changes/renders
 		StageManager.stage.children.forEach(container => 
