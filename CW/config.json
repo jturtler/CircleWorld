@@ -1,40 +1,63 @@
 {
+	"INFO_Vars": {
+		"colorTeamList": [ "blue", "red", "gray", "green" ],
+		"circlePropJson": {
+			"protectedUntilAge": 4,
+			"innerCircle": { 
+				"addAge": 10,
+				"width_half": 4, 
+				"color": "[EVAL_OnCreate]Util.getRandomColorHex()",
+				"behavior_parent": {
+					"movement": "chaseNearBy"
+				}
+			},
+			"EVAL_OnCreate": [ "itemData.innerCircle.color" ]
+		}
+	},
 	"appModes":
 	[
 		{
 			"modeName": "circleSpawn",
 			"onStartRunEval": [
-				" createjs.Ticker.framerate = 15; ",
+				" createjs.Ticker.framerate = 20; ",
 				" INFO.maxCircleNum = 40; "				
 			],
 			"onFrameMoveEval": [
 				" /* This gets called on every frame/tick - create circle.. */ ",
-				" if ( INFO.frameCount === undefined ) INFO.frameCount = 0; ",
-				" else INFO.frameCount++; ",
 				" ",
-				" var colorTeamList = [ 'blue', 'red', 'gray', 'green' ]; ",
+				" INFO.frameCount = ( INFO.frameCount === undefined ) ? 0: INFO.frameCount + 1; ",
 				" ",
-				" if ( ( StageManager.stage.children.length <= INFO.maxCircleNum ) && ( INFO.frameCount % 30 ) === 0 ) { ",
-				"   var propJson = { ",
-				"     color: Util.getRandomInList( colorTeamList ), ",
-				"     startPosition: AppUtil.getPosition_Center(), ",
-				"     protectedAgeUpTo: 4 ",
-				"   };  ",
+				" if ( ( StageManager.stage.children.length <= INFO.maxCircleNum ) && ( INFO.frameCount % 30 ) === 0 ) ", 
+				" { ",
+				"   var propJson = Util.cloneJson( INFO.circlePropJson ); ",
+				"   propJson.color = Util.getRandomInList( INFO.colorTeamList ); ",
+				"   propJson.startPosition = AppUtil.getPosition_Center(); ",
 				"   ",
 				"   var container = CircleManager.createCircleItem( propJson ); ",
-				"   container.itemData.onFrameMove = container => { ", 
-				"     if ( !container.itemData.innerCircle && container.itemData.age > 10 ) CircleManager.addInnerCircle_setInItemData( container, { width_half: 4, color: Util.getRandomColorHex() } ); ",
-				"     MovementHelper.moveNext( container ); ",
-				"   } ",				
+				"   ",
+				"   container.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
 				" } "
 			]	
 		},
 		{
-			"modeName": "portalTwo",
+			"modeName": "portal2",
 			"onStartRunEval": [
-				" createjs.Ticker.framerate = 15; ",
+				" createjs.Ticker.framerate = 20; ",
 				" ",
-				" for( var i = 0; i < 2; i++ ) PortalManager.createPortalItem(); "
+				" var propJson = Util.cloneJson( INFO.circlePropJson ); ",
+				" ",
+				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalItem( { spawnCircleProp: propJson } ); "
+			],
+			"onFrameMoveEval": [ ]	
+		},
+		{
+			"modeName": "portal4",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 20; ",
+				" ",
+				" var propJson = Util.cloneJson( INFO.circlePropJson ); ",
+				" ",
+				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalItem( { spawnCircleProp: propJson } ); "
 			],
 			"onFrameMoveEval": [ ]	
 		}

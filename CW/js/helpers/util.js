@@ -7,27 +7,31 @@ function Util() { };
 Util.isTypeObject = function (obj) {
 	// Array is also 'object' type, thus, check to make sure this is not array.
 	if (Util.isTypeArray(obj)) return false;
-	else return (obj !== undefined && typeof (obj) === 'object');
+	else return (obj !== undefined && obj !== null && typeof (obj) === 'object');
 };
 
 Util.isTypeArray = function (obj) {
-	return (obj !== undefined && Array.isArray(obj));
+	return (obj !== undefined && obj !== null && Array.isArray(obj));
 };
 
 Util.isTypeString = function (obj) {
-	return (obj !== undefined && typeof (obj) === 'string');
+	return (obj !== undefined && obj !== null && typeof (obj) === 'string');
 };
 
 // ---------------------------
 
 Util.evalTryCatch = function( inputVal )
 {
+	var output = '';
+
 	try
 	{
 		inputVal = Util.getEvalStr(inputVal); // Handle array into string joining
-		if (inputVal) eval(inputVal);
+		if (inputVal) output = eval(inputVal);
 	}
 	catch( errMsg ) { console.error( 'ERROR in Util.evalTryCatch, ' + errMsg ); }
+
+	return output;
 };
 
 
@@ -45,6 +49,30 @@ Util.getEvalStr = function (evalObj)
 	catch (errMsg) {  console.log('ERROR in Util.getEvalStr, errMsg: ' + errMsg);  }
 
 	return evalStr;
+};
+
+Util.EVAL_OnCreate = function( itemData )
+{
+	try
+	{
+		var evalKeyCheckStr = '[EVAL_OnCreate]';
+
+		if ( itemData.EVAL_OnCreate )
+		{
+			itemData.EVAL_OnCreate.forEach( itemStr => {
+				var propStr = eval( itemStr );
+				if ( propStr.indexOf( evalKeyCheckStr ) >= 0 ) 
+				{
+					try {
+						eval( itemStr + ' = ' + propStr.replace( evalKeyCheckStr, '' ) );
+					}
+					catch (errMsg) {  console.log( 'ERROR in Util.EVAL_OnCreate, evalKey operation, errMsg: ' + errMsg);  }
+				}
+			});
+			//"EVAL_OnCreate": [ "itemData.innerCircle.color" ]
+		}
+	}
+	catch (errMsg) {  console.log('ERROR in Util.EVAL_OnCreate, errMsg: ' + errMsg);  }
 };
 
 

@@ -20,14 +20,16 @@ CircleManager.createCircleItem = function ( inputJson )
 		speed: Util.getRandomInRange(5, 8),
 		width_half: Util.getRandomInRange(8, 13),
 		angle: Util.getRandomInRange( 0, 360 ),
-		// innerCircle: { width_half: 4, color: Util.getRandomColorHex() },
+		innerCircle: { addAge: 10, width_half: 4, color: Util.getRandomColorHex() },
 		behaviors: {			
 			collectDistances: true,
 			onCollision: 'bounce',
-			protectedAgeUpTo: 4
+			protectedUntilAge: 4
 		}
 	};
 	Util.mergeJson( circleItemData, inputJson );
+
+	Util.EVAL_OnCreate( circleItemData );
 
 
 	// With above 'inputJson', 'circleJson' merged, have 'CommonObjManager.createItem' create 'itemData' & 'container'
@@ -36,12 +38,16 @@ CircleManager.createCircleItem = function ( inputJson )
 	var itemData = container.itemData;
 	itemData.objType = 'circle';
 
-	// Default 'circle' event handler ('onFrameMove', 'onClick' )
+
+	// -- SET EVENTS SECTION ---
+	//		- Default 'circle' event handler ('onFrameMove', 'onClick' )
+	// 'onFrameMove_ClassBase' - Not overridable / always run(?) 'onFrameMove' ClassBase version
+	itemData.onFrameMove_ClassBase = container => CircleManager.addInnerCircleInAge( container );
 	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => MovementHelper.moveNext( container );
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
-
 	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
 	
+
 	// More 'circle' related shapes & etc created/added to 'container'
 	CircleManager.setCircleContainer( container );
 
@@ -60,23 +66,36 @@ CircleManager.setCircleContainer = function ( container )
 	container.ref_Shape = shape;
 	container.addChild( shape );
 
-	if ( itemData.innerCircle ) CircleManager.addInnerCircle( container, itemData.innerCircle );
+	// if ( itemData.innerCircle ) CircleManager.addInnerCircle( container, itemData.innerCircle );
 };
 
 
-CircleManager.addInnerCircle = function( container, innerCircleJson )
+CircleManager.addInnerCircle = function ( container, innerCircleJson )
 {
 	var innerCircleShape = new createjs.Shape();
 	innerCircleShape.graphics.beginFill( innerCircleJson.color ).drawCircle(0, 0, innerCircleJson.width_half );
 	container.ref_innerCircleShape = innerCircleShape;
 	container.addChild( innerCircleShape );
+
+	innerCircleJson.added = true;
+};
+
+CircleManager.addInnerCircleInAge = function ( container )
+{
+	var itemData = container.itemData;
+	var innerCircle = itemData.innerCircle;
+
+	if ( innerCircle && !innerCircle.added && itemData.age >= innerCircle.addAge ) CircleManager.addInnerCircle( container, innerCircle );
 };
 
 
+/*
 CircleManager.addInnerCircle_setInItemData = function( container, innerCircleJson )
 {
 	container.itemData.innerCircle = innerCircleJson;
 
 	CircleManager.addInnerCircle( container, innerCircleJson );
 };
+*/
+
 // ---------------------------------

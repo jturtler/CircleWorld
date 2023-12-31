@@ -49,6 +49,7 @@ StageManager.frameMove = function ( e )
 		{
 			try {
 				if ( container.itemData.age && aged ) container.itemData.age++;	// TODO: <-- Should age on every framerate?  1 seconds?
+				if ( container.itemData.onFrameMove_ClassBase ) container.itemData.onFrameMove_ClassBase( container );	
 				if ( container.itemData.onFrameMove ) container.itemData.onFrameMove( container );	
 			}
 			catch( errMsg ) {  console.error( 'ERROR in StageManager.frameMove, in children container onFrameMove, ' + errMsg ); }

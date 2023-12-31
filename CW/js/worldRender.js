@@ -33,6 +33,21 @@ WorldRender.setUp_Tag_Events = function()
 {
 	WorldRender.appModeTag_PopulateNSetupEvents( $( '#selAppMode' ), INFO.configJson );
 
+	$( '#btnInfoPanel' ).click( function()
+	{		
+		// Open the info panel dialog/popup..
+
+		AppUtil.openDivPopupArea($('#divPopupArea'), function (divMainContentTag) 
+		{
+			//divMainContentTag.attr('style', 'overflow: scroll;height: 90%; margin-top: 2px; background-color: #eee;padding: 3px;');
+
+			// ---------------
+			divMainContentTag.append('<div class="infoLine" style="opacity: 0;">- </div>');
+			divMainContentTag.append('<div class="infoLine">------------------------</div>');
+		});
+
+	});
+
 	// Add Circle
 	$( '#btnAddObj' ).click( function() 
 	{
@@ -84,6 +99,10 @@ WorldRender.setUp_Tag_Events = function()
 
 			case 65: //_keycode_a:
 				$( '#btnAddObj' ).click();
+				return false;
+
+			case 73: //_keycode_i:
+				$( '#btnInfoPanel' ).click();
 				return false;
 		}
 	};
@@ -186,6 +205,31 @@ WorldRender.resetAppData = function( )
 
 	// 4. reset 'INFO' all - except 'configJson'
 	var tempConfigJson = INFO.configJson;
-	INFO = {};
-	INFO.configJson = tempConfigJson;
+	INFO = { configJson: tempConfigJson };
+	WorldRender.setConfig_INFO_Vars( INFO.configJson.INFO_Vars );
+}; 
+
+
+WorldRender.setConfig_INFO_Vars = function( INFO_Vars )
+{
+	if ( INFO_Vars )
+	{
+		for ( var prop in INFO_Vars )
+		{			
+			var data = INFO_Vars[ prop ];
+
+			// Probably not used.. <-- Due to these not should be decided on define time, but on Run Time!
+			// if ( Util.isTypeString( data ) && data.trim().indexOf( '[EVAL]' ) === 0 ) data = Util.evalTryCatch( data.replace( '[EVAL]', '' ) );
+
+			INFO[prop] = data;
+		}
+	}
+};
+
+
+// ---------------------------------
+
+WorldRender.openInfoPanel = function( )
+{
+
 };

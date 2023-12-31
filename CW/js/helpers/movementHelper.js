@@ -19,7 +19,7 @@ MovementHelper.moveNext = function (container)
 	{
 		if ( behaviors && behaviors.onCollision )
 		{
-			if ( behaviors.protectedAgeUpTo && behaviors.protectedAgeUpTo > itemData.age ) { } // ignore since still in protected mode
+			if ( behaviors.protectedUntilAge && behaviors.protectedUntilAge > itemData.age ) { } // ignore since still in protected mode
 			else if ( behaviors.onCollision === 'bounce' )
 			{
 				// TODO: ALSO, if in collision when the age is turned on just now, also ignore it for a while?

@@ -9,14 +9,6 @@ AppUtil.OFFSET_HEIGHT = 25; // For bottom control space
 AppUtil.appReloading = false;  
 AppUtil.callOnlyOnce_timeoutId;
 
-// ============================================
-// Size of browser viewport --> $(window).height(); $(window).width();
-// Size of HTML document --> $(document).height(); $(document).width();
-// For screen size (screen obj): --> window.screen.height; window.screen.width;
-
-// Browser refresh/reload
-// Set this before refreshing, thus, sw state event not display the update message.
-
 // ==== Methods ======================
 
 AppUtil.appReloadWtMsg = function( msg, option )
@@ -72,3 +64,69 @@ AppUtil.getPosition_Random = function()
 	};
 };
 
+
+// ==========================================
+// ====  BLOCK / UNBLOCK PAGE
+
+// Use this to display a popup with some messages or interactions..
+//AppUtil.openDivPopupArea( $( '#divPopupArea' ), populateProcess, closeProcess )
+AppUtil.openDivPopupArea = function (divPopupAreaTag, populateProcess, closeProcess) 
+{
+	AppUtil.blockPage(undefined, function (scrimTag) {
+		divPopupAreaTag.show();  // Always clear out 'mainContent' and reCreate it.
+		$('.scrim').show();
+
+		divPopupAreaTag.find('div.divExtraSec').remove();
+
+
+		var divMainContentTag = divPopupAreaTag.find('.divMainContent');
+		divMainContentTag.html(''); //.attr('style', ''); // Reset the content & style.  // style="overflow: scroll;height: 85%; margin-top: 10px; background-color: #eee;padding: 7px;"
+
+		var closeBtn = divPopupAreaTag.find('div.close');
+
+		closeBtn.off('click').click(function () {
+			$('.scrim').hide();
+			divPopupAreaTag.hide();
+			AppUtil.unblockPage(scrimTag);
+
+			if (closeProcess) {
+				try {
+					closeProcess(divPopupAreaTag);
+				} catch (errMsg) { console.log('ERROR during AppUtil.openDivPopupArea closeProcess, ' + errMsg); }
+			}
+		});
+
+		scrimTag.off('click').click(function () {  closeBtn.click();  });
+
+		if (populateProcess) {
+			try {
+				populateProcess(divMainContentTag, divPopupAreaTag);
+			} catch (errMsg) { console.log('ERROR during AppUtil.openDivPopupArea populateProcess, ' + errMsg); }
+		}
+
+	});
+
+};
+
+AppUtil.blockPage = function (scrimTag, runFunc) {
+	if (!scrimTag) scrimTag = AppUtil.getScrimTag();
+
+	scrimTag.off('click');
+	scrimTag.show();
+
+	if (runFunc) runFunc(scrimTag);
+
+	return scrimTag;
+};
+
+AppUtil.unblockPage = function (scrimTag) {
+	if (!scrimTag) scrimTag = AppUtil.getScrimTag();
+
+	scrimTag.off('click');
+	scrimTag.hide();
+};
+
+// -- GET ----
+AppUtil.getScrimTag = function () {
+	return $('.scrim');
+};

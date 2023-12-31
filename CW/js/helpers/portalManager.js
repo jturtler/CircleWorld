@@ -29,10 +29,20 @@ PortalManager.createPortalItem = function ( inputJson )
 		color: PortalManager.getNextPortalTeamColor( PortalManager.containerList.length ),
 		spawnFreqency: PortalManager.portalSpawnFrequency, // every 3 tick, create new itemData..
 		remainSpawnNum: PortalManager.remainSpawnNum,
-		positionFixed: false
+		positionFixed: false,
+		spawnCircleProp: {
+			protectedUntilAge: 4,
+			innerCircle: {
+				addAge: 10,
+				width_half: 4,
+				color: Util.getRandomColorHex()
+			}
+		}		
 	};
 	Util.mergeJson( portalItemData, inputJson );
 	
+	Util.EVAL_OnCreate( portalItemData );
+
 
 	// Get 'itemData' & 'container' created by common method.
 	var container = CommonObjManager.createItem( portalItemData );
@@ -41,17 +51,18 @@ PortalManager.createPortalItem = function ( inputJson )
 	itemData.objType = 'portal';
 
 
-	// Default 'portal' event handler ('onFrameMove', 'onClick' )
+	// -- SET EVENTS SECTION ---
+	//		- Default event handler ('onFrameMove', 'onClick' )
+	itemData.onFrameMove_ClassBase = container => {};
 	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => PortalManager.spawnCircle( container );
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
 	if ( !itemData.onCanvasSizeChanged ) itemData.onCanvasSizeChanged = container => PortalManager.repositionContainer( container );
-
 	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
 
 
 	PortalManager.containerList.push( container );
 	
-	PortalManager.repositionPortals( PortalManager.containerList );
+	PortalManager.repositionPortals( PortalManager.containerList ); // When portal number increases, reposition the portal positions.
 
 	PortalManager.setPortalContainer( container );
 
@@ -89,8 +100,13 @@ PortalManager.spawnCircle = function ( container )
 		if ( itemData.remainSpawnNum > 0 )
 		{
 			// Spawn Circle Item/Object <-- every 3 frame?  <-- Need global frame count..
-			// PortalManager.spawnCircle( itemData, position );
-			CircleManager.createCircleItem( { color: itemData.color, startPosition: { x: container.x, y: container.y }, collisionExceptions: [ { target: container, turns: 4 } ] } );
+
+			var spawnCircleProp = Util.cloneJson( itemData.spawnCircleProp );
+			spawnCircleProp.color = itemData.color;
+			spawnCircleProp.startPosition = { x: container.x, y: container.y };
+			spawnCircleProp.collisionExceptions = [ { target: container, turns: 4 } ];  // <-- circular loop on Util.traverseEval
+
+			CircleManager.createCircleItem( spawnCircleProp );
 			itemData.remainSpawnNum--;
 
 			// Label change

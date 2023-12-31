@@ -49,6 +49,31 @@
 			padding-inline: 3px;
     		font-size: 11px;			
 		}
+
+		.scrim {
+			display: none;
+			position: fixed;
+			height: 100vh;
+			width: 100vw;
+			bottom: 0;
+			left: 0;
+			background-color: black;
+			opacity: 0.4;
+			z-index: 2000;
+		}
+		
+		.popupAreaCss {
+			z-index: 2100;
+			position: fixed;
+			top: 4%;
+			left: 4%;
+			right: 4%;
+			bottom: 4%;
+			height: 85%;
+			min-height: 300px;
+			padding: 2px;
+			background-color: white;
+		}
 	</style>
 	
 	<script src="js/libraries/easeljs.min.js"></script>
@@ -76,6 +101,7 @@
 	<div id="commands" style="overflow: auto; text-wrap: nowrap; margin-top: 1px;">
 		<select id="selAppMode" style="font-size: 11px;"></select>
 		<span class="spanDivider">|</span>
+		<button id="btnInfoPanel" class="btnPanelStyle" style="padding-inline: 0px;"><b>[I]</b></button>
 		<button id="btnAddObj" class="btnPanelStyle"><b>[A]</b>dd</button>
 		<button id="btnStopStart" class="btnPanelStyle"><b>[S]</b><span id="spanStopStart">top</span></button>
 		<span class="spanDivider">|</span>
@@ -86,6 +112,21 @@
 		<span id="spanInfo" style="color: #555; font-size: 11px;"></span>	
 	</div>
 
+	<!-- LV1. Overlay gray layer for clicks -->
+  	<div class="scrim" style="display: none;"></div>
+
+	<!-- LV1. Overlay gray layer for clicks -->
+	<div id="divPopupArea" class="popupAreaCss" style="display:none;">
+		<div class="divMainLayout" style="height:100%;">
+			<div style="text-align: right;">
+				<div class="close" style="text-align: center;background-color: silver;width: 13px;height: 13px;display: inline-block;border: solid 1px #999;cursor: pointer;">
+					<span style="vertical-align: top; font-size: 12px;">X</span>
+				</div>
+			</div>
+			<div class="divMainContent" style="overflow: scroll; height: 90%; background-color: #eee; padding: 3px;"></div>
+		</div>
+	</div>
+  
 	<script>
 		
 		var INFO = {};  // Global 'INFO' json variable - for storing/checking values.
