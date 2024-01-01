@@ -1,5 +1,23 @@
 function MovementHelper() { };
 
+// ------------------------------------
+
+MovementHelper.detectLineColor = "green";
+MovementHelper.PROXY_LINES = [];
+
+// ------------------------------------
+
+MovementHelper.clearProxyLines = function()
+{
+	for ( var i = MovementHelper.PROXY_LINES.length - 1; i >= 0; i--) 
+	{ 
+		StageManager.stage.removeChild( MovementHelper.PROXY_LINES[i] );
+
+		MovementHelper.PROXY_LINES.splice( i, 1 );
+	}
+};
+
+
 MovementHelper.moveNext = function (container) 
 {
 	var itemData = container.itemData;
@@ -9,7 +27,11 @@ MovementHelper.moveNext = function (container)
 
 	var behaviors = itemData.behaviors;
 
-	if ( behaviors && behaviors.collectDistances ) MovementHelper.collectDistances( container, StageManager.stage.children );
+	if ( behaviors && behaviors.collectDistances ) MovementHelper.collectDistances( container, StageManager.getStageChildrenContainers() );
+
+
+	MovementHelper.performDistanceProxyDraw( container );
+
 
 	// CHECK 1. collision with any other object
 	//		- Rather than each object checking all other object, we can reduce this list
@@ -161,6 +183,72 @@ MovementHelper.getAngle_fromMovement = function( movement )
 
 // ---------------------------------------
 // --- Distance between objects
+
+MovementHelper.performDistanceProxyDraw = function ( container )
+{
+	var itemData = container.itemData;
+
+	if ( itemData.behaviors?.proxyDetectAction && itemData.distances )
+	{
+		// Draw lines that falls into the proxy distance..
+		var chaseProxyDistance = itemData.behaviors.proxyDetectAction.chaseProxyDistance;
+
+		if ( chaseProxyDistance )
+		{
+			for ( var i = 0; i < itemData.distances.length; i++ )
+			{
+				var distanceJson = itemData.distances[i];
+	
+				if ( distanceJson.distance <= chaseProxyDistance && !MovementHelper.checkTargetDistanceLine( container, distanceJson.ref_target ) )
+				{
+					distanceJson.ref_line = MovementHelper.drawProxyLine( container, distanceJson.ref_target, MovementHelper.detectLineColor );
+				}
+			}	
+		}
+	}
+};
+
+MovementHelper.checkTargetDistanceLine = function( sourceShape, targetShape )
+{
+	var lineExistsInTargetDistances = false;
+
+	var trgDistances = targetShape.itemData.distances;
+
+	if ( trgDistances )
+	{
+		var distanceJson = trgDistances.find( dst => ( dst.ref_target === sourceShape && dst.ref_line ) );
+
+		if ( distanceJson ) lineExistsInTargetDistances = true;
+	}
+
+	return lineExistsInTargetDistances;
+};
+
+MovementHelper.drawProxyLine = function( sourceShape, targetShape, color ) 
+{
+	var shapeLine;
+
+	try
+	{
+		shapeLine = new createjs.Shape();
+
+		shapeLine.graphics
+		  .setStrokeStyle(1)
+		  .beginStroke( color )
+		  .moveTo( sourceShape.x, sourceShape.y )
+		  .lineTo( targetShape.x, targetShape.y )
+		  .endStroke();
+	 
+		shapeLine.ref_Objs = { source: sourceShape, target: targetShape }
+
+		StageManager.stage.addChild( shapeLine );
+
+		MovementHelper.PROXY_LINES.push( shapeLine );
+	}
+	catch( errMsg ) { console.error( 'ERROR in MovementHelper.drawProxyLine, ' + errMsg ); }
+
+	return shapeLine;
+};
 
 
 MovementHelper.collectDistances = function( currObj, targets )

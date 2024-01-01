@@ -4,11 +4,14 @@
 		"circlePropJson": {
 			"protectedUntilAge": 4,
 			"innerCircle": { 
-				"addAge": 10,
+				"addAge": 4,
 				"width_half": 4, 
-				"color": "[EVAL_OnCreate]Util.getRandomColorHex()",
-				"behavior_parent": {
-					"movement": "chaseNearBy"
+				"color": "Util.getRandomColorHex()",
+				"behaviorChange": {
+					"proxyDetectAction": {
+						"action": "chase",
+						"chaseProxyDistance": 100
+					}
 				}
 			},
 			"EVAL_OnCreate": [ "itemData.innerCircle.color" ]
@@ -20,14 +23,14 @@
 			"modeName": "circleSpawn",
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
-				" INFO.maxCircleNum = 40; "				
+				" INFO.maxCircleNum = 4; "				
 			],
 			"onFrameMoveEval": [
 				" /* This gets called on every frame/tick - create circle.. */ ",
 				" ",
 				" INFO.frameCount = ( INFO.frameCount === undefined ) ? 0: INFO.frameCount + 1; ",
 				" ",
-				" if ( ( StageManager.stage.children.length <= INFO.maxCircleNum ) && ( INFO.frameCount % 30 ) === 0 ) ", 
+				" if ( ( CircleManager.containerList.length <= INFO.maxCircleNum ) && ( INFO.frameCount % 30 ) === 0 ) ", 
 				" { ",
 				"   var propJson = Util.cloneJson( INFO.circlePropJson ); ",
 				"   propJson.color = Util.getRandomInList( INFO.colorTeamList ); ",

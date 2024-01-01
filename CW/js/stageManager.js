@@ -42,15 +42,20 @@ StageManager.frameMove = function ( e )
 {
 	if ( !e.paused )
 	{
+		MovementHelper.clearProxyLines();
 		var aged = ( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;
 		
+		
 		// 1. Each children 'container' changes/renders
-		StageManager.stage.children.forEach(container => 
+		StageManager.getStageChildrenContainers().forEach(container => 
 		{
 			try {
-				if ( container.itemData.age && aged ) container.itemData.age++;	// TODO: <-- Should age on every framerate?  1 seconds?
-				if ( container.itemData.onFrameMove_ClassBase ) container.itemData.onFrameMove_ClassBase( container );	
-				if ( container.itemData.onFrameMove ) container.itemData.onFrameMove( container );	
+				if ( container.itemData )
+				{
+					if ( container.itemData.age && aged ) container.itemData.age++;	// TODO: <-- Should age on every framerate?  1 seconds?
+					if ( container.itemData.onFrameMove_ClassBase ) container.itemData.onFrameMove_ClassBase( container );	
+					if ( container.itemData.onFrameMove ) container.itemData.onFrameMove( container );		
+				}
 			}
 			catch( errMsg ) {  console.error( 'ERROR in StageManager.frameMove, in children container onFrameMove, ' + errMsg ); }
 		});
@@ -89,7 +94,7 @@ StageManager.startPlan = function( dataJson )
 StageManager.adjustCanvasSize = function () 
 {
 	// Check all objects and if 'canvasSizeChanged' method exists, call them..
-	StageManager.stage.children.forEach( container => {
+	StageManager.getStageChildrenContainers().forEach( container => {
 		if ( container.itemData.onCanvasSizeChanged ) 
 		{
 			try {
@@ -99,6 +104,17 @@ StageManager.adjustCanvasSize = function ()
 	});
 
 	StageManager.stage.update();
+};
+
+
+StageManager.getStageChildrenContainers = function ( objType ) 
+{	
+	var list = [];
+
+	list = StageManager.stage.children.filter( obj => ( obj.itemData ) );
+	if ( objType ) list = list.filter( obj => obj.itemData?.objType === objType );
+
+	return list;
 };
 
 

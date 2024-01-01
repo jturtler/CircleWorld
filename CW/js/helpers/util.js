@@ -59,9 +59,11 @@ Util.EVAL_OnCreate = function( itemData )
 
 		if ( itemData.EVAL_OnCreate )
 		{
-			itemData.EVAL_OnCreate.forEach( itemStr => {
+			itemData.EVAL_OnCreate.forEach( itemStr => 
+			{
 				var propStr = eval( itemStr );
-				if ( propStr.indexOf( evalKeyCheckStr ) >= 0 ) 
+
+				if ( Util.isTypeString( propStr ) ) // if ( propStr.indexOf( evalKeyCheckStr ) >= 0 ) 
 				{
 					try {
 						eval( itemStr + ' = ' + propStr.replace( evalKeyCheckStr, '' ) );

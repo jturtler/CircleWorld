@@ -193,6 +193,7 @@ WorldRender.resetAppData = function( )
 	createjs.Ticker.framerate = 20;
 
 	// 1. Clear the 'containerList' array
+	MovementHelper.clearProxyLines();  // LINES (Proxy) remove
 	CircleManager.clearData();
 	PortalManager.clearData();
 	CommonObjManager.clearData();

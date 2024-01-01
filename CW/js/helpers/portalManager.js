@@ -2,7 +2,7 @@
 function PortalManager() { };
 
 // ------------------------------------
-
+PortalManager.objType = 'portal';
 PortalManager.portalTeamColors = [ 'blue', 'red', 'gray', 'green' ];
 PortalManager.PortalPositionOffset = 100;
 PortalManager.portalSpawnFrequency = 40; //StageManager.framerate * 2;
@@ -12,6 +12,7 @@ PortalManager.containerList = []; // Keep all the created containers here..
 
 // ------------------------------------
 
+// Should only be called follow by 'stage.removeAllChildren()'
 PortalManager.clearData = function()
 {
 	PortalManager.containerList = [];
@@ -48,7 +49,7 @@ PortalManager.createPortalItem = function ( inputJson )
 	var container = CommonObjManager.createItem( portalItemData );
 
 	var itemData = container.itemData;
-	itemData.objType = 'portal';
+	itemData.objType = PortalManager.objType;
 
 
 	// -- SET EVENTS SECTION ---

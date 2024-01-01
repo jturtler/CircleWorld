@@ -2,9 +2,11 @@
 function CircleManager() { };
 
 CircleManager.containerList = []; // Keep all the created containers here..
+CircleManager.objType = 'circle';
 
 // -----------------------------
 
+// Should only be called follow by 'stage.removeAllChildren()'
 CircleManager.clearData = function()
 {
 	CircleManager.containerList = [];
@@ -26,7 +28,8 @@ CircleManager.createCircleItem = function ( inputJson )
 			onCollision: 'bounce',
 			protectedUntilAge: 4
 		}
-	};
+	};	// behaviorChange can be inserted into above 'behaviors' when innerCircle is added at some age..
+
 	Util.mergeJson( circleItemData, inputJson );
 
 	Util.EVAL_OnCreate( circleItemData );
@@ -36,7 +39,7 @@ CircleManager.createCircleItem = function ( inputJson )
 	var container = CommonObjManager.createItem( circleItemData );
 
 	var itemData = container.itemData;
-	itemData.objType = 'circle';
+	itemData.objType = CircleManager.objType;
 
 
 	// -- SET EVENTS SECTION ---
@@ -80,22 +83,19 @@ CircleManager.addInnerCircle = function ( container, innerCircleJson )
 	innerCircleJson.added = true;
 };
 
+// 'container.itemData' already has 'innerCircle' data, but at some age, it start to show/activate..
 CircleManager.addInnerCircleInAge = function ( container )
 {
 	var itemData = container.itemData;
 	var innerCircle = itemData.innerCircle;
 
-	if ( innerCircle && !innerCircle.added && itemData.age >= innerCircle.addAge ) CircleManager.addInnerCircle( container, innerCircle );
+	if ( innerCircle )
+	{
+		if ( innerCircle.behaviorChange ) Util.mergeJson( itemData.behaviors, innerCircle.behaviorChange );
+		// "proxyDetectAction": {  "action": "chase", "chaseProxyDistance": 100  }
+	
+		if ( !innerCircle.added && itemData.age >= innerCircle.addAge ) CircleManager.addInnerCircle( container, innerCircle );	
+	}	
 };
-
-
-/*
-CircleManager.addInnerCircle_setInItemData = function( container, innerCircleJson )
-{
-	container.itemData.innerCircle = innerCircleJson;
-
-	CircleManager.addInnerCircle( container, innerCircleJson );
-};
-*/
 
 // ---------------------------------
