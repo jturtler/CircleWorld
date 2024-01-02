@@ -51,30 +51,32 @@ Util.getEvalStr = function (evalObj)
 	return evalStr;
 };
 
-Util.EVAL_OnCreate = function( itemData )
+Util.onObjCreate_EvalFields = function( itemData )
 {
 	try
 	{
-		var evalKeyCheckStr = '[EVAL_OnCreate]';
+		// var evalKeyCheckStr = '[onObjCreate_EvalFields]';
 
-		if ( itemData.EVAL_OnCreate )
+		if ( itemData.onObjCreate_EvalFields )
 		{
-			itemData.EVAL_OnCreate.forEach( itemStr => 
+			itemData.onObjCreate_EvalFields.forEach( itemStr => 
 			{
 				var propStr = eval( itemStr );
 
 				if ( Util.isTypeString( propStr ) ) // if ( propStr.indexOf( evalKeyCheckStr ) >= 0 ) 
 				{
 					try {
-						eval( itemStr + ' = ' + propStr.replace( evalKeyCheckStr, '' ) );
+						eval( itemStr + ' = ' + propStr ); //.replace( evalKeyCheckStr, '' ) );
 					}
-					catch (errMsg) {  console.log( 'ERROR in Util.EVAL_OnCreate, evalKey operation, errMsg: ' + errMsg);  }
+					catch (errMsg) {  console.log( 'ERROR in Util.onObjCreate_EvalFields, evalKey operation, errMsg: ' + errMsg);  }
 				}
 			});
-			//"EVAL_OnCreate": [ "itemData.innerCircle.color" ]
+			//"onObjCreate_EvalFields": [ "itemData.innerCircle.color" ]
+
+			delete itemData.onObjCreate_EvalFields;
 		}
 	}
-	catch (errMsg) {  console.log('ERROR in Util.EVAL_OnCreate, errMsg: ' + errMsg);  }
+	catch (errMsg) {  console.log('ERROR in Util.onObjCreate_EvalFields, errMsg: ' + errMsg);  }
 };
 
 

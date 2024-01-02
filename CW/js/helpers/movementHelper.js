@@ -2,12 +2,12 @@ function MovementHelper() { };
 
 // ------------------------------------
 
-MovementHelper.detectLineColor = "green";
+MovementHelper.detectLineColor = "yellow";
 MovementHelper.PROXY_LINES = [];
 
 // ------------------------------------
 
-MovementHelper.clearProxyLines = function()
+MovementHelper.removeAllProxyLines = function()
 {
 	for ( var i = MovementHelper.PROXY_LINES.length - 1; i >= 0; i--) 
 	{ 
@@ -24,6 +24,7 @@ MovementHelper.moveNext = function (container)
 	var movementCaseMet = false;
 
 	var movement = MovementHelper.getMovementCalc( itemData.angle, itemData.speed );
+	INFO.movementInEval = movement;
 
 	var behaviors = itemData.behaviors;
 
@@ -31,6 +32,9 @@ MovementHelper.moveNext = function (container)
 
 
 	MovementHelper.performDistanceProxyDraw( container );
+
+	//MovementHelper.caseConditionCheck( container );
+
 
 
 	// CHECK 1. collision with any other object
@@ -41,7 +45,7 @@ MovementHelper.moveNext = function (container)
 	{
 		if ( behaviors && behaviors.onCollision )
 		{
-			if ( behaviors.protectedUntilAge && behaviors.protectedUntilAge > itemData.age ) { } // ignore since still in protected mode
+			if ( behaviors.ghostModeAgeTill && behaviors.ghostModeAgeTill > itemData.age ) { } // ignore since still in protected mode
 			else if ( behaviors.onCollision === 'bounce' )
 			{
 				// TODO: ALSO, if in collision when the age is turned on just now, also ignore it for a while?
@@ -60,8 +64,8 @@ MovementHelper.moveNext = function (container)
 					{
 						// TODO: this is not right...  Need proper Vector collision bounce calculation
 						//		- Override expression in Config Eval? - if exists..
-						movement.x = -movement.x;
-						movement.y = -movement.y;
+						if ( behaviors.bounceLogicEval ) Util.evalTryCatch( behaviors.bounceLogicEval );
+						else {  movement.x = -movement.x;  movement.y = -movement.y;	 }
 
 						itemData.angle = MovementHelper.getAngle_fromMovement( movement );
 

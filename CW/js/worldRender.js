@@ -4,6 +4,8 @@ function WorldRender() { };
 WorldRender.stage;
 WorldRender.infoJson = {};  // canvasName, canvasTag, canvasHtml, winTag, etc..
 
+WorldRender.spanInfoTag = $( '#spanInfo' );
+
 // ------------------------
 
 WorldRender.setInfoJson = function (inputJson) 
@@ -53,7 +55,7 @@ WorldRender.setUp_Tag_Events = function()
 	{
 		var dataInfo = { color: 'black', startPosition: AppUtil.getPosition_Center() };
 
-		CircleManager.createCircleItem( dataInfo );
+		CircleManager.createCircleObj( dataInfo );
 
 		// If the stage is paused, show the added circle right away by updating stage.
 		if ( createjs.Ticker.paused ) StageManager.stage.update();
@@ -65,13 +67,13 @@ WorldRender.setUp_Tag_Events = function()
 		{			
 			createjs.Ticker.paused = true;
 			$( '#spanStopStart' ).text( 'tart' );
-			$( '#spanInfo' ).text( 'Stopped.. ' );
+			WorldRender.spanInfoTag.text( 'Stopped.. ' );
 		}
 		else
 		{
 			createjs.Ticker.paused = false;
 			$( '#spanStopStart' ).text( 'top' );
-			$( '#spanInfo' ).text( 'Started Again.. ' );
+			WorldRender.spanInfoTag.text( 'Started Again.. ' );
 		}
 	});
 
@@ -192,14 +194,14 @@ WorldRender.resetAppData = function( )
 {
 	createjs.Ticker.framerate = 20;
 
-	// 1. Clear the 'containerList' array
-	MovementHelper.clearProxyLines();  // LINES (Proxy) remove
-	CircleManager.clearData();
-	PortalManager.clearData();
-	CommonObjManager.clearData();
-
-	// 2. Remove all stage containers
-	StageManager.removeStageObjs();
+	// 1. Clear the 'containerList' array -  // Below Step 2 takes care of removing all..
+	// MovementHelper.removeAllProxyLines();  // LINES (Proxy) remove
+	//CircleManager.removeAllCircleContainers();
+	//PortalManager.removeAllPortalContainers();
+	//CommonObjManager.removeAllContainers();
+	
+	// 2. Remove all stage objects
+	StageManager.removeAllStageObjs();
 
 	// 3. curr appModeConfig json reset
 	WorldRender.infoJson.appModeConfig = '';
@@ -225,8 +227,10 @@ WorldRender.setConfig_INFO_Vars = function( INFO_Vars )
 			INFO[prop] = data;
 		}
 	}
-};
 
+	// In case the config 'INFO_Vars' did not set INFO.colorTeamList, set it here..(?)
+	if ( !INFO.colorTeamList ) INFO.colorTeamList = CircleManager.colorTeamList_DEFAULT;
+};
 
 // ---------------------------------
 
@@ -234,3 +238,10 @@ WorldRender.openInfoPanel = function( )
 {
 
 };
+
+
+WorldRender.spanInfoText = function( text )
+{
+	WorldRender.spanInfoTag.text( text );
+};
+

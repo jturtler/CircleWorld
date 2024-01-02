@@ -3,9 +3,7 @@ function CommonObjManager() { };
 
 CommonObjManager.selectedContainer;
 CommonObjManager.selectedContainer_highlightShape;
-CommonObjManager.selectedColor = 'yellow';
-
-CommonObjManager.containerList = []; // Keep all the created containers here..
+CommonObjManager.selectedColor = 'green';
 
 CommonObjManager.itemJsonDefault = {
 	startPosition: { x: 200, y: 200 }, // position can change afterwards if obj is not in stationary one.
@@ -19,13 +17,19 @@ CommonObjManager.itemJsonDefault = {
 
 // ------------------------------------
 
-CommonObjManager.clearData = function()
+CommonObjManager.getContainers = function()
 {
-	CommonObjManager.containerList = [];
+	return StageManager.getStageChildrenContainers();
 };
 
+CommonObjManager.removeAllContainers = function()
+{
+	StageManager.removeStageChildrenContainers();
+};
 
-CommonObjManager.createItem = function ( inputJson )
+// -----------------------------------
+
+CommonObjManager.createObj = function ( inputJson )
 {
 	// 'itemData' create - combine/merge with 'inputJson' data.
 	if ( !inputJson ) inputJson = {};
@@ -35,7 +39,6 @@ CommonObjManager.createItem = function ( inputJson )
 
 	// Create 'container' (children of 'stage') with 'itemData' in it.
 	var container = CommonObjManager.createStageItem( itemData ); // return 'container'
-	CommonObjManager.containerList.push( container );
 
 	return container; // 'itemData' is part of 'container.
 };
@@ -114,6 +117,8 @@ CommonObjManager.clickObjectEvent = function ( e )
 	{
 		var itemData = container.itemData;
 		console.log( itemData );
+
+		WorldRender.spanInfoText( 'Item Selected: ' + itemData.name );
 
 
 		// Clear other selections..

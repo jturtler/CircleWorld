@@ -1,42 +1,56 @@
 
 function CircleManager() { };
 
-CircleManager.containerList = []; // Keep all the created containers here..
 CircleManager.objType = 'circle';
+
+CircleManager.colorTeamList_DEFAULT = [ "blue", "orange", "gray", "white", "black", "purple" ];
 
 // -----------------------------
 
-// Should only be called follow by 'stage.removeAllChildren()'
-CircleManager.clearData = function()
-{
-	CircleManager.containerList = [];
+CircleManager.circleProp_DEFAULT = {
+	name: "CircleManager.objType + '_' + CommonObjManager.getContainers().length", // Could be, ideally, set like 'circle_blue_1'
+	speed: "Util.getRandomInRange(5, 8)",
+	width_half: "Util.getRandomInRange(8, 13)",
+	angle: "Util.getRandomInRange( 0, 360 )",
+	color: " Util.getRandomInList( INFO.colorTeamList ); ",
+	innerCircle: { addAge: 10, width_half: 4, color: "[RandomColorHex]" },
+	behaviors: {
+		collectDistances: true,
+		onCollision: 'bounce',
+		ghostModeAgeTill: 4
+	},
+	onObjCreate_EvalFields: [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.color", "itemData.startPosition" ]
 };
 
-CircleManager.createCircleItem = function ( inputJson )
+// -----------------------------
+
+// TODO: rename 'containers' --> 'objs'?
+CircleManager.getCircleContainers = function()
 {
-	if ( !inputJson ) inputJson = {};
+	return StageManager.getStageChildrenContainers( CircleManager.objType );
+};
+
+CircleManager.removeAllCircleContainers = function()
+{
+	StageManager.removeStageChildrenContainers( CircleManager.objType );
+};
+
+// -----------------------------
+
+CircleManager.createCircleObj = function ( inputObjProp )
+{
+	if ( !inputObjProp ) inputObjProp = {};
  
-	// Circle related 'itemData' default - overwritten by 'inputJson' is has any of the properties..
-	var circleItemData = {
-		name: 'circle_' + CommonObjManager.containerList.length, // Could be, ideally, set like 'circle_blue_1'
-		speed: Util.getRandomInRange(5, 8),
-		width_half: Util.getRandomInRange(8, 13),
-		angle: Util.getRandomInRange( 0, 360 ),
-		innerCircle: { addAge: 10, width_half: 4, color: Util.getRandomColorHex() },
-		behaviors: {			
-			collectDistances: true,
-			onCollision: 'bounce',
-			protectedUntilAge: 4
-		}
-	};	// behaviorChange can be inserted into above 'behaviors' when innerCircle is added at some age..
+	// Circle related 'prop' default - overwritten by 'inputObjProp' is has any of the properties..
+	var circleProp = ( INFO.baseCircleProp ) ? Util.cloneJson( INFO.baseCircleProp ): Util.cloneJson( CircleManager.circleProp_DEFAULT );
+	Util.mergeJson( circleProp, inputObjProp );
 
-	Util.mergeJson( circleItemData, inputJson );
-
-	Util.EVAL_OnCreate( circleItemData );
+	Util.onObjCreate_EvalFields( circleProp );
+	// TODO: re-'name' obj with color (team) in the name string?
 
 
-	// With above 'inputJson', 'circleJson' merged, have 'CommonObjManager.createItem' create 'itemData' & 'container'
-	var container = CommonObjManager.createItem( circleItemData );
+	// With above 'inputObjProp', 'circleJson' merged, have 'CommonObjManager.createObj' create 'itemData' & 'container'
+	var container = CommonObjManager.createObj( circleProp );
 
 	var itemData = container.itemData;
 	itemData.objType = CircleManager.objType;
@@ -52,15 +66,13 @@ CircleManager.createCircleItem = function ( inputJson )
 	
 
 	// More 'circle' related shapes & etc created/added to 'container'
-	CircleManager.setCircleContainer( container );
-
-	CircleManager.containerList.push( container );
+	CircleManager.setCircleShapes( container );
 
 	return container;
 };
 
 
-CircleManager.setCircleContainer = function ( container )
+CircleManager.setCircleShapes = function ( container )
 {
 	var itemData = container.itemData;
 
@@ -69,12 +81,16 @@ CircleManager.setCircleContainer = function ( container )
 	container.ref_Shape = shape;
 	container.addChild( shape );
 
+	// Below moved to not create right away, but scheduled by age - 'CircleManager.addInnerCircleInAge'
+	//		TODO: The Logic should be more changed?
 	// if ( itemData.innerCircle ) CircleManager.addInnerCircle( container, itemData.innerCircle );
 };
-
+ 
 
 CircleManager.addInnerCircle = function ( container, innerCircleJson )
 {
+	if ( innerCircleJson.color === '[RandomColorHex]' ) innerCircleJson.color = Util.getRandomColorHex();
+
 	var innerCircleShape = new createjs.Shape();
 	innerCircleShape.graphics.beginFill( innerCircleJson.color ).drawCircle(0, 0, innerCircleJson.width_half );
 	container.ref_innerCircleShape = innerCircleShape;

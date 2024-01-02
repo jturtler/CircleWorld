@@ -21,12 +21,6 @@ StageManager.startUp = function (infoJson, options)
 	StageManager.setFramerate_Event();
 };
 
-
-StageManager.removeStageObjs = function()
-{
-	StageManager.stage.removeAllChildren();
-};
-
 // --------------------
 // --- Frame Run
 
@@ -42,10 +36,10 @@ StageManager.frameMove = function ( e )
 {
 	if ( !e.paused )
 	{
-		MovementHelper.clearProxyLines();
+		MovementHelper.removeAllProxyLines();
 		var aged = ( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;
 		
-		
+
 		// 1. Each children 'container' changes/renders
 		StageManager.getStageChildrenContainers().forEach(container => 
 		{
@@ -65,9 +59,9 @@ StageManager.frameMove = function ( e )
 		try
 		{
 			var config = WorldRender.infoJson.appModeConfig;
-			if ( config && config.onFrameMoveEval ) Util.evalTryCatch( config.onFrameMoveEval );
+			if ( config && config.onStageFrameMoveEval ) Util.evalTryCatch( config.onStageFrameMoveEval );
 		}
-		catch( errMsg ) {  console.error( 'ERROR in StageManager.frameMove, in config onFrameMoveEval, ' + errMsg ); }
+		catch( errMsg ) {  console.error( 'ERROR in StageManager.frameMove, in config onStageFrameMoveEval, ' + errMsg ); }
 
 
 		StageManager.stage.update();
@@ -80,16 +74,6 @@ StageManager.frameMove = function ( e )
 };
 
 // ---------------------------------------------
-
-StageManager.startPlan = function( dataJson )
-{
-	if ( dataJson.plan === 'Portal' )
-	{
-		// Add Portal one by one?
-		for( var i = 0; i < 4; i++ ) PortalManager.createPortalItem();
-	}
-};
-
 
 StageManager.adjustCanvasSize = function () 
 {
@@ -106,6 +90,7 @@ StageManager.adjustCanvasSize = function ()
 	StageManager.stage.update();
 };
 
+// ----------------------------
 
 StageManager.getStageChildrenContainers = function ( objType ) 
 {	
@@ -117,7 +102,23 @@ StageManager.getStageChildrenContainers = function ( objType )
 	return list;
 };
 
+StageManager.removeStageChildrenContainers = function ( objType ) 
+{	
+	var list = StageManager.getStageChildrenContainers( objType );
+
+	for ( var i = list.length - 1; i >= 0; i--) 
+	{ 
+		StageManager.stage.removeChild( list[i] );
+	}
+};
+
+
+StageManager.removeAllStageObjs = function()
+{
+	StageManager.stage.removeAllChildren();
+};
+
 
 // --------------------
-// --- Frame Run Related
+
 

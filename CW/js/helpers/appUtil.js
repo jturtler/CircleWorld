@@ -4,7 +4,7 @@
 function AppUtil() {}
 
 AppUtil.OFFSET_WIDTH = 4;
-AppUtil.OFFSET_HEIGHT = 25; // For bottom control space
+AppUtil.OFFSET_HEIGHT = 30; // For bottom control space
 
 AppUtil.appReloading = false;  
 AppUtil.callOnlyOnce_timeoutId;
