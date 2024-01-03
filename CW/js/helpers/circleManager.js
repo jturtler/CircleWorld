@@ -54,12 +54,17 @@ CircleManager.createCircleObj = function ( inputObjProp )
 
 	var itemData = container.itemData;
 	itemData.objType = CircleManager.objType;
+	// NEW:
+	itemData.strengthChangeRate = Util.getRandomInRange( 0.2, 0.6, { decimal: 2}); // 'power'/'strength' is initially set from 'width'?
+	itemData.strength = itemData.width_half; // 'power'/'strength' is initially set from 'width'?
+	// increase gradually as ages / consumes others?
 
 
 	// -- SET EVENTS SECTION ---
 	//		- Default 'circle' event handler ('onFrameMove', 'onClick' )
 	// 'onFrameMove_ClassBase' - Not overridable / always run(?) 'onFrameMove' ClassBase version
-	itemData.onFrameMove_ClassBase = container => CircleManager.addInnerCircleInAge( container );
+	itemData.onFrameMove_ClassBase = container => { };
+	itemData.onAgeIncrease = container => CircleManager.ageIncreaseActions( container );
 	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => MovementHelper.moveNext( container );
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
 	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
@@ -86,6 +91,33 @@ CircleManager.setCircleShapes = function ( container )
 	// if ( itemData.innerCircle ) CircleManager.addInnerCircle( container, itemData.innerCircle );
 };
  
+// ---------------------------------
+
+CircleManager.ageIncreaseActions = function( container )
+{
+	var itemData = container.itemData;
+
+	// Increament the stength as obj ages..
+	itemData.strength += itemData.strengthChangeRate;
+	
+	CircleManager.checkNaddInnerCircleInAge( container );
+};
+
+
+// 'container.itemData' already has 'innerCircle' data, but at some age, it start to show/activate..
+CircleManager.checkNaddInnerCircleInAge = function ( container )
+{
+	var itemData = container.itemData;
+	var innerCircle = itemData.innerCircle;
+
+	if ( innerCircle )
+	{	
+		if ( !innerCircle.added && itemData.age >= innerCircle.addAge ) {
+			if ( innerCircle.behaviorChange ) Util.mergeJson( itemData.behaviors, innerCircle.behaviorChange );  // "proxyDetectAction": {  "action": "chase", "chaseProxyDistance": 100  }
+			CircleManager.addInnerCircle( container, innerCircle );	
+		}
+	}	
+};
 
 CircleManager.addInnerCircle = function ( container, innerCircleJson )
 {
@@ -98,20 +130,3 @@ CircleManager.addInnerCircle = function ( container, innerCircleJson )
 
 	innerCircleJson.added = true;
 };
-
-// 'container.itemData' already has 'innerCircle' data, but at some age, it start to show/activate..
-CircleManager.addInnerCircleInAge = function ( container )
-{
-	var itemData = container.itemData;
-	var innerCircle = itemData.innerCircle;
-
-	if ( innerCircle )
-	{
-		if ( innerCircle.behaviorChange ) Util.mergeJson( itemData.behaviors, innerCircle.behaviorChange );
-		// "proxyDetectAction": {  "action": "chase", "chaseProxyDistance": 100  }
-	
-		if ( !innerCircle.added && itemData.age >= innerCircle.addAge ) CircleManager.addInnerCircle( container, innerCircle );	
-	}	
-};
-
-// ---------------------------------

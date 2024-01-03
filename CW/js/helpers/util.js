@@ -82,11 +82,24 @@ Util.onObjCreate_EvalFields = function( itemData )
 
 // ---------------------------
 
-Util.getRandomInRange = function (start, end) 
+Util.decimalSet = function ( inputVal, decimal ) 
 {
+	var decimalFix;
+	if ( !decimal ) decimalFix = 1;
+	else if ( decimal === 1 ) decimalFix = 10;
+	else if ( decimal >= 2 ) decimalFix = 100;  // if decimal place go over 2 place, cut off on 2
+	
+	return Math.round( inputVal * decimalFix ) / decimalFix ;
+};
+
+
+Util.getRandomInRange = function (start, end, option ) 
+{
+	if ( !option ) option = {};
+	
 	var range = end - start;
 
-	var randRange = Math.floor(Math.random() * range);
+	var randRange = Util.decimalSet( Math.random() * range, option.decimal );
 
 	return start + randRange;
 };
@@ -100,7 +113,7 @@ Util.getRandomInList = function (list)
 
 Util.getRandomColorHex = function () 
 {
-	return '#' + Math.floor(Math.random()*16777215).toString(16);
+	return '#' + Math.round(Math.random()*16777215).toString(16);
 };
 
 Util.cutDecimalPlace = function ( input, decimalPlace ) 

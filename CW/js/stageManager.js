@@ -36,9 +36,13 @@ StageManager.frameMove = function ( e )
 {
 	if ( !e.paused )
 	{
-		MovementHelper.removeAllProxyLines();
 		var aged = ( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;
 		
+
+		// 0. Proxy 'lines' remove (for new stage frame drawing), and clear all obj's 'distances' data.
+		MovementHelper.removeAllProxyLines();
+		MovementHelper.clearAllDistances( StageManager.getStageChildrenContainers() );
+
 
 		// 1. Each children 'container' changes/renders
 		StageManager.getStageChildrenContainers().forEach(container => 
@@ -46,7 +50,10 @@ StageManager.frameMove = function ( e )
 			try {
 				if ( container.itemData )
 				{
-					if ( container.itemData.age && aged ) container.itemData.age++;	// TODO: <-- Should age on every framerate?  1 seconds?
+					if ( container.itemData.age && aged ) {						
+						container.itemData.age++;
+						if ( container.itemData.onAgeIncrease ) container.itemData.onAgeIncrease( container );	
+					}
 					if ( container.itemData.onFrameMove_ClassBase ) container.itemData.onFrameMove_ClassBase( container );	
 					if ( container.itemData.onFrameMove ) container.itemData.onFrameMove( container );		
 				}

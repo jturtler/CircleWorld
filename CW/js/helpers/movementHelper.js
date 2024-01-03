@@ -17,6 +17,15 @@ MovementHelper.removeAllProxyLines = function()
 	}
 };
 
+MovementHelper.clearAllDistances = function( containers )
+{
+	containers.forEach( container => {
+		container.itemData.distances = [];
+	});
+};
+
+
+// --------------------------------------------
 
 MovementHelper.moveNext = function (container) 
 {
@@ -33,7 +42,7 @@ MovementHelper.moveNext = function (container)
 
 	MovementHelper.performDistanceProxyDraw( container );
 
-	//MovementHelper.caseConditionCheck( container );
+	MovementHelper.nearestTargetPaint( container );
 
 
 
@@ -188,6 +197,7 @@ MovementHelper.getAngle_fromMovement = function( movement )
 // ---------------------------------------
 // --- Distance between objects
 
+// Populating newly created 'distances' obj array data with nearby object detection lines (drawn)
 MovementHelper.performDistanceProxyDraw = function ( container )
 {
 	var itemData = container.itemData;
@@ -203,18 +213,56 @@ MovementHelper.performDistanceProxyDraw = function ( container )
 			{
 				var distanceJson = itemData.distances[i];
 	
-				if ( distanceJson.distance <= chaseProxyDistance && !MovementHelper.checkTargetDistanceLine( container, distanceJson.ref_target ) )
+				if ( distanceJson.distance <= chaseProxyDistance )
 				{
-					distanceJson.ref_line = MovementHelper.drawProxyLine( container, distanceJson.ref_target, MovementHelper.detectLineColor );
+					var ref_line = MovementHelper.checkNGetTargetDistanceLine( container, distanceJson.ref_target );
+
+					// If 'target' has ref_line aready, use that reference in this obj's distanceJson.  Otherwise, create the line & set ref.
+					// We are not saving the new line's ref to both objects, since other object probably didn't have distances created, yet.
+					if ( ref_line ) distanceJson.ref_line = ref_line;
+					else distanceJson.ref_line = MovementHelper.drawProxyLine( container, distanceJson.ref_target, MovementHelper.detectLineColor );
 				}
 			}	
 		}
 	}
 };
 
-MovementHelper.checkTargetDistanceLine = function( sourceShape, targetShape )
+
+MovementHelper.nearestTargetPaint = function( container )
 {
-	var lineExistsInTargetDistances = false;
+	// Condition - the target need to be smaller (seems).  The 'line' is shared, however we can flag in the distance?  or in the obj?
+	var itemData = container.itemData;
+
+	if ( itemData.behaviors?.proxyDetectAction && itemData.distances )
+	{
+		for ( var i = 0; i < itemData.distances.length; i++ )
+		{
+			var distanceJson = itemData.distances[i];
+
+			// Get 1st one (nearest) with condition.. + change the paint color?
+			if ( distanceJson.ref_line && MovementHelper.checkSmallerTarget( container, distanceJson.ref_target ) )
+			{
+				// 
+			}
+		}
+	}
+};
+
+
+MovementHelper.checkSmallerTarget = function( source, target )
+{
+	if ( source.itemData.width_half >= target.itemData.width_half )
+	{
+		// mark it as the target
+		source.itemData.distances
+	}
+};
+
+
+MovementHelper.checkNGetTargetDistanceLine = function( sourceShape, targetShape )
+{
+	//var lineExistsInTargetDistances = false;
+	var ref_line;
 
 	var trgDistances = targetShape.itemData.distances;
 
@@ -222,10 +270,10 @@ MovementHelper.checkTargetDistanceLine = function( sourceShape, targetShape )
 	{
 		var distanceJson = trgDistances.find( dst => ( dst.ref_target === sourceShape && dst.ref_line ) );
 
-		if ( distanceJson ) lineExistsInTargetDistances = true;
+		if ( distanceJson ) ref_line = distanceJson.ref_line;
 	}
 
-	return lineExistsInTargetDistances;
+	return ref_line;
 };
 
 MovementHelper.drawProxyLine = function( sourceShape, targetShape, color ) 
