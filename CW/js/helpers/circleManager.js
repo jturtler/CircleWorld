@@ -5,8 +5,10 @@ CircleManager.objType = 'circle';
 
 CircleManager.colorTeamList_DEFAULT = [ "blue", "orange", "gray", "white", "black", "purple" ];
 
-CircleManager.fightWinSizeChangeRate = 0.1;  // per frame / strength..
-CircleManager.fightLossSizeChangeRate = 0.4;
+CircleManager.fightWinSizeChangeRate = 0.2;  // per frame / strength..
+CircleManager.fightLossSizeChangeRate = 0.7;
+
+CircleManager.circleSizeMax = 50;
 
 // -----------------------------
 
@@ -58,7 +60,7 @@ CircleManager.createCircleObj = function ( inputObjProp )
 	var itemData = container.itemData;
 	itemData.objType = CircleManager.objType;
 	// NEW:
-	itemData.strengthChangeRate = Util.getRandomInRange( 0.2, 0.6, { decimal: 2}); // 'power'/'strength' is initially set from 'width'?
+	itemData.strengthChangeRate = Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); // 'power'/'strength' is initially set from 'width'?
 	itemData.strength = itemData.width_half; // 'power'/'strength' is initially set from 'width'?
 	// increase gradually as ages / consumes others?
 
@@ -85,7 +87,8 @@ CircleManager.setCircleShapes = function ( container )
 	var itemData = container.itemData;
 
 	var shape = new createjs.Shape();
-	shape.graphics.beginFill(itemData.color).drawCircle(0, 0, itemData.width_half);
+	CircleManager.drawCircleShape( shape, itemData );
+
 	container.ref_Shape = shape;
 	container.addChild( shape );
 
@@ -94,6 +97,19 @@ CircleManager.setCircleShapes = function ( container )
 	// if ( itemData.innerCircle ) CircleManager.addInnerCircle( container, itemData.innerCircle );
 };
  
+CircleManager.drawCircleShape = function( shape, itemData )
+{
+	shape.graphics.clear().beginFill(itemData.color).drawCircle( 0, 0, itemData.width_half);
+};
+
+
+/*
+CircleManager.reshapeCircle = function( container, movement )
+{
+	shape.graphics.beginFill(itemData.color).drawCircle(movement.x, movement.y, itemData.width_half);
+};
+*/
+
 // ---------------------------------
 
 CircleManager.ageIncreaseActions = function( container )

@@ -75,6 +75,8 @@ CommonObjManager.highlightSeconds = function( container, option )
 	
 		var itemData = container.itemData;
 	
+		CommonObjManager.clearHighlightShape( container ); // if exists, remove any highlight shape
+
 		var width_full = itemData.width_half * option.sizeRate;
 	
 		var highlightShape = new createjs.Shape();
@@ -93,17 +95,30 @@ CommonObjManager.highlightSeconds = function( container, option )
 		
 		container.ref_highlightShape = highlightShape;	
 
-
-		setTimeout( () => 
-		{
-			if ( container.ref_highlightShape )
-			{
-				container.removeChild( container.ref_highlightShape );  // delete container.ref_highlightShape;
-			}
-		}, option.timeoutSec * 1000 );
-	
+		itemData.highlightCount = createjs.Ticker.framerate;	
 	}
 	catch( errMsg ) {  console.error( 'ERROR in CommonObjManager.highlightSeconds, ' + errMsg ); }
+};
+
+CommonObjManager.clearHighlightShape = function( container )
+{
+	if ( container.ref_highlightShape ) {
+		container.removeChild( container.ref_highlightShape );
+		delete container.ref_highlightShape;
+	} 
+};
+
+CommonObjManager.highlightShapeCountCheck_NClear = function( container )
+{
+	if ( container.itemData.highlightCount )
+	{
+		container.itemData.highlightCount--;
+
+		if ( container.itemData.highlightCount <= 0 && container.ref_highlightShape ) 
+		{
+			CommonObjManager.clearHighlightShape ( container );
+		} 
+	}
 };
 
 
@@ -149,3 +164,5 @@ CommonObjManager.clearPrevSelection = function ()
 		CommonObjManager.selectedContainer.removeChild( CommonObjManager.selectedContainer_shape );
 	}
 };
+
+// --------------------------------------------

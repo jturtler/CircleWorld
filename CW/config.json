@@ -25,15 +25,15 @@
 				"behaviorChange": {
 					"proxyDetection": {
 						"proxyDistance": 100
-					},
-					"chaseAction": {
-						"action": "chase",
-						"chaseCondition": { "sizeSmaller": true, "nearest": false, "NOTE": "not yet implemented" },
-						"onCollision": "attack",
-						"attackEval": " ---- "
 					}
 				}
 			}
+		},
+		"chaseAction": {
+			"action": "chase",
+			"chaseCondition": { "sizeSmaller": true, "nearest": false, "NOTE": "not yet implemented" },
+			"onCollision": "attack",
+			"attackLogicEval": ""
 		},
 		"onStartRunEval_Circle": [
 			" createjs.Ticker.framerate = 20; ",
@@ -107,19 +107,25 @@
 			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
 		},
 		{
-			"modeName": "c5_Eat",
+			"modeName": "c5_Chase",
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
 				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropExtra ) ); ",
-				" INFO.baseCircleProp. "				
+				" INFO.baseCircleProp.innerCircle.behaviorChange.chaseAction = INFO.chaseAction; "
 			],
 			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
 		},
 		{
-			"modeName": "c6_King"
+			"modeName": "c6_King",
+			"onStartRunEval": [
+				" alert( 'Not Ready, Yet.' ); "
+			]
 		},
 		{
-			"modeName": "c6_Durab"
+			"modeName": "c6_Spec",
+			"onStartRunEval": [
+				" alert( 'Not Ready, Yet.' ); "
+			]
 		},
 		{
 			"modeName": "portal2",

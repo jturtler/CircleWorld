@@ -6,7 +6,7 @@ MovementHelper.detectLineColor = "yellow";
 MovementHelper.attackLineColor = "red";
 MovementHelper.circleHighlightColor = "red";
 
-MovementHelper.maxTickAngleChange = 5;  // max angle change per tick is 5 degree.  If frameRate is 10, we have 10 tick per sec.  thus, 50 degree per sec max changing angle.
+MovementHelper.maxTickAngleChange = 0.5;  // max angle change per tick is 5 degree.  If frameRate is 10, we have 10 tick per sec.  thus, 50 degree per sec max changing angle.
 
 MovementHelper.PROXY_LINES = [];
 
@@ -14,12 +14,15 @@ MovementHelper.PROXY_LINES = [];
 
 MovementHelper.removeAllProxyLines = function()
 {
-	for ( var i = MovementHelper.PROXY_LINES.length - 1; i >= 0; i--) 
-	{ 
-		StageManager.stage.removeChild( MovementHelper.PROXY_LINES[i] );
-
-		MovementHelper.PROXY_LINES.splice( i, 1 );
-	}
+	if ( MovementHelper.PROXY_LINES.length > 0 ) 
+	{
+		for ( var i = MovementHelper.PROXY_LINES.length - 1; i >= 0; i--) 
+		{ 
+			StageManager.stage.removeChild( MovementHelper.PROXY_LINES[i] );
+	
+			MovementHelper.PROXY_LINES.splice( i, 1 );
+		}	
+	} 
 };
 
 MovementHelper.clearAllDistances = function( containers )
@@ -83,21 +86,10 @@ MovementHelper.moveNext = function (container)
 
 				if ( obj_inCollision )
 				{
-					if ( behaviors.onCollision === 'bounce' )
+					if ( behaviors.chaseAction?.onCollision === 'attack' && attackTarget )
 					{
-						// TODO: this is not right...  Need proper Vector collision bounce calculation
-						if ( behaviors.bounceLogicEval ) Util.evalTryCatch( behaviors.bounceLogicEval );
-						else {  movement.x = -movement.x;  movement.y = -movement.y;	 }
-		
-						itemData.angle = MovementHelper.getAngle_fromMovement( movement );
-		
-						// Highlight with circle
-						CommonObjManager.highlightSeconds( container, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } );
-		
-						movementCaseMet = true;
-					}
-					else if ( behaviors.chaseAction?.onCollision === 'attack' && attackTarget )
-					{
+						itemData.statusList.push( 'attack' );
+
 						// Attack 
 						MovementHelper.attackAction( container, attackTarget, behaviors.chaseAction ); // Also set for config eval logic
 
@@ -110,11 +102,29 @@ MovementHelper.moveNext = function (container)
 							movementCaseMet = true;
 						}
 					}
+					else if ( behaviors.onCollision === 'bounce' )
+					{
+						itemData.statusList.push( 'bounce' );
+
+						// TODO: this is not right...  Need proper Vector collision bounce calculation
+						if ( behaviors.bounceLogicEval ) Util.evalTryCatch( behaviors.bounceLogicEval );
+						else {  movement.x = -movement.x;  movement.y = -movement.y;	 }
+		
+						itemData.angle = MovementHelper.getAngle_fromMovement( movement );
+		
+						// Highlight with circle
+						CommonObjManager.highlightSeconds( container, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } );
+		
+						movementCaseMet = true;
+					}
+
 				}
 				else
 				{
 					if ( behaviors.chaseAction?.action === 'chase' && attackTarget )
 					{
+						itemData.statusList.push( 'chase' );
+
 						var changedData = MovementHelper.setDirection_moveTowardTarget( container, attackTarget, itemData.speed );
 						itemData.angle = changedData.newAngle;
 						movement = changedData.newMovement;
@@ -139,7 +149,7 @@ MovementHelper.moveNext = function (container)
 
 MovementHelper.decrementTurns = function( list )
 {
-	if ( list )
+	if ( list && list.length > 0 )
 	{
 		for ( var i = list.length - 1; i >= 0; i--) 
 		{ 
@@ -354,7 +364,7 @@ MovementHelper.drawLine = function( lineShape, color, sourceObj, targetObj )
 {
 	if ( !color ) color = 'yellow';
 
-	lineShape.graphics
+	lineShape.graphics.clear()
 		.setStrokeStyle(1)
 		.beginStroke( color )
 		.moveTo( sourceObj.x, sourceObj.y )
@@ -398,6 +408,7 @@ MovementHelper.checkCollision = function( container )
 			else if ( MovementHelper.targetInTouch( otherItemDistance.distance, itemData.width_half, otherItemDistance.ref_target.itemData.width_half ) )
 			{
 				obj_inCollision = otherItemDistance.ref_target;
+				itemData.statusList.push( 'onCollision' );
 				break;
 			}
 		}
@@ -476,9 +487,21 @@ MovementHelper.ObjStatusChange_SizeStrength = function( winner, loser )
 {
 	// Change stength & size..
 	loser.itemData.strength--;
-	if ( loser.itemData.strength >= 0 )	loser.itemData.width_half = 0;  // Remove these from ..
+	if ( loser.itemData.strength <= 0 )	{
+		loser.itemData.strength = 0;
+		loser.itemData.width_half = 0;  // Remove these from ..
+	}
 	else loser.itemData.width_half -= CircleManager.fightLossSizeChangeRate;
+
+	if ( loser.itemData.width_half < 0 ) loser.itemData.width_half = 0;
+
+	if ( loser.itemData.objType === CircleManager.objType && loser.ref_Shape ) CircleManager.drawCircleShape( loser.ref_Shape, loser.itemData );
+
 
 	winner.itemData.strength++;
 	winner.itemData.width_half += CircleManager.fightWinSizeChangeRate;
+	if ( winner.itemData.width_half > CircleManager.circleSizeMax ) winner.itemData.width_half = CircleManager.circleSizeMax;
+
+	if ( winner.itemData.objType === CircleManager.objType && winner.ref_Shape ) CircleManager.drawCircleShape( winner.ref_Shape, winner.itemData );
+
 };

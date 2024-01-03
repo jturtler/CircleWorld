@@ -39,23 +39,31 @@ StageManager.frameMove = function ( e )
 		var aged = ( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;
 		
 
-		// 0. Proxy 'lines' remove (for new stage frame drawing), and clear all obj's 'distances' data.
+		// 1. Proxy 'lines' remove (for new stage frame drawing), and clear all obj's 'distances' data.
 		MovementHelper.removeAllProxyLines();
 		MovementHelper.clearAllDistances( StageManager.getStageChildrenContainers() );
 
+		// 2. Remove Child/Container who has size 0
+		StageManager.removeObjs_ByStatus( StageManager.getStageChildrenContainers(), { sizeEmpty: true } );
 
 		// 1. Each children 'container' changes/renders
 		StageManager.getStageChildrenContainers().forEach(container => 
 		{
 			try {
-				if ( container.itemData )
+				var itemData = container.itemData;
+
+				if ( itemData )
 				{
-					if ( container.itemData.age && aged ) {						
-						container.itemData.age++;
-						if ( container.itemData.onAgeIncrease ) container.itemData.onAgeIncrease( container );	
+					itemData.statusList = []; // TODO: Move this to other place in later time.. <-- Later, keep last 10 status?
+					CommonObjManager.highlightShapeCountCheck_NClear( container );
+
+
+					if ( itemData.age && aged ) {						
+						itemData.age++;
+						if ( itemData.onAgeIncrease ) itemData.onAgeIncrease( container );	
 					}
-					if ( container.itemData.onFrameMove_ClassBase ) container.itemData.onFrameMove_ClassBase( container );	
-					if ( container.itemData.onFrameMove ) container.itemData.onFrameMove( container );		
+					if ( itemData.onFrameMove_ClassBase ) itemData.onFrameMove_ClassBase( container );	
+					if ( itemData.onFrameMove ) itemData.onFrameMove( container );		
 				}
 			}
 			catch( errMsg ) {  console.error( 'ERROR in StageManager.frameMove, in children container onFrameMove, ' + errMsg ); }
@@ -113,18 +121,23 @@ StageManager.removeStageChildrenContainers = function ( objType )
 {	
 	var list = StageManager.getStageChildrenContainers( objType );
 
-	for ( var i = list.length - 1; i >= 0; i--) 
-	{ 
-		StageManager.stage.removeChild( list[i] );
-	}
+	list.forEach( obj => StageManager.stage.removeChild( list[i] ) );
 };
-
 
 StageManager.removeAllStageObjs = function()
 {
 	StageManager.stage.removeAllChildren();
 };
 
+StageManager.removeObjs_ByStatus = function ( list, option ) 
+{
+	if ( !option ) option = {};
+
+	if ( option.sizeEmpty ) 
+	{
+		list.filter( obj => obj.itemData.width_half <= 0 ).forEach( obj => StageManager.stage.removeChild( obj ) );	
+	}
+};
 
 // --------------------
 
