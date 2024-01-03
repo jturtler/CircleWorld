@@ -3,6 +3,9 @@ function MovementHelper() { };
 // ------------------------------------
 
 MovementHelper.detectLineColor = "yellow";
+MovementHelper.attackLineColor = "red";
+MovementHelper.circleHighlightColor = "red";
+
 MovementHelper.PROXY_LINES = [];
 
 // ------------------------------------
@@ -79,7 +82,7 @@ MovementHelper.moveNext = function (container)
 						itemData.angle = MovementHelper.getAngle_fromMovement( movement );
 
 						// Highlight with circle
-						CommonObjManager.highlightSeconds( container, { color: 'red', timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } );
+						CommonObjManager.highlightSeconds( container, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } );
 
 						movementCaseMet = true;
 					}
@@ -232,6 +235,7 @@ MovementHelper.nearestTargetPaint = function( container )
 {
 	// Condition - the target need to be smaller (seems).  The 'line' is shared, however we can flag in the distance?  or in the obj?
 	var itemData = container.itemData;
+	var attackDistance;
 
 	if ( itemData.behaviors?.proxyDetectAction && itemData.distances )
 	{
@@ -239,36 +243,40 @@ MovementHelper.nearestTargetPaint = function( container )
 		{
 			var distanceJson = itemData.distances[i];
 
-			// Get 1st one (nearest) with condition.. + change the paint color?
-			if ( distanceJson.ref_line && MovementHelper.checkSmallerTarget( container, distanceJson.ref_target ) )
+			// Get nearest object with attack condition. (size equal or smaller)
+			if ( distanceJson.ref_line && MovementHelper.checkAttackTarget( container, distanceJson.ref_target ) )
 			{
-				// 
+				distanceJson.attackable = true;
+				// make the line 'red'
+				if ( distanceJson.ref_line ) MovementHelper.drawLine( distanceJson.ref_line, MovementHelper.attackLineColor, container, distanceJson.ref_target );
+
+				attackDistance = distanceJson;
+				break;
 			}
 		}
 	}
+
+	return attackDistance;
 };
 
 
-MovementHelper.checkSmallerTarget = function( source, target )
+MovementHelper.checkAttackTarget = function( source, target )
 {
-	if ( source.itemData.width_half >= target.itemData.width_half )
-	{
-		// mark it as the target
-		source.itemData.distances
-	}
+	// Also, allow same size object as the target to attach
+	return ( source.itemData.width_half >= target.itemData.width_half );
 };
 
 
-MovementHelper.checkNGetTargetDistanceLine = function( sourceShape, targetShape )
+MovementHelper.checkNGetTargetDistanceLine = function( sourceObj, targetObj )
 {
 	//var lineExistsInTargetDistances = false;
 	var ref_line;
 
-	var trgDistances = targetShape.itemData.distances;
+	var trgDistances = targetObj.itemData.distances;
 
 	if ( trgDistances )
 	{
-		var distanceJson = trgDistances.find( dst => ( dst.ref_target === sourceShape && dst.ref_line ) );
+		var distanceJson = trgDistances.find( dst => ( dst.ref_target === sourceObj && dst.ref_line ) );
 
 		if ( distanceJson ) ref_line = distanceJson.ref_line;
 	}
@@ -276,32 +284,35 @@ MovementHelper.checkNGetTargetDistanceLine = function( sourceShape, targetShape 
 	return ref_line;
 };
 
-MovementHelper.drawProxyLine = function( sourceShape, targetShape, color ) 
+MovementHelper.drawProxyLine = function( sourceObj, targetObj, color ) 
 {
-	var shapeLine;
+	var lineShape;
 
 	try
 	{
-		shapeLine = new createjs.Shape();
+		lineShape = new createjs.Shape();
 
-		shapeLine.graphics
-		  .setStrokeStyle(1)
-		  .beginStroke( color )
-		  .moveTo( sourceShape.x, sourceShape.y )
-		  .lineTo( targetShape.x, targetShape.y )
-		  .endStroke();
-	 
-		shapeLine.ref_Objs = { source: sourceShape, target: targetShape }
+		MovementHelper.drawLine( lineShape, color, sourceObj, targetObj );
 
-		StageManager.stage.addChild( shapeLine );
+		StageManager.stage.addChild( lineShape );
 
-		MovementHelper.PROXY_LINES.push( shapeLine );
+		MovementHelper.PROXY_LINES.push( lineShape );
 	}
 	catch( errMsg ) { console.error( 'ERROR in MovementHelper.drawProxyLine, ' + errMsg ); }
 
-	return shapeLine;
+	return lineShape;
 };
 
+
+MovementHelper.drawLine = function( lineShape, color, sourceObj, targetObj ) 
+{
+	lineShape.graphics
+		.setStrokeStyle(1)
+		.beginStroke( color )
+		.moveTo( sourceObj.x, sourceObj.y )
+		.lineTo( targetObj.x, targetObj.y )
+		.endStroke();
+};
 
 MovementHelper.collectDistances = function( currObj, targets )
 {
