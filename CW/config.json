@@ -14,9 +14,8 @@
 		},
 		"circlePropExtra": {
 			"behaviors": {			
-				"collectDistances": true,
+				"behaviorActivateAge": 4,
 				"onCollision": "bounce",
-				"ghostModeAgeTill": 4,
 				"bounceLogicEval": " INFO.movementInEval.x = -INFO.movementInEval.x; INFO.movementInEval.y = -INFO.movementInEval.y; " 
 			},
 			"innerCircle": { 
@@ -24,10 +23,14 @@
 				"width_half": 4, 
 				"color": "[RandomColorHex]",
 				"behaviorChange": {
-					"proxyDetectAction": {
+					"proxyDetection": {
+						"proxyDistance": 100
+					},
+					"chaseAction": {
 						"action": "chase",
-						"chaseCondition": { "sizeSmaller": true, "nearest": false },
-						"chaseProxyDistance": 100
+						"chaseCondition": { "sizeSmaller": true, "nearest": false, "NOTE": "not yet implemented" },
+						"onCollision": "attack",
+						"attackEval": " ---- "
 					}
 				}
 			}
@@ -48,9 +51,8 @@
 			" } "
 		],
 		"behavior_bounce": { 
-			"collectDistances": true, 
 			"onCollision": "bounce", 
-			"ghostModeAgeTill": 4, 
+			"behaviorActivateAge": 4, 
 			"bounceLogicEval": " INFO.movementInEval.x = -INFO.movementInEval.x; INFO.movementInEval.y = -INFO.movementInEval.y; " 
 		},
 		"innerCircle": {

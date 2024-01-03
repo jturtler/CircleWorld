@@ -5,6 +5,9 @@ CircleManager.objType = 'circle';
 
 CircleManager.colorTeamList_DEFAULT = [ "blue", "orange", "gray", "white", "black", "purple" ];
 
+CircleManager.fightWinSizeChangeRate = 0.1;  // per frame / strength..
+CircleManager.fightLossSizeChangeRate = 0.4;
+
 // -----------------------------
 
 CircleManager.circleProp_DEFAULT = {
@@ -15,9 +18,9 @@ CircleManager.circleProp_DEFAULT = {
 	color: " Util.getRandomInList( INFO.colorTeamList ); ",
 	innerCircle: { addAge: 10, width_half: 4, color: "[RandomColorHex]" },
 	behaviors: {
-		collectDistances: true,
+		behaviorActivateAge: 4,
 		onCollision: 'bounce',
-		ghostModeAgeTill: 4
+		bounceLogicEval: " INFO.movementInEval.x = -INFO.movementInEval.x; INFO.movementInEval.y = -INFO.movementInEval.y; " 
 	},
 	onObjCreate_EvalFields: [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.color", "itemData.startPosition" ]
 };
@@ -113,7 +116,7 @@ CircleManager.checkNaddInnerCircleInAge = function ( container )
 	if ( innerCircle )
 	{	
 		if ( !innerCircle.added && itemData.age >= innerCircle.addAge ) {
-			if ( innerCircle.behaviorChange ) Util.mergeJson( itemData.behaviors, innerCircle.behaviorChange );  // "proxyDetectAction": {  "action": "chase", "chaseProxyDistance": 100  }
+			if ( innerCircle.behaviorChange ) Util.mergeJson( itemData.behaviors, innerCircle.behaviorChange );  // "proxyDetection": {  "action": "chase", "proxyDistance": 100  }
 			CircleManager.addInnerCircle( container, innerCircle );	
 		}
 	}	

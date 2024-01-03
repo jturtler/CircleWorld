@@ -6,6 +6,8 @@ MovementHelper.detectLineColor = "yellow";
 MovementHelper.attackLineColor = "red";
 MovementHelper.circleHighlightColor = "red";
 
+MovementHelper.maxTickAngleChange = 5;  // max angle change per tick is 5 degree.  If frameRate is 10, we have 10 tick per sec.  thus, 50 degree per sec max changing angle.
+
 MovementHelper.PROXY_LINES = [];
 
 // ------------------------------------
@@ -32,71 +34,17 @@ MovementHelper.clearAllDistances = function( containers )
 
 MovementHelper.moveNext = function (container) 
 {
-	var itemData = container.itemData;
 	var movementCaseMet = false;
 
-	var movement = MovementHelper.getMovementCalc( itemData.angle, itemData.speed );
-	INFO.movementInEval = movement;
-
+	var itemData = container.itemData;
 	var behaviors = itemData.behaviors;
+	var attackTarget;
 
-	if ( behaviors && behaviors.collectDistances ) MovementHelper.collectDistances( container, StageManager.getStageChildrenContainers() );
+	var movement = MovementHelper.getMovementCalc( itemData.angle, itemData.speed );
+	INFO.movementInEval = movement; // For movement change eval from config
 
-
-	MovementHelper.performDistanceProxyDraw( container );
-
-	MovementHelper.nearestTargetPaint( container );
-
-
-
-	// CHECK 1. collision with any other object
-	//		- Rather than each object checking all other object, we can reduce this list
-	//		- by calcuating once per frame...
-	//		- 
-	if ( !movementCaseMet )
-	{
-		if ( behaviors && behaviors.onCollision )
-		{
-			if ( behaviors.ghostModeAgeTill && behaviors.ghostModeAgeTill > itemData.age ) { } // ignore since still in protected mode
-			else if ( behaviors.onCollision === 'bounce' )
-			{
-				// TODO: ALSO, if in collision when the age is turned on just now, also ignore it for a while?
-
-				var obj_inCollision = MovementHelper.checkCollision( container );
-
-				if ( !itemData.collisionCheckCount ) itemData.collisionCheckCount = 1;
-				else itemData.collisionCheckCount++;
-
-				if ( obj_inCollision )
-				{
-					if ( itemData.collisionCheckCount === 1 ) itemData.collisionWhileInBeginning = true;
-
-					if ( itemData.collisionWhileInBeginning ) { } // We should ignore collision if the collision check started while in collision with other object..
-					else
-					{
-						// TODO: this is not right...  Need proper Vector collision bounce calculation
-						//		- Override expression in Config Eval? - if exists..
-						if ( behaviors.bounceLogicEval ) Util.evalTryCatch( behaviors.bounceLogicEval );
-						else {  movement.x = -movement.x;  movement.y = -movement.y;	 }
-
-						itemData.angle = MovementHelper.getAngle_fromMovement( movement );
-
-						// Highlight with circle
-						CommonObjManager.highlightSeconds( container, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } );
-
-						movementCaseMet = true;
-					}
-				}
-				else
-				{
-					if ( itemData.collisionWhileInBeginning ) itemData.collisionWhileInBeginning = false;
-				}
-			}
-		}
-	}
-
-
-	// CHECK 2. - If 'WallTouched' case, change the 'movement'
+	
+	// Priority #1. - If 'WallTouched' case, change the 'movement'
 	if ( !movementCaseMet )
 	{
 		var wallTouched = MovementHelper.getWallReached( container, movement, WorldRender.infoJson.canvasHtml ); 
@@ -110,6 +58,75 @@ MovementHelper.moveNext = function (container)
 	}
 
 	
+	// Priority #2. If on Object Collision, Bounce/Attack
+	//			- Otherwise, check for 'Chase' action
+	if ( !movementCaseMet )
+	{
+		if ( behaviors )
+		{
+			if ( behaviors.proxyDetection ) 
+			{
+				// 'distance' to all other object data collection
+				itemData.distances = MovementHelper.collectDistances( container, StageManager.getStageChildrenContainers() );
+
+				MovementHelper.performDistanceProxyDraw( container );
+			
+				attackTarget = MovementHelper.getNearestAttackTarget( container, { linePaint: true, paintColor: MovementHelper.attackLineColor } );	
+			}
+
+
+			// 'behavior' ignore / not active age check
+			if ( behaviors.behaviorActivateAge && behaviors.behaviorActivateAge > itemData.age ) { }
+			else
+			{
+				var obj_inCollision = MovementHelper.checkCollision( container );
+
+				if ( obj_inCollision )
+				{
+					if ( behaviors.onCollision === 'bounce' )
+					{
+						// TODO: this is not right...  Need proper Vector collision bounce calculation
+						if ( behaviors.bounceLogicEval ) Util.evalTryCatch( behaviors.bounceLogicEval );
+						else {  movement.x = -movement.x;  movement.y = -movement.y;	 }
+		
+						itemData.angle = MovementHelper.getAngle_fromMovement( movement );
+		
+						// Highlight with circle
+						CommonObjManager.highlightSeconds( container, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } );
+		
+						movementCaseMet = true;
+					}
+					else if ( behaviors.chaseAction?.onCollision === 'attack' && attackTarget )
+					{
+						// Attack 
+						MovementHelper.attackAction( container, attackTarget, behaviors.chaseAction ); // Also set for config eval logic
+
+						// Still 'chase' while attacking?
+						if ( behaviors.chaseAction?.action === 'chase' )
+						{
+							var changedData = MovementHelper.setDirection_moveTowardTarget( container, attackTarget, itemData.speed );
+							itemData.angle = changedData.newAngle;
+							movement = changedData.newMovement;
+							movementCaseMet = true;
+						}
+					}
+				}
+				else
+				{
+					if ( behaviors.chaseAction?.action === 'chase' && attackTarget )
+					{
+						var changedData = MovementHelper.setDirection_moveTowardTarget( container, attackTarget, itemData.speed );
+						itemData.angle = changedData.newAngle;
+						movement = changedData.newMovement;
+			
+						movementCaseMet = true;
+					}
+				}
+			}
+		}
+	}
+
+
 	// Set the new movements..
 	container.x += movement.x;
 	container.y += movement.y;	
@@ -131,8 +148,6 @@ MovementHelper.decrementTurns = function( list )
 		}
 	}
 };
-
-// collisionExceptions: [ { target: container, turns: 1 }
 
 // -----------------------------------
 
@@ -170,7 +185,7 @@ MovementHelper.getNewAngle_fromBounce = function ( wallTouched, movement )
 };
 
 // ---------------------------------------
-
+// --- Basic Calculation Related Methods
 
 // Part of physics or utils..
 MovementHelper.getMovementCalc = function( angle, speed ) 
@@ -185,7 +200,7 @@ MovementHelper.getMovementCalc = function( angle, speed )
 	return movement;
 };
 
-
+// getAngleFromDirectionXY
 MovementHelper.getAngle_fromMovement = function( movement )
 {
   var angle = ( Math.atan2( movement.y, movement.x ) / Math.PI ) * 180;
@@ -197,6 +212,36 @@ MovementHelper.getAngle_fromMovement = function( movement )
 };
 
 
+MovementHelper.getAngleToTarget = function( sourceObj, targetObj )
+{
+  var movementX = targetObj.x - sourceObj.x;
+  var movementY = targetObj.y - sourceObj.y;
+  
+  var angle = ( Math.atan2( movementY, movementX ) / Math.PI ) * 180;
+
+  // QUESTION: Why I have to do this? 0 - 270.. somehow, 280 => -10..  () -0 ~ -90
+  if ( angle < 0 )
+  {
+	 angle = angle + 360;
+  }
+
+  return angle;
+};
+
+MovementHelper.getDistance = function( obj1, obj2 )
+{
+	var xA = obj1.x;
+	var yA = obj1.y;
+	var xB = obj2.x;
+	var yB = obj2.y;
+
+	var xDiff = xA - xB;
+	var yDiff = yA - yB;
+
+	return Math.sqrt( ( xDiff * xDiff ) + ( yDiff * yDiff ) );
+};
+
+
 // ---------------------------------------
 // --- Distance between objects
 
@@ -205,18 +250,18 @@ MovementHelper.performDistanceProxyDraw = function ( container )
 {
 	var itemData = container.itemData;
 
-	if ( itemData.behaviors?.proxyDetectAction && itemData.distances )
+	if ( itemData.behaviors?.proxyDetection && itemData.distances )
 	{
 		// Draw lines that falls into the proxy distance..
-		var chaseProxyDistance = itemData.behaviors.proxyDetectAction.chaseProxyDistance;
+		var proxyDistance = itemData.behaviors.proxyDetection.proxyDistance;
 
-		if ( chaseProxyDistance )
+		if ( proxyDistance )
 		{
 			for ( var i = 0; i < itemData.distances.length; i++ )
 			{
 				var distanceJson = itemData.distances[i];
 	
-				if ( distanceJson.distance <= chaseProxyDistance )
+				if ( distanceJson.distance <= proxyDistance )
 				{
 					var ref_line = MovementHelper.checkNGetTargetDistanceLine( container, distanceJson.ref_target );
 
@@ -231,13 +276,15 @@ MovementHelper.performDistanceProxyDraw = function ( container )
 };
 
 
-MovementHelper.nearestTargetPaint = function( container )
+MovementHelper.getNearestAttackTarget = function( container, option )
 {
+	if ( !option ) option = {};
+
 	// Condition - the target need to be smaller (seems).  The 'line' is shared, however we can flag in the distance?  or in the obj?
 	var itemData = container.itemData;
-	var attackDistance;
+	var attackTarget;
 
-	if ( itemData.behaviors?.proxyDetectAction && itemData.distances )
+	if ( itemData.behaviors?.proxyDetection && itemData.distances )
 	{
 		for ( var i = 0; i < itemData.distances.length; i++ )
 		{
@@ -247,29 +294,28 @@ MovementHelper.nearestTargetPaint = function( container )
 			if ( distanceJson.ref_line && MovementHelper.checkAttackTarget( container, distanceJson.ref_target ) )
 			{
 				distanceJson.attackable = true;
-				// make the line 'red'
-				if ( distanceJson.ref_line ) MovementHelper.drawLine( distanceJson.ref_line, MovementHelper.attackLineColor, container, distanceJson.ref_target );
+				attackTarget = distanceJson.ref_target;
 
-				attackDistance = distanceJson;
+				if ( option.linePaint && distanceJson.ref_line ) MovementHelper.drawLine( distanceJson.ref_line, option.paintColor, container, distanceJson.ref_target );
+
 				break;
 			}
 		}
 	}
 
-	return attackDistance;
+	return attackTarget;
 };
 
 
 MovementHelper.checkAttackTarget = function( source, target )
 {
-	// Also, allow same size object as the target to attach
-	return ( source.itemData.color !== target.itemData.color && source.itemData.width_half >= target.itemData.width_half );
+	// Also, allow same size object as the target to attach - TODO: Make this configurable..
+	return ( source.itemData.color !== target.itemData.color && source.itemData.width_half > target.itemData.width_half );
 };
 
 
 MovementHelper.checkNGetTargetDistanceLine = function( sourceObj, targetObj )
 {
-	//var lineExistsInTargetDistances = false;
 	var ref_line;
 
 	var trgDistances = targetObj.itemData.distances;
@@ -306,6 +352,8 @@ MovementHelper.drawProxyLine = function( sourceObj, targetObj, color )
 
 MovementHelper.drawLine = function( lineShape, color, sourceObj, targetObj ) 
 {
+	if ( !color ) color = 'yellow';
+
 	lineShape.graphics
 		.setStrokeStyle(1)
 		.beginStroke( color )
@@ -316,36 +364,22 @@ MovementHelper.drawLine = function( lineShape, color, sourceObj, targetObj )
 
 MovementHelper.collectDistances = function( currObj, targets )
 {
-	var itemData = currObj.itemData;
-	itemData.distances = [];
+	var distances = [];
 
 	targets.forEach( target => {
 
 		if ( target != currObj )
 		{
 			var distance = MovementHelper.getDistance( currObj, target );
-			itemData.distances.push( { distance: distance, ref_target: target } );
+			distances.push( { distance: distance, ref_target: target } );
 		}
 	});
 
 	// sort the list.. - smallest 1st..  ascending order
-	Util.sortByKey( itemData.distances, 'distance' );
+	Util.sortByKey( distances, 'distance' );
+
+	return distances;
 };
-
-
-MovementHelper.getDistance = function( obj1, obj2 )
-{
-	var xA = obj1.x;
-	var yA = obj1.y;
-	var xB = obj2.x;
-	var yB = obj2.y;
-
-	var xDiff = xA - xB;
-	var yDiff = yA - yB;
-
-	return Math.sqrt( ( xDiff * xDiff ) + ( yDiff * yDiff ) );
-};
-
 
 MovementHelper.checkCollision = function( container )
 {
@@ -375,4 +409,76 @@ MovementHelper.checkCollision = function( container )
 MovementHelper.targetInTouch = function( distance, currWidth_half, targetWidth_half )
 {
 	return ( distance <= ( currWidth_half + targetWidth_half ) );
+};
+
+
+// ------------------------------------------
+
+MovementHelper.setDirection_moveTowardTarget = function( sourceObj, targetObj, speed )
+{
+  var angleToTarget = MovementHelper.getAngleToTarget( sourceObj, targetObj );
+
+  var angleChange = MovementHelper.getAngleTowardTarget( angleToTarget, sourceObj.itemData.angle, MovementHelper.maxTickAngleChange );
+
+  var newAngle = ( sourceObj.itemData.angle + angleChange + 360 ) % 360;
+			 
+  var movement = MovementHelper.getMovementCalc( newAngle, speed );
+
+  return { newAngle: newAngle, newMovement: movement};
+};
+
+  // paramInputs: 45, 130, 5
+  // targetAngle = 45, currentAngle = 130, maxAngle = 5
+  // we want to change to 45 evantually..
+
+  // 45 - 130 = -85, but with max 5 at a time, the new angle is 130 - 5
+
+  // 1st is target, 2nd is currAngle..
+  // 100 - 30 = 70, but should limit to 5 degree each tick, thus, angle 5, thus, 30 + 5
+
+  // 340 - 10 = 330  <-- but over 180, thus need to go the other way.. (angle direction)  
+  //    330 - 360 = -30..  --> -5(max), 10 - 5..   
+
+  // 10 - 350 = -340.  Because less than -180, switch.  -340 + 360 = 20..  
+
+MovementHelper.getAngleTowardTarget = function( targetAngle, currAngle, maxAngle )
+{
+  // 1. Get simple angle diff number;
+  var angleDiff = targetAngle - currAngle;
+
+  // 2. Switch angle diff direction (if large) to smaller angle diff direction.
+  if ( angleDiff > 180 ) angleDiff = angleDiff - 360;
+  else if ( angleDiff < -180 ) angleDiff = angleDiff + 360;
+
+  // 3. Limit the angle diff to max angle.
+  if ( angleDiff > 0 && angleDiff > maxAngle ) angleDiff = maxAngle;
+  if ( angleDiff < 0 && angleDiff > (-maxAngle) ) angleDiff = (-maxAngle);
+
+  return angleDiff;
+};
+
+// ---------------------------------------
+
+MovementHelper.attackAction = function( attackerObj, targetObj, chaseAction )
+{
+	INFO.attacterObj = attackerObj;
+	INFO.attackedObj = targetObj;
+
+	if ( chaseAction.attackLogicEval ) Util.evalTryCatch( chaseAction.attackLogicEval );
+	else
+	{
+		if ( INFO.attacterObj.itemData.strength >= INFO.attackedObj.itemData.strength ) MovementHelper.ObjStatusChange_SizeStrength( INFO.attacterObj, INFO.attackedObj );
+		else MovementHelper.ObjStatusChange_SizeStrength( INFO.attackedObj, INFO.attacterObj );
+	}
+};
+
+MovementHelper.ObjStatusChange_SizeStrength = function( winner, loser )
+{
+	// Change stength & size..
+	loser.itemData.strength--;
+	if ( loser.itemData.strength >= 0 )	loser.itemData.width_half = 0;  // Remove these from ..
+	else loser.itemData.width_half -= CircleManager.fightLossSizeChangeRate;
+
+	winner.itemData.strength++;
+	winner.itemData.width_half += CircleManager.fightWinSizeChangeRate;
 };

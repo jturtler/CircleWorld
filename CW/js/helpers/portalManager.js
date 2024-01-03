@@ -18,7 +18,7 @@ PortalManager.portalProp_DEFAULT = {
 	remainSpawnNum: PortalManager.remainSpawnNum,
 	positionFixed: false,
 	spawnCircleProp: {
-		ghostModeAgeTill: 4,
+		behaviorActivateAge: 4,
 		innerCircle: {
 			addAge: 10,
 			width_half: 4,
