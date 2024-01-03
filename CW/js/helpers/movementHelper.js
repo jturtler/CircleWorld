@@ -263,7 +263,7 @@ MovementHelper.nearestTargetPaint = function( container )
 MovementHelper.checkAttackTarget = function( source, target )
 {
 	// Also, allow same size object as the target to attach
-	return ( source.itemData.width_half >= target.itemData.width_half );
+	return ( source.itemData.color !== target.itemData.color && source.itemData.width_half >= target.itemData.width_half );
 };
 
 
