@@ -12,7 +12,7 @@
 			"innerCircle": { },
 			"onObjCreate_EvalFields": [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.color", "itemData.startPosition" ]
 		},
-		"circlePropExtra": {
+		"circlePropMore": {
 			"behaviors": {			
 				"behaviorActivateAge": 4,
 				"onCollision": "bounce",
@@ -42,13 +42,13 @@
 			" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); "
 		],
 		"onStageFrameMoveEval_Circle": [
-			" INFO.frameCount++; ",
-			" ",
 			" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( CircleManager.getCircleContainers().length <= INFO.maxCircleNum ) ) ", 
 			" { ",
 			"   var circleContainer = CircleManager.createCircleObj(); ",
 			"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
-			" } "
+			" } ",
+			" ",
+			" INFO.frameCount++; "
 		],
 		"behavior_bounce": { 
 			"onCollision": "bounce", 
@@ -72,13 +72,13 @@
 				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); "
 			],
 			"onStageFrameMoveEval": [
-				" INFO.frameCount++; ",
-				" ",
 				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( CircleManager.getCircleContainers().length <= INFO.maxCircleNum ) ) ", 
 				" { ",
 				"   var circleContainer = CircleManager.createCircleObj(); ",
 				"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
-				" } "
+				" } ",
+				" ",
+				" INFO.frameCount++; "				
 			]
 		},
 		{
@@ -102,7 +102,7 @@
 			"modeName": "c4_PXLine",
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
-				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropExtra ) ); "
+				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropMore ) ); "
 			],
 			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
 		},
@@ -110,10 +110,21 @@
 			"modeName": "c5_Chase",
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
-				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropExtra ) ); ",
-				" INFO.baseCircleProp.innerCircle.behaviorChange.chaseAction = INFO.chaseAction; "
+				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropMore ) ); ",
+				" INFO.baseCircleProp.innerCircle.behaviorChange.chaseAction = INFO.chaseAction; ",
+				" INFO.maxCircleSpawnNum = 50; ",
+				" INFO.circleSpawnCount = 0; "
 			],
-			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
+			"onStageFrameMoveEval": [
+				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
+				" { ",
+				"   var circleContainer = CircleManager.createCircleObj(); ",
+				"   INFO.circleSpawnCount++; ",
+				"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
+				" } ",
+				" ",
+				" INFO.frameCount++; "
+			]
 		},
 		{
 			"modeName": "c6_King",
@@ -133,7 +144,7 @@
 				" createjs.Ticker.framerate = 20; ",
 				" ",
 				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); ",
-				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropExtra ) ); ",
+				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropMore ) ); ",
 				" ",
 				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: INFO.baseCircleProp } ); "
 			],
@@ -145,7 +156,7 @@
 				" createjs.Ticker.framerate = 20; ",
 				" ",
 				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); ",
-				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropExtra ) ); ",
+				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropMore ) ); ",
 				" ",
 				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: INFO.baseCircleProp } ); "
 			],

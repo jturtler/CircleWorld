@@ -6,7 +6,7 @@ MovementHelper.detectLineColor = "yellow";
 MovementHelper.attackLineColor = "red";
 MovementHelper.circleHighlightColor = "red";
 
-MovementHelper.maxTickAngleChange = 0.5;  // max angle change per tick is 5 degree.  If frameRate is 10, we have 10 tick per sec.  thus, 50 degree per sec max changing angle.
+MovementHelper.maxTickAngleChange = 0.4;  // max angle change per tick is 5 degree.  If frameRate is 10, we have 10 tick per sec.  thus, 50 degree per sec max changing angle.
 
 MovementHelper.PROXY_LINES = [];
 
