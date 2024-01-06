@@ -23,6 +23,8 @@ WorldRender.startUp = function ()
 {
 	AppUtil.fitCanvasSize( WorldRender.infoJson ); // Adjust Canvas Size to fit the browser size
 	
+	WorldRender.setINFO_GlobalSettings_withDefault( GlobalSettings.DefaultJson );
+
 	StageManager.startUp( WorldRender.infoJson );
 
 	// SetUp Events - 'Add Obj', 'Add Portal', 'Show/Hide Info Panel'
@@ -230,6 +232,25 @@ WorldRender.setConfig_INFO_Vars = function( INFO_Vars )
 
 	// In case the config 'INFO_Vars' did not set INFO.colorTeamList, set it here..(?)
 	if ( !INFO.colorTeamList ) INFO.colorTeamList = CircleManager.colorTeamList_DEFAULT;
+
+	WorldRender.setINFO_GlobalSettings_withDefault( GlobalSettings.DefaultJson );	
+};
+
+// ---------------------------------
+
+WorldRender.setINFO_GlobalSettings_withDefault = function( GlobalSettings_DefaultJson )
+{
+	if ( !INFO.GlobalSettings ) INFO.GlobalSettings = {}; // Normally, this gets set by configJson's appMode selection, 'INFO_vars'
+
+	var gSettingsJson = Util.cloneJson( GlobalSettings_DefaultJson );
+
+	// Merge deep..  Base is 'GlobalSettings_DefaultJson' from 'GlobalSettings' class.
+	Util.mergeDeep( gSettingsJson, INFO.GlobalSettings, { arrOverwrite: true } );
+
+	INFO.GlobalSettings = gSettingsJson;
+
+	// Run 'preRunEval' for quick shortcut INFO variables creation.
+	if ( INFO.GlobalSettings.preRunEval ) Util.evalTryCatch( INFO.GlobalSettings.preRunEval );
 };
 
 // ---------------------------------

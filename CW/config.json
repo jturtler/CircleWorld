@@ -1,65 +1,117 @@
 {
-	"INFO_Vars": {
+	"INFO_Vars": 
+	{
 		"colorTeamList": [ "blue", "orange", "gray", "white", "black", "purple" ],
+
+		"GlobalSettings": 
+		{
+			"NOTE": "This overrides the default setting value in code.  In code, there are default values.",
+
+			"preRunEval": [
+				" /* ShortCut INFO variables to long named ones.. */ ",
+				" INFO.CIR_SETS = INFO.GlobalSettings.CircleSettings; ",
+				" INFO.WIN_SizeUpR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
+				" INFO.WIN_SpeedDownR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
+				" INFO.LOS_SizeUpR = INFO.CIR_SETS.fightLogic.fightLoseSizeChangeRate; "
+			],
+
+			"CircleSettings": 
+			{
+				"ageLogic": {
+					"ageIncreaseCheckInTickEval": "( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;",
+					"NOTE": "Aged in every 'framerate'th time <-- which is once per second. ",
+					"ageIncreaseActionsEval": " INFO.TempVars.obj.itemData.strength += INFO.TempVars.obj.itemData.strengthChangeRate; ",
+					"atAgeChanges": {
+						"5": [
+							{ "bounceActionBehaviorSet": true }
+						],
+						"10": [
+							{ "innerCircleAdd": true, "settingName": "innerCircle_W4CR" },
+							{ "proxyDetectionBehaviorSet": true },
+							{ "chaseActionBehaviorSet": true }
+						]
+					}
+				},
+				"bounceActionLogic": {
+					"bounceLogicEval": [
+						" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
+						" CommonObjManager.highlightSeconds( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } ); "
+					]
+				},
+				"innerCircle_W4CR": { 
+					"width_half": 4, 
+					"color": "[RandomColorHex]"
+				},
+				"proxyDetectionLogic": {
+					"proxyDistance": 100
+				},
+				"chaseActionLogic": {
+					"angleChangeMax_perTick": 0.4,					
+					"chaseTargetEval": " ( INFO.TempVars.srcObj.itemData.color !== INFO.TempVars.trgObj.itemData.color && INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half ) ",
+					"chaseMovementEval": " 'NOT YET IMPLEMENTED.. ' ", 
+					"onCollision": "fight"
+				},
+				"fightLogic": {
+					"fightWinSizeChangeRate": 0.2,
+					"fightLoseSizeChangeRate": 0.7,
+					"winEval": [
+						" INFO.TempVars.winObj.itemData.strength++; ",
+						" INFO.TempVars.winObj.itemData.width_half += INFO.WIN_SizeUpR; ",
+						" INFO.TempVars.winObj.itemData.speed -= ( INFO.WIN_SizeUpR * INFO.WIN_SpeedDownR ); ",
+						" CircleManager.adjustSizeMax( INFO.TempVars.winObj ); ",
+						" CircleManager.adjustSpeedMin( INFO.TempVars.winObj ); ",
+						" if ( INFO.TempVars.winObj.ref_Shape ) CircleManager.drawCircleShape( INFO.TempVars.winObj.ref_Shape, INFO.TempVars.winObj.itemData ); "
+					],
+					"loseEval": [
+						" INFO.TempVars.loseObj.itemData.strength--; ",
+						" INFO.TempVars.loseObj.itemData.width_half -= INFO.LOS_SizeUpR; ",
+						" CircleManager.adjustSizeMin( INFO.TempVars.loseObj ); ",
+						" if ( INFO.TempVars.loseObj.itemData.strength <= 0 ) { INFO.TempVars.loseObj.itemData.strength = 0; INFO.TempVars.loseObj.itemData.width_half = 0; } ",
+						" if ( INFO.TempVars.loseObj.ref_Shape ) CircleManager.drawCircleShape( INFO.TempVars.loseObj.ref_Shape, INFO.TempVars.loseObj.itemData ); "
+					]
+				},
+				"sizeChangeLogic": {
+					"speedDownRate_bySizeUp": 0.2,
+					"speedMin": 2.5,
+					"width_halfMax": 25
+				}				
+			},
+
+			"NEXT": " Need to add 'ageChangeAction': --> in age 6, add inner circle, with behavior on, ghostmode off.."
+		},
+
 		"circlePropMin": { 
 			"name": "'circle_' + CommonObjManager.getContainers().length",
 			"speed": " Util.getRandomInRange(5, 8); ",
 			"width_half": " Util.getRandomInRange(8, 13); ",
+			"strength": " Util.getRandomInRange(8, 13); ",
+			"strengthChangeRate": " Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
 			"angle": " Util.getRandomInRange( 0, 360 ); ",
 			"color": " Util.getRandomInList( INFO.colorTeamList ); ",
 			"startPosition": " AppUtil.getPosition_Center(); ",
 			"behaviors": {	},
 			"innerCircle": { },
-			"onObjCreate_EvalFields": [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.color", "itemData.startPosition" ]
+			"onObjCreate_EvalFields": [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.strength", "itemData.strengthChangeRate", "itemData.angle", "itemData.color", "itemData.startPosition" ]
 		},
-		"circlePropMore": {
-			"behaviors": {			
-				"behaviorActivateAge": 4,
-				"onCollision": "bounce",
-				"bounceLogicEval": " INFO.movementInEval.x = -INFO.movementInEval.x; INFO.movementInEval.y = -INFO.movementInEval.y; " 
-			},
-			"innerCircle": { 
-				"addAge": 8,
-				"width_half": 4, 
-				"color": "[RandomColorHex]",
-				"behaviorChange": {
-					"proxyDetection": {
-						"proxyDistance": 100
-					}
-				}
-			}
-		},
-		"chaseAction": {
-			"action": "chase",
-			"chaseCondition": { "sizeSmaller": true, "nearest": false, "NOTE": "not yet implemented" },
-			"onCollision": "attack",
-			"attackLogicEval": ""
-		},
+
 		"onStartRunEval_Circle": [
-			" createjs.Ticker.framerate = 20; ",
-			" INFO.maxCircleNum = 30; ",
+			" createjs.Ticker.framerate = 20; /* 20 frames run in a seconds.. */ ",
 			" INFO.frameCount = 0; ",
+			" INFO.maxCircleSpawnNum = 30; ",
+			" INFO.circleSpawnCount = 0; ",
+
 			" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); "
 		],
 		"onStageFrameMoveEval_Circle": [
-			" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( CircleManager.getCircleContainers().length <= INFO.maxCircleNum ) ) ", 
+			" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
 			" { ",
 			"   var circleContainer = CircleManager.createCircleObj(); ",
+			"   INFO.circleSpawnCount++; ",
 			"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
 			" } ",
 			" ",
-			" INFO.frameCount++; "
-		],
-		"behavior_bounce": { 
-			"onCollision": "bounce", 
-			"behaviorActivateAge": 4, 
-			"bounceLogicEval": " INFO.movementInEval.x = -INFO.movementInEval.x; INFO.movementInEval.y = -INFO.movementInEval.y; " 
-		},
-		"innerCircle": {
-			"addAge": 10, 
-			"width_half": 4, 
-			"color": "[RandomColorHex]"
-		}
+			" INFO.frameCount++; "	
+		]
 	},
 	"appModes":
 	[
@@ -67,14 +119,20 @@
 			"modeName": "c1_Spawn30",
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; /* 20 frames run in a seconds.. */ ",
-				" INFO.maxCircleNum = 30; ",
 				" INFO.frameCount = 0; ",
-				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); "
+				" INFO.maxCircleSpawnNum = 30; ",
+				" INFO.circleSpawnCount = 0; ",
+				" ",
+				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); ",
+				" ",
+				" /* ---- Disable Features ---- */ ",
+				" INFO.GlobalSettings.CircleSettings.ageLogic.atAgeChanges = ''; "
 			],
 			"onStageFrameMoveEval": [
-				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( CircleManager.getCircleContainers().length <= INFO.maxCircleNum ) ) ", 
+				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
 				" { ",
 				"   var circleContainer = CircleManager.createCircleObj(); ",
+				"   INFO.circleSpawnCount++; ",
 				"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
 				" } ",
 				" ",
@@ -85,7 +143,8 @@
 			"modeName": "c2_Bounce",
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
-				" INFO.baseCircleProp.behaviors = Util.cloneJson( INFO.behavior_bounce ); "
+
+				" delete INFO.GlobalSettings.CircleSettings.ageLogic.atAgeChanges['10']; "
 			],
 			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
 		},
@@ -93,38 +152,19 @@
 			"modeName": "c3_Age10",
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
-				" INFO.baseCircleProp.behaviors = Util.cloneJson( INFO.behavior_bounce ); ",
-				" INFO.baseCircleProp.innerCircle = Util.cloneJson( INFO.innerCircle ); "
+
+				" INFO.GlobalSettings.CircleSettings.chaseActionLogic = ''; "
 			],
 			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "			
-		},
-		{
-			"modeName": "c4_PXLine",
-			"onStartRunEval": [
-				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
-				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropMore ) ); "
-			],
-			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
 		},
 		{
 			"modeName": "c5_Chase",
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
-				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropMore ) ); ",
-				" INFO.baseCircleProp.innerCircle.behaviorChange.chaseAction = INFO.chaseAction; ",
-				" INFO.maxCircleSpawnNum = 50; ",
-				" INFO.circleSpawnCount = 0; "
+
+				" INFO.maxCircleSpawnNum = 50; "
 			],
-			"onStageFrameMoveEval": [
-				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
-				" { ",
-				"   var circleContainer = CircleManager.createCircleObj(); ",
-				"   INFO.circleSpawnCount++; ",
-				"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
-				" } ",
-				" ",
-				" INFO.frameCount++; "
-			]
+			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
 		},
 		{
 			"modeName": "c6_King",
@@ -144,7 +184,6 @@
 				" createjs.Ticker.framerate = 20; ",
 				" ",
 				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); ",
-				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropMore ) ); ",
 				" ",
 				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: INFO.baseCircleProp } ); "
 			],
@@ -156,7 +195,6 @@
 				" createjs.Ticker.framerate = 20; ",
 				" ",
 				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); ",
-				" Util.mergeJson( INFO.baseCircleProp, Util.cloneJson( INFO.circlePropMore ) ); ",
 				" ",
 				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: INFO.baseCircleProp } ); "
 			],
@@ -177,8 +215,10 @@
 					"speed": 5,
 					"name": "circle_blue_1",
 					"angle": 127,
+					"strength": 7,
+					"strengthChangeRate": 0.20,
 					"innerCircle": { "width_half": 4, "color": "black" },
-					"behaviors": { "collectDistances": true, "onCollision": "bounce", "bounceLogic": { } }
+					"behaviors": { "proxyDetection": true, "bounceAction": true, "chaseAction": true }
 				},
 				"children": [],
 				"ref_Shape": "",
@@ -194,7 +234,10 @@
 				"itemData": {
 					"width_half": 7,
 					"color": "blue",
+					"speed": 0,
 					"name": "portal_blue_1",
+					"strength": 1000,
+					"strengthChangeRate": 0,
 					"spawnFreqency": 3,
 					"remainSpawnNum": 15,
 					"positionFixed": false					

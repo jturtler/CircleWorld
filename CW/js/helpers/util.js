@@ -20,16 +20,26 @@ Util.isTypeString = function (obj) {
 
 // ---------------------------
 
-Util.evalTryCatch = function( inputVal )
+Util.evalTryCatch = function( inputVal, option )
 {
 	var output = '';
+	if ( !option ) option = {};
+
+	if ( option.INFO_TempVars )
+	{
+		if ( !INFO.TempVars ) INFO.TempVars = {};  // INFO.TempVars is reserved for one time use Temporary varaibles - normally used on eval from conf..
+
+		Object.keys( option.INFO_TempVars ).forEach( key => {
+			INFO.TempVars[ key ] = option.INFO_TempVars[key];
+		});
+	}
 
 	try
 	{
 		inputVal = Util.getEvalStr(inputVal); // Handle array into string joining
 		if (inputVal) output = eval(inputVal);
 	}
-	catch( errMsg ) { console.error( 'ERROR in Util.evalTryCatch, ' + errMsg ); }
+	catch( errMsg ) { console.error( 'ERROR in Util.evalTryCatch, ' + errMsg + ', inputVal: ' + inputVal ); }
 
 	return output;
 };

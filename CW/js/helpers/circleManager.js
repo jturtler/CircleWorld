@@ -5,11 +5,6 @@ CircleManager.objType = 'circle';
 
 CircleManager.colorTeamList_DEFAULT = [ "blue", "orange", "gray", "white", "black", "purple" ];
 
-CircleManager.fightWinSizeChangeRate = 0.2;  // per frame / strength..
-CircleManager.fightLossSizeChangeRate = 0.7;
-
-CircleManager.circleSizeMax = 50;
-
 // -----------------------------
 
 CircleManager.circleProp_DEFAULT = {
@@ -20,9 +15,7 @@ CircleManager.circleProp_DEFAULT = {
 	color: " Util.getRandomInList( INFO.colorTeamList ); ",
 	innerCircle: { addAge: 10, width_half: 4, color: "[RandomColorHex]" },
 	behaviors: {
-		behaviorActivateAge: 4,
-		onCollision: 'bounce',
-		bounceLogicEval: " INFO.movementInEval.x = -INFO.movementInEval.x; INFO.movementInEval.y = -INFO.movementInEval.y; " 
+		onCollision: 'bounce'
 	},
 	onObjCreate_EvalFields: [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.color", "itemData.startPosition" ]
 };
@@ -59,9 +52,7 @@ CircleManager.createCircleObj = function ( inputObjProp )
 
 	var itemData = container.itemData;
 	itemData.objType = CircleManager.objType;
-	// NEW:
-	itemData.strengthChangeRate = Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); // 'power'/'strength' is initially set from 'width'?
-	itemData.strength = itemData.width_half; // 'power'/'strength' is initially set from 'width'?
+
 	// increase gradually as ages / consumes others?
 
 
@@ -116,10 +107,38 @@ CircleManager.ageIncreaseActions = function( container )
 {
 	var itemData = container.itemData;
 
-	// Increament the stength as obj ages..
-	itemData.strength += itemData.strengthChangeRate;
+	var ageLogic = INFO.GlobalSettings.CircleSettings.ageLogic;
 	
-	CircleManager.checkNaddInnerCircleInAge( container );
+	if ( ageLogic.ageIncreaseActionsEval ) Util.evalTryCatch( ageLogic.ageIncreaseActionsEval, { INFO_TempVars: { obj: container } } );
+
+	CircleManager.atAgeChanges( container );
+	// CircleManager.checkNaddInnerCircleInAge( container );
+};
+
+CircleManager.atAgeChanges = function ( container )
+{
+	var itemData = container.itemData;
+
+	var cSets = INFO.GlobalSettings.CircleSettings;
+	var ageLogic = cSets.ageLogic;
+
+	if ( ageLogic.atAgeChanges )
+	{
+		for( var prop in ageLogic.atAgeChanges )
+		{
+			if ( prop == itemData.age )
+			{
+				var ageActions = ageLogic.atAgeChanges[prop];
+
+				ageActions.forEach( action => {
+					if ( action.innerCircleAdd && action.settingName ) CircleManager.addInnerCircle( container, cSets[ action.settingName ] );
+					else if ( action.bounceActionBehaviorSet ) container.itemData.behaviors.bounceAction = true;
+					else if ( action.proxyDetectionBehaviorSet ) container.itemData.behaviors.proxyDetection = true;
+					else if ( action.chaseActionBehaviorSet ) container.itemData.behaviors.chaseAction = true;
+				});
+			}
+		}
+	}
 };
 
 
@@ -132,7 +151,7 @@ CircleManager.checkNaddInnerCircleInAge = function ( container )
 	if ( innerCircle )
 	{	
 		if ( !innerCircle.added && itemData.age >= innerCircle.addAge ) {
-			if ( innerCircle.behaviorChange ) Util.mergeJson( itemData.behaviors, innerCircle.behaviorChange );  // "proxyDetection": {  "action": "chase", "proxyDistance": 100  }
+			if ( innerCircle.behaviorChange ) Util.mergeJson( itemData.behaviors, innerCircle.behaviorChange );
 			CircleManager.addInnerCircle( container, innerCircle );	
 		}
 	}	
@@ -140,12 +159,70 @@ CircleManager.checkNaddInnerCircleInAge = function ( container )
 
 CircleManager.addInnerCircle = function ( container, innerCircleJson )
 {
-	if ( innerCircleJson.color === '[RandomColorHex]' ) innerCircleJson.color = Util.getRandomColorHex();
+	if ( innerCircleJson )
+	{
+		if ( innerCircleJson.color === '[RandomColorHex]' ) innerCircleJson.color = Util.getRandomColorHex();
 
-	var innerCircleShape = new createjs.Shape();
-	innerCircleShape.graphics.beginFill( innerCircleJson.color ).drawCircle(0, 0, innerCircleJson.width_half );
-	container.ref_innerCircleShape = innerCircleShape;
-	container.addChild( innerCircleShape );
+		var innerCircleShape = new createjs.Shape();
+		innerCircleShape.graphics.beginFill( innerCircleJson.color ).drawCircle(0, 0, innerCircleJson.width_half );
+		container.ref_innerCircleShape = innerCircleShape;
+		container.addChild( innerCircleShape );
+	
+		innerCircleJson.added = true;	
+	}
+};
 
-	innerCircleJson.added = true;
+
+// ------------------------------------------
+
+
+CircleManager.fightObjStatusChange = function( winObj, loseObj )
+{
+	var cSettings = INFO.GlobalSettings.CircleSettings;
+	var fightLogic = cSettings.fightLogic;
+	// var sizeChangeLogic = cSettings.sizeChangeLogic;
+
+	if ( fightLogic.winEval ) Util.evalTryCatch( fightLogic.winEval, { INFO_TempVars: { winObj: winObj } } );
+	if ( fightLogic.loseEval ) Util.evalTryCatch( fightLogic.loseEval, { INFO_TempVars: { loseObj: loseObj } } );
+	/*
+	else
+	{
+		winObj.itemData.strength++;
+		winObj.itemData.width_half += fightLogic.fightWinSizeChangeRate;
+		winObj.itemData.speed -= ( fightLogic.fightWinSizeChangeRate * sizeChangeLogic.speedDownRate_bySizeUp );
+		CircleManager.adjustSizeMax( winObj );
+		CircleManager.adjustSpeedMin( winObj );
+		if ( winObj.ref_Shape ) CircleManager.drawCircleShape( winObj.ref_Shape, winObj.itemData );
+	}*/
+
+	// Lose Obj Changes
+	// if ( fightLogic.loseEval ) Util.evalTryCatch( fightLogic.loseEval, { INFO_TempVars: { loseObj: loseObj } } );
+	/* else
+	{
+		loseObj.itemData.strength--;
+		loseObj.itemData.width_half -= fightLogic.fightLoseSizeChangeRate;		
+		CircleManager.adjustSizeMax( loseObj );
+		if ( loseObj.itemData.strength <= 0 )  {  loseObj.itemData.strength = 0;  loseObj.itemData.width_half = 0;  }
+		if ( loseObj.itemData.objType === CircleManager.objType && loseObj.ref_Shape ) CircleManager.drawCircleShape( loseObj.ref_Shape, loseObj.itemData );
+	}*/
+};
+
+
+CircleManager.adjustSizeMax = function( obj )
+{
+	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
+
+	if ( obj.itemData.width_half > sizeChangeLogic.width_halfMax ) obj.itemData.width_half = sizeChangeLogic.width_halfMax;
+};
+
+CircleManager.adjustSpeedMin = function( obj )
+{
+	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
+
+	if ( obj.itemData.speed < sizeChangeLogic.speedMin ) winObj.itemData.speed = sizeChangeLogic.speedMin;
+};
+
+CircleManager.adjustSizeMin = function( obj )
+{
+	if ( obj.itemData.width_half < 0 ) obj.itemData.width_half = 0;
 };

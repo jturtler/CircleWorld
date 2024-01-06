@@ -32,7 +32,7 @@ function Kid(stage, name, attribute, locationX, locationY) {
 
   me.currentInterest;
 
-  me.maxTickAngleChange = 5;  // max angle change per tick is 5 degree.  If frameRate is 10, we have 10 tick per sec.  thus, 50 degree per sec max changing angle.
+  me.angleChangeMax_perTick = 5;  // max angle change per tick is 5 degree.  If frameRate is 10, we have 10 tick per sec.  thus, 50 degree per sec max changing angle.
 
   // ----------------------------
 
@@ -474,7 +474,7 @@ function Kid(stage, name, attribute, locationX, locationY) {
     var angleToTarget = me.getAngleToTarget( targetObj );
     var currAngle = me.getAngleCurr();
 
-    var angleChange = me.getAngleAwayTarget( angleToTarget, currAngle, me.maxTickAngleChange );
+    var angleChange = me.getAngleAwayTarget( angleToTarget, currAngle, me.angleChangeMax_perTick );
 
     var newAngle = ( currAngle + angleChange + 360 ) % 360;
             
@@ -487,7 +487,7 @@ function Kid(stage, name, attribute, locationX, locationY) {
     var angleToTarget = me.getAngleToTarget( targetObj );
     var currAngle = me.getAngleCurr();
 
-    var angleChange = me.getAngleTowardTarget( angleToTarget, currAngle, me.maxTickAngleChange );
+    var angleChange = me.getAngleTowardTarget( angleToTarget, currAngle, me.angleChangeMax_perTick );
 
     var newAngle = ( currAngle + angleChange + 360 ) % 360;
             

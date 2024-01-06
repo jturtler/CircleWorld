@@ -36,8 +36,7 @@ StageManager.frameMove = function ( e )
 {
 	if ( !e.paused )
 	{
-		var aged = ( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;
-		
+		var aged = eval( INFO.GlobalSettings.CircleSettings.ageLogic.ageIncreaseCheckInTickEval );		
 
 		// 1. Proxy 'lines' remove (for new stage frame drawing), and clear all obj's 'distances' data.
 		MovementHelper.removeAllProxyLines();

@@ -12,13 +12,14 @@ PortalManager.remainSpawnNum = 15; //StageManager.framerate * 2;
 PortalManager.portalProp_DEFAULT = {
 	name: "PortalManager.objType + '_' + CommonObjManager.getContainers().length",
 	width_half: 8,
+	speed: 0,
 	strength: 1000,
+	strengthChangeRate: 0,	
 	color: "PortalManager.getNextPortalTeamColor( PortalManager.getPortalContainers().length )",
 	spawnFreqency: PortalManager.portalSpawnFrequency, // every 3 tick, create new itemData..
 	remainSpawnNum: PortalManager.remainSpawnNum,
 	positionFixed: false,
 	spawnCircleProp: {
-		behaviorActivateAge: 4,
 		innerCircle: {
 			addAge: 10,
 			width_half: 4,
