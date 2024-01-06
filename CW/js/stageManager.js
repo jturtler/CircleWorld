@@ -120,7 +120,7 @@ StageManager.removeStageChildrenContainers = function ( objType )
 {	
 	var list = StageManager.getStageChildrenContainers( objType );
 
-	list.forEach( obj => StageManager.stage.removeChild( list[i] ) );
+	list.forEach( obj => StageManager.stage.removeChild( obj ) );
 };
 
 StageManager.removeAllStageObjs = function()

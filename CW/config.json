@@ -14,7 +14,6 @@
 				" INFO.WIN_SpeedDownR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
 				" INFO.LOS_SizeUpR = INFO.CIR_SETS.fightLogic.fightLoseSizeChangeRate; ",
 				" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; "
-				
 			],
 
 			"CircleSettings": 
@@ -24,7 +23,12 @@
 					"NOTE": "Aged in every 'framerate'th time <-- which is once per second. ",
 					"ageIncreaseActionsEval": [
 						" INFO.TempVars.obj.itemData.strength += INFO.TempVars.obj.itemData.strengthChangeRate; ",
-						" INFO.TempVars.obj.itemData.width_half += INFO.C_Size.width_half_UpRateByAge; "
+						" INFO.TempVars.obj.itemData.width_half += INFO.C_Size.width_half_UpRateByAge; ",
+
+						" if ( INFO.TempVars.obj.width_half >= INFO.C_Size.width_halfMax ) { ", 
+						"    INFO.TempVars.obj.itemData.behaviors.proxyDistance = 200; ",
+						"    INFO.TempVars.srcObj.itemData.team = ''; ",
+						" } "
 					],
 					"atAgeChanges": {
 						"5": [
@@ -39,8 +43,9 @@
 				},
 				"bounceActionLogic": {
 					"bounceLogicEval": [
-						" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
-						" CommonObjManager.highlightSeconds( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } ); "
+						" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; ",
+						" INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
+						" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, shape: 'circle', sizeRate: 1.4 } ); "
 					]
 				},
 				"innerCircle_W4CR": { 
@@ -52,7 +57,7 @@
 				},
 				"chaseActionLogic": {
 					"angleChangeMax_perTick": 0.4,
-					"chaseTargetEval": " ( INFO.TempVars.srcObj.itemData.color !== INFO.TempVars.trgObj.itemData.color && ( INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half || INFO.TempVars.srcObj.itemData.width_half >= INFO.C_Size.width_halfMax ) ) ",
+					"chaseTargetEval": " ( ( !INFO.TempVars.srcObj.itemData.team || INFO.TempVars.srcObj.itemData.team !== INFO.TempVars.trgObj.itemData.team ) && ( INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half || INFO.TempVars.srcObj.itemData.width_half >= INFO.C_Size.width_halfMax ) ) ",
 					"chaseMovementEval": " 'NOT YET IMPLEMENTED.. ' ", 
 					"onCollision": "fight"
 				},
@@ -80,24 +85,25 @@
 					"speedMin": 2.5,
 					"width_halfMax": 25,
 					"width_half_UpRateByAge": 0.1
-				}				
+				}
 			},
 
 			"NEXT": " Need to add 'ageChangeAction': --> in age 6, add inner circle, with behavior on, ghostmode off.."
 		},
 
 		"circlePropMin": { 
-			"name": "'circle_' + CommonObjManager.getContainers().length",
+			"name": " CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ); ",
 			"speed": " Util.getRandomInRange(5, 8); ",
 			"width_half": " Util.getRandomInRange(8, 13); ",
 			"strength": " Util.getRandomInRange(8, 13); ",
 			"strengthChangeRate": " Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
 			"angle": " Util.getRandomInRange( 0, 360 ); ",
-			"color": " Util.getRandomInList( INFO.colorTeamList ); ",
+			"color": " INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color.color; ",
+			"team": " INFO.TempVars_color; ",
 			"startPosition": " AppUtil.getPosition_Center(); ",
 			"behaviors": {	},
 			"innerCircle": { },
-			"onObjCreate_EvalFields": [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.strength", "itemData.strengthChangeRate", "itemData.angle", "itemData.color", "itemData.startPosition" ]
+			"onObjCreate_EvalFields": [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.strength", "itemData.strengthChangeRate", "itemData.angle", "itemData.color", "itemData.team", "itemData.startPosition" ]
 		},
 
 		"onStartRunEval_Circle": [

@@ -32,7 +32,7 @@ GlobalSettings.DefaultJson = {
 		"bounceActionLogic": {
 			"bounceLogicEval": [
 				" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
-				" CommonObjManager.highlightSeconds( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } ); "
+				" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } ); "
 			]
 		},
 		"innerCircle_W4CR": { 

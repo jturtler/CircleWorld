@@ -2,8 +2,12 @@
 function CommonObjManager() { };
 
 CommonObjManager.selectedContainer;
-CommonObjManager.selectedContainer_highlightShape;
+CommonObjManager.selectedContainer_shape;
 CommonObjManager.selectedColor = 'green';
+
+CommonObjManager.createdObjCount = 0;
+CommonObjManager.objNameIndex = 0;
+CommonObjManager.objNameList = [];
 
 CommonObjManager.itemJsonDefault = {
 	startPosition: { x: 200, y: 200 }, // position can change afterwards if obj is not in stationary one.
@@ -17,6 +21,7 @@ CommonObjManager.itemJsonDefault = {
 
 // ------------------------------------
 
+// TODO: Should be obsolete?
 CommonObjManager.getContainers = function()
 {
 	return StageManager.getStageChildrenContainers();
@@ -25,6 +30,13 @@ CommonObjManager.getContainers = function()
 CommonObjManager.removeAllContainers = function()
 {
 	StageManager.removeStageChildrenContainers();
+};
+
+CommonObjManager.resetData = function()
+{
+	CommonObjManager.createdObjCount = 0;
+	CommonObjManager.objNameIndex = 0;
+	CommonObjManager.objNameList = [];
 };
 
 // -----------------------------------
@@ -39,6 +51,8 @@ CommonObjManager.createObj = function ( inputJson )
 
 	// Create 'container' (children of 'stage') with 'itemData' in it.
 	var container = CommonObjManager.createStageItem( itemData ); // return 'container'
+
+	CommonObjManager.createdObjCount++;
 
 	return container; // 'itemData' is part of 'container.
 };
@@ -62,13 +76,13 @@ CommonObjManager.createStageItem = function (itemData)
 
 // ------------------------------------
 
-CommonObjManager.highlightSeconds = function( container, option )
+CommonObjManager.highlightForPeriod = function( container, option )
 {
 	try
 	{
 		if ( !option ) option = {};
 		if ( !option.color ) option.color = 'yellow';
-		if ( !option.timeoutSec ) option.timeoutSec = 1;
+		if ( !option.framecounts ) option.framecounts = createjs.Ticker.framerate;
 		if ( !option.shape ) option.shape = 'circle';  // rect, etc..
 		if ( !option.sizeRate ) option.sizeRate = 2;
 		// shape: 'circle/rect/etc..', timeout
@@ -95,9 +109,9 @@ CommonObjManager.highlightSeconds = function( container, option )
 		
 		container.ref_highlightShape = highlightShape;	
 
-		itemData.highlightCount = createjs.Ticker.framerate;	
+		itemData.highlightCount = option.framecounts;	
 	}
-	catch( errMsg ) {  console.error( 'ERROR in CommonObjManager.highlightSeconds, ' + errMsg ); }
+	catch( errMsg ) {  console.error( 'ERROR in CommonObjManager.highlightForPeriod, ' + errMsg ); }
 };
 
 CommonObjManager.clearHighlightShape = function( container )
@@ -166,3 +180,22 @@ CommonObjManager.clearPrevSelection = function ()
 };
 
 // --------------------------------------------
+
+CommonObjManager.getUniqueObjName = function ( option ) 
+{
+	if ( !option ) option = {};
+	var typeName = ( option.type ) ? option.type: 'none';
+
+	CommonObjManager.objNameIndex++;
+
+	var name = 'obj' + CommonObjManager.objNameIndex + '_' + typeName;
+
+	CommonObjManager.objNameList.push( name );
+
+	return name;
+};
+
+CommonObjManager.getObjByName = function ( name )
+{
+	return StageManager.getStageChildrenContainers().find( obj => obj.itemData?.name === name );
+};

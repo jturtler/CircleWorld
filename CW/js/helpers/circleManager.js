@@ -8,16 +8,16 @@ CircleManager.colorTeamList_DEFAULT = [ "blue", "orange", "gray", "white", "blac
 // -----------------------------
 
 CircleManager.circleProp_DEFAULT = {
-	name: "CircleManager.objType + '_' + CommonObjManager.getContainers().length", // Could be, ideally, set like 'circle_blue_1'
+	name: " CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ); ", // Could be, ideally, set like 'circle_blue_1'
 	speed: "Util.getRandomInRange(5, 8)",
 	width_half: "Util.getRandomInRange(8, 13)",
 	angle: "Util.getRandomInRange( 0, 360 )",
-	color: " Util.getRandomInList( INFO.colorTeamList ); ",
-	innerCircle: { addAge: 10, width_half: 4, color: "[RandomColorHex]" },
-	behaviors: {
-		onCollision: 'bounce'
-	},
-	onObjCreate_EvalFields: [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.color", "itemData.startPosition" ]
+	strength: " Util.getRandomInRange(8, 13); ",
+	strengthChangeRate: " Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
+	color: " INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color; ",
+	team: " INFO.TempVars_color; ",
+	behaviors: { },
+	onObjCreate_EvalFields: [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.strength", "itemData.strengthChangeRate", "itemData.color", "itemData.team" ]
 };
 
 // -----------------------------
@@ -44,16 +44,12 @@ CircleManager.createCircleObj = function ( inputObjProp )
 	Util.mergeJson( circleProp, inputObjProp );
 
 	Util.onObjCreate_EvalFields( circleProp );
-	// TODO: re-'name' obj with color (team) in the name string?
-
 
 	// With above 'inputObjProp', 'circleJson' merged, have 'CommonObjManager.createObj' create 'itemData' & 'container'
 	var container = CommonObjManager.createObj( circleProp );
 
 	var itemData = container.itemData;
 	itemData.objType = CircleManager.objType;
-
-	// increase gradually as ages / consumes others?
 
 
 	// -- SET EVENTS SECTION ---
@@ -82,24 +78,12 @@ CircleManager.setCircleShapes = function ( container )
 
 	container.ref_Shape = shape;
 	container.addChild( shape );
-
-	// Below moved to not create right away, but scheduled by age - 'CircleManager.addInnerCircleInAge'
-	//		TODO: The Logic should be more changed?
-	// if ( itemData.innerCircle ) CircleManager.addInnerCircle( container, itemData.innerCircle );
 };
  
 CircleManager.drawCircleShape = function( shape, itemData )
 {
 	shape.graphics.clear().beginFill(itemData.color).drawCircle( 0, 0, itemData.width_half);
 };
-
-
-/*
-CircleManager.reshapeCircle = function( container, movement )
-{
-	shape.graphics.beginFill(itemData.color).drawCircle(movement.x, movement.y, itemData.width_half);
-};
-*/
 
 // ---------------------------------
 
@@ -112,7 +96,6 @@ CircleManager.ageIncreaseActions = function( container )
 	if ( ageLogic.ageIncreaseActionsEval ) Util.evalTryCatch( ageLogic.ageIncreaseActionsEval, { INFO_TempVars: { obj: container } } );
 
 	CircleManager.atAgeChanges( container );
-	// CircleManager.checkNaddInnerCircleInAge( container );
 };
 
 CircleManager.atAgeChanges = function ( container )

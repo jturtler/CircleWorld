@@ -10,25 +10,20 @@ PortalManager.remainSpawnNum = 15; //StageManager.framerate * 2;
 
 
 PortalManager.portalProp_DEFAULT = {
-	name: "PortalManager.objType + '_' + CommonObjManager.getContainers().length",
+	name: " CommonObjManager.getUniqueObjName( { type: PortalManager.objType } ); ",
 	width_half: 8,
 	speed: 0,
 	strength: 1000,
 	strengthChangeRate: 0,	
-	color: "PortalManager.getNextPortalTeamColor( PortalManager.getPortalContainers().length )",
+	color: " INFO.TempVars_color = PortalManager.getNextPortalTeamColor( PortalManager.getPortalContainers().length ); INFO.TempVars_color; ",
+	team: " INFO.TempVars_color; ",
+
 	spawnFreqency: PortalManager.portalSpawnFrequency, // every 3 tick, create new itemData..
 	remainSpawnNum: PortalManager.remainSpawnNum,
 	positionFixed: false,
-	spawnCircleProp: {
-		innerCircle: {
-			addAge: 10,
-			width_half: 4,
-			color: "Util.getRandomColorHex()"
-		}
-	},
-	onObjCreate_EvalFields: [ "itemData.name", "itemData.color", "itemData.spawnCircleProp.innerCircle.color" ]	
+	spawnCircleProp: { },
+	onObjCreate_EvalFields: [ "itemData.name", "itemData.color", "itemData.team" ]	
 };
-
 
 // ------------------------------------
 
@@ -87,7 +82,7 @@ PortalManager.setPortalShapes = function ( container )
 	// 'Portal' Shape Add
 	var shape = new createjs.Shape();
 	shape.graphics.beginFill(itemData.color).drawRect( -itemData.width_half, -width_full, width_full, width_full * 2 );
-	container.ref_Shape = shape;
+	container.ref_ShapeRect = shape;
 	container.addChild( shape );
 
 	// 'Portal' Label Add
@@ -111,8 +106,10 @@ PortalManager.spawnCircle = function ( container )
 
 			var spawnCircleProp = Util.cloneJson( itemData.spawnCircleProp );
 			spawnCircleProp.color = itemData.color;
+			spawnCircleProp.team = itemData.team;			
 			spawnCircleProp.startPosition = { x: container.x, y: container.y };
 			spawnCircleProp.collisionExceptions = [ { target: container, turns: 4 } ];  // <-- circular loop on Util.traverseEval
+			spawnCircleProp.onObjCreate_EvalFields_Exceptions = [ 'itemData.color', 'itemData.team', 'itemData.startPosition' ];
 
 			CircleManager.createCircleObj( spawnCircleProp );
 			itemData.remainSpawnNum--;
@@ -120,7 +117,7 @@ PortalManager.spawnCircle = function ( container )
 			// Label change
 			if ( container.ref_Label ) container.ref_Label.text = itemData.remainSpawnNum;
 
-			CommonObjManager.highlightSeconds( container, { color: 'yellow', timeoutSec: 1, shape: 'rect', sizeRate: 1.5 } );
+			CommonObjManager.highlightForPeriod( container, { color: 'yellow', timeoutSec: 1, shape: 'rect', sizeRate: 1.5 } );
 		}
 	}
 };

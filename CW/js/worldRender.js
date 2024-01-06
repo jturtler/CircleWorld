@@ -196,12 +196,9 @@ WorldRender.resetAppData = function( )
 {
 	createjs.Ticker.framerate = 20;
 
-	// 1. Clear the 'containerList' array -  // Below Step 2 takes care of removing all..
-	// MovementHelper.removeAllProxyLines();  // LINES (Proxy) remove
-	//CircleManager.removeAllCircleContainers();
-	//PortalManager.removeAllPortalContainers();
-	//CommonObjManager.removeAllContainers();
-	
+	// 1. Reset some global variables/array/counts, etc..	
+	CommonObjManager.resetData();
+
 	// 2. Remove all stage objects
 	StageManager.removeAllStageObjs();
 
@@ -209,9 +206,8 @@ WorldRender.resetAppData = function( )
 	WorldRender.infoJson.appModeConfig = '';
 
 	// 4. reset 'INFO' all - except 'configJson'
-	var tempConfigJson = INFO.configJson;
-	INFO = { configJson: tempConfigJson };
-	WorldRender.setConfig_INFO_Vars( INFO.configJson.INFO_Vars );
+	INFO = { configJson: INFO.configJson };
+	WorldRender.setConfig_INFO_Vars( INFO.configJson.INFO_Vars ); // Reload 'GlobalSettings' under config 'INFO'
 }; 
 
 
@@ -220,18 +216,13 @@ WorldRender.setConfig_INFO_Vars = function( INFO_Vars )
 	if ( INFO_Vars )
 	{
 		for ( var prop in INFO_Vars )
-		{			
-			var data = INFO_Vars[ prop ];
-
-			// Probably not used.. <-- Due to these not should be decided on define time, but on Run Time!
-			// if ( Util.isTypeString( data ) && data.trim().indexOf( '[EVAL]' ) === 0 ) data = Util.evalTryCatch( data.replace( '[EVAL]', '' ) );
-
-			INFO[prop] = data;
+		{
+			INFO[prop] = INFO_Vars[ prop ];
 		}
 	}
 
 	// In case the config 'INFO_Vars' did not set INFO.colorTeamList, set it here..(?)
-	if ( !INFO.colorTeamList ) INFO.colorTeamList = CircleManager.colorTeamList_DEFAULT;
+	if ( !INFO.colorTeamList ) INFO.colorTeamList = Util.cloneJson( CircleManager.colorTeamList_DEFAULT );
 
 	WorldRender.setINFO_GlobalSettings_withDefault( GlobalSettings.DefaultJson );	
 };
