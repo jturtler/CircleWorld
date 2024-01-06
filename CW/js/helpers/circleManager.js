@@ -108,7 +108,7 @@ CircleManager.ageIncreaseActions = function( container )
 	var itemData = container.itemData;
 
 	var ageLogic = INFO.GlobalSettings.CircleSettings.ageLogic;
-	
+
 	if ( ageLogic.ageIncreaseActionsEval ) Util.evalTryCatch( ageLogic.ageIncreaseActionsEval, { INFO_TempVars: { obj: container } } );
 
 	CircleManager.atAgeChanges( container );
@@ -184,27 +184,6 @@ CircleManager.fightObjStatusChange = function( winObj, loseObj )
 
 	if ( fightLogic.winEval ) Util.evalTryCatch( fightLogic.winEval, { INFO_TempVars: { winObj: winObj } } );
 	if ( fightLogic.loseEval ) Util.evalTryCatch( fightLogic.loseEval, { INFO_TempVars: { loseObj: loseObj } } );
-	/*
-	else
-	{
-		winObj.itemData.strength++;
-		winObj.itemData.width_half += fightLogic.fightWinSizeChangeRate;
-		winObj.itemData.speed -= ( fightLogic.fightWinSizeChangeRate * sizeChangeLogic.speedDownRate_bySizeUp );
-		CircleManager.adjustSizeMax( winObj );
-		CircleManager.adjustSpeedMin( winObj );
-		if ( winObj.ref_Shape ) CircleManager.drawCircleShape( winObj.ref_Shape, winObj.itemData );
-	}*/
-
-	// Lose Obj Changes
-	// if ( fightLogic.loseEval ) Util.evalTryCatch( fightLogic.loseEval, { INFO_TempVars: { loseObj: loseObj } } );
-	/* else
-	{
-		loseObj.itemData.strength--;
-		loseObj.itemData.width_half -= fightLogic.fightLoseSizeChangeRate;		
-		CircleManager.adjustSizeMax( loseObj );
-		if ( loseObj.itemData.strength <= 0 )  {  loseObj.itemData.strength = 0;  loseObj.itemData.width_half = 0;  }
-		if ( loseObj.itemData.objType === CircleManager.objType && loseObj.ref_Shape ) CircleManager.drawCircleShape( loseObj.ref_Shape, loseObj.itemData );
-	}*/
 };
 
 
@@ -219,7 +198,7 @@ CircleManager.adjustSpeedMin = function( obj )
 {
 	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
 
-	if ( obj.itemData.speed < sizeChangeLogic.speedMin ) winObj.itemData.speed = sizeChangeLogic.speedMin;
+	if ( obj.itemData.speed < sizeChangeLogic.speedMin ) obj.itemData.speed = sizeChangeLogic.speedMin;
 };
 
 CircleManager.adjustSizeMin = function( obj )
