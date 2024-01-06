@@ -12,7 +12,9 @@
 				" INFO.CIR_SETS = INFO.GlobalSettings.CircleSettings; ",
 				" INFO.WIN_SizeUpR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
 				" INFO.WIN_SpeedDownR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
-				" INFO.LOS_SizeUpR = INFO.CIR_SETS.fightLogic.fightLoseSizeChangeRate; "
+				" INFO.LOS_SizeUpR = INFO.CIR_SETS.fightLogic.fightLoseSizeChangeRate; ",
+				" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; "
+				
 			],
 
 			"CircleSettings": 
@@ -20,7 +22,10 @@
 				"ageLogic": {
 					"ageIncreaseCheckInTickEval": "( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;",
 					"NOTE": "Aged in every 'framerate'th time <-- which is once per second. ",
-					"ageIncreaseActionsEval": " INFO.TempVars.obj.itemData.strength += INFO.TempVars.obj.itemData.strengthChangeRate; ",
+					"ageIncreaseActionsEval": [
+						" INFO.TempVars.obj.itemData.strength += INFO.TempVars.obj.itemData.strengthChangeRate; ",
+						" INFO.TempVars.obj.itemData.width_half += INFO.C_Size.width_half_UpRateByAge; "
+					],
 					"atAgeChanges": {
 						"5": [
 							{ "bounceActionBehaviorSet": true }
@@ -46,8 +51,8 @@
 					"proxyDistance": 100
 				},
 				"chaseActionLogic": {
-					"angleChangeMax_perTick": 0.4,					
-					"chaseTargetEval": " ( INFO.TempVars.srcObj.itemData.color !== INFO.TempVars.trgObj.itemData.color && INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half ) ",
+					"angleChangeMax_perTick": 0.4,
+					"chaseTargetEval": " ( INFO.TempVars.srcObj.itemData.color !== INFO.TempVars.trgObj.itemData.color && ( INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half || INFO.TempVars.srcObj.itemData.width_half >= INFO.C_Size.width_halfMax ) ) ",
 					"chaseMovementEval": " 'NOT YET IMPLEMENTED.. ' ", 
 					"onCollision": "fight"
 				},
@@ -73,7 +78,8 @@
 				"sizeChangeLogic": {
 					"speedDownRate_bySizeUp": 0.2,
 					"speedMin": 2.5,
-					"width_halfMax": 25
+					"width_halfMax": 25,
+					"width_half_UpRateByAge": 0.1
 				}				
 			},
 
