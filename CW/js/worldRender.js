@@ -63,21 +63,13 @@ WorldRender.setUp_Tag_Events = function()
 		if ( createjs.Ticker.paused ) StageManager.stage.update();
 	});
 
+	
 	$( '#btnStopStart' ).click( function() 
 	{
-		if ( !createjs.Ticker.paused )
-		{			
-			createjs.Ticker.paused = true;
-			$( '#spanStopStart' ).text( 'tart' );
-			WorldRender.spanInfoTag.text( 'Stopped.. ' );
-		}
-		else
-		{
-			createjs.Ticker.paused = false;
-			$( '#spanStopStart' ).text( 'top' );
-			WorldRender.spanInfoTag.text( 'Started Again.. ' );
-		}
+		if ( !createjs.Ticker.paused ) StageManager.stageStopStart( { bStop: true, spanMsg: true } );
+		else StageManager.stageStopStart( { bStop: false, spanMsg: true } );
 	});
+
 
 	// browserResize_Setup
 	$( window ).on( "resize", () => 

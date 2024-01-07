@@ -82,7 +82,7 @@
 				},
 				"sizeChangeLogic": {
 					"speedDownRate_bySizeUp": 0.2,
-					"speedMin": 2.5,
+					"speedMin": 3,
 					"width_halfMax": 25,
 					"width_half_UpRateByAge": 0.1
 				}

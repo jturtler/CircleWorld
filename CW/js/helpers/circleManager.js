@@ -58,9 +58,10 @@ CircleManager.createCircleObj = function ( inputObjProp )
 	itemData.onFrameMove_ClassBase = container => { };
 	itemData.onAgeIncrease = container => CircleManager.ageIncreaseActions( container );
 	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => MovementHelper.moveNext( container );
-	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
+	// if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
 	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
-	
+	container.addEventListener('mousedown', CommonObjManager.objMouseDownAction );
+      	
 
 	// More 'circle' related shapes & etc created/added to 'container'
 	CircleManager.setCircleShapes( container );

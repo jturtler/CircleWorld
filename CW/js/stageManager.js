@@ -29,7 +29,11 @@ StageManager.setFramerate_Event = function ()
 	// createjs.Ticker.framerate = framerate;
 	createjs.Ticker.removeEventListener( 'tick', StageManager.frameMove );
 	createjs.Ticker.addEventListener( 'tick', StageManager.frameMove );
+
+	StageManager.stage.addEventListener( 'stagemouseup', CommonObjManager.objMouseUpAction )
 };
+
+// ----------------------------------------------
 
 
 StageManager.frameMove = function ( e ) 
@@ -41,6 +45,7 @@ StageManager.frameMove = function ( e )
 		// 1. Proxy 'lines' remove (for new stage frame drawing), and clear all obj's 'distances' data.
 		MovementHelper.removeAllProxyLines();
 		MovementHelper.clearAllDistances( StageManager.getStageChildrenContainers() );
+		CommonObjManager.tempLines_Check_NClear();
 
 		// 2. Remove Child/Container who has size 0
 		StageManager.removeObjs_ByStatus( StageManager.getStageChildrenContainers(), { sizeEmpty: true } );
@@ -55,7 +60,6 @@ StageManager.frameMove = function ( e )
 				{
 					itemData.statusList = []; // TODO: Move this to other place in later time.. <-- Later, keep last 10 status?
 					CommonObjManager.highlightShapeCountCheck_NClear( container );
-
 
 					if ( itemData.age && aged ) {						
 						itemData.age++;
@@ -103,6 +107,28 @@ StageManager.adjustCanvasSize = function ()
 
 	StageManager.stage.update();
 };
+
+
+StageManager.stageStopStart = function ( option ) 
+{
+	if ( !option ) option = {};
+	var spanMsg = ( option.spanMsg !== undefined ) ? option.spanMsg: false;
+	var bStop = ( option.bStop !== undefined ) ? option.bStop: true;
+
+	createjs.Ticker.paused = bStop;
+
+	if ( bStop )
+	{
+		if ( spanMsg ) WorldRender.spanInfoTag.text( 'Stopped.. ' );
+		$( '#spanStopStart' ).text( 'tart' ); // set button text as 'start' for indicating 'start' again by button click.
+	}
+	else 
+	{
+		if ( spanMsg ) WorldRender.spanInfoTag.text( 'Started Again.. ' );
+		$( '#spanStopStart' ).text( 'top' ); // set button text as 'start' for indicating 'start' again by button click.
+	}
+};
+
 
 // ----------------------------
 

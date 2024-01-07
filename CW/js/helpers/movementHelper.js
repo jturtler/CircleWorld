@@ -7,6 +7,7 @@ MovementHelper.attackLineColor = "red";
 MovementHelper.circleHighlightColor = "red";
 
 MovementHelper.PROXY_LINES = [];
+MovementHelper.TEMP_LINES = [];
 
 // ------------------------------------
 
