@@ -193,9 +193,6 @@ CommonObjManager.objMouseDownAction = function ( e )
 
 	if ( itemData ) 
 	{
-		console.log( itemData );
-		WorldRender.spanInfoText( 'Item Selected: ' + itemData.name );
-
 		StageManager.stageStopStart( { bStop: true } );
 
 		// Clear previouew
@@ -241,6 +238,8 @@ CommonObjManager.objMouseUpAction = function ( e )
 		}
 		else {
 			// click event? 
+			console.log( srcObj.itemData );
+			WorldRender.spanInfoText( 'Item Selected: ' + srcObj.itemData.name );
 		}
 
 		// ----------------------
