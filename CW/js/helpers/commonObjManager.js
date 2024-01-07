@@ -67,7 +67,7 @@ CommonObjManager.createStageItem = function (itemData)
 	container.x = itemData.startPosition.x;
 	container.y = itemData.startPosition.y;
 
-	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
+	// if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
 	
 	StageManager.stage.addChild( container );
 
@@ -82,32 +82,16 @@ CommonObjManager.highlightForPeriod = function( container, option )
 	try
 	{
 		if ( !option ) option = {};
-		if ( !option.color ) option.color = 'yellow';
 		if ( !option.endCount ) option.endCount = createjs.Ticker.framerate;
-		if ( !option.shape ) option.shape = 'circle';  // rect, etc..
-		if ( !option.sizeRate ) option.sizeRate = 2;
 		// shape: 'circle/rect/etc..', timeout
 	
 		var itemData = container.itemData;
 	
 		CommonObjManager.clearHighlightShape( container ); // if exists, remove any highlight shape
 
-		var width_full = itemData.width_half * option.sizeRate;
-	
-		var highlightShape = new createjs.Shape();
-		if ( option.shape === 'rect' )
-		{
-			var width_double = width_full * 2;
-			highlightShape.graphics.setStrokeStyle(1).beginStroke( option.color ).drawRect( -width_full, -width_double, width_double, width_double * 2 );
-		}
-		else if ( option.shape === 'circle' )
-		{	
-			highlightShape.graphics.setStrokeStyle(1).beginStroke( option.color ).drawCircle(0, 0, width_full );
-		}
-
-		
-		container.addChild( highlightShape );
-		
+		// option: { color: 'yellow', sizeRate: 1.0, sizeOffset: 4, shape: 'circle' / 'square' }
+		var highlightShape = CommonObjManager.drawShapeLine_Obj( container, option );
+				
 		container.ref_highlightShape = highlightShape;	
 
 		itemData.highlightCount = option.endCount;	
@@ -164,7 +148,7 @@ CommonObjManager.drawLine_ForPeriod = function( sourceObj, targetObj, option )
 
 	if ( !option ) option = {};
 	if ( !option.color ) option.color = 'yellow';
-	if ( !option.endCount ) option.endCount = createjs.Ticker.framerate;
+	if ( !option.endCount ) option.endCount = Math.round( createjs.Ticker.framerate / 2 );
 
 	try
 	{
@@ -196,7 +180,7 @@ CommonObjManager.objMouseDownAction = function ( e )
 		StageManager.stageStopStart( { bStop: true } );
 
 		// Clear previouew
-		CommonObjManager.clearShape_Obj();
+		CommonObjManager.clearMouseDownShape();
 
 		// Select object <-- paint it..	- record position, time
 		CommonObjManager.mouseDownObj = {
@@ -205,7 +189,7 @@ CommonObjManager.objMouseDownAction = function ( e )
 			stageY: e.stageY,
 			time: new Date().getTime(),
 			status: 'mouseDown',
-			selectShape: CommonObjManager.drawShape_Obj( container )
+			selectShape: CommonObjManager.drawShapeLine_Obj( container, { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
 		}; 
 
 		StageManager.stage.update();
@@ -224,47 +208,60 @@ CommonObjManager.objMouseUpAction = function ( e )
 
 		// Calculate + paint the line of new direction??
 		var trgXY = { x: e.stageX, y: e.stageY };
-
 		var distance = MovementHelper.getDistance( srcObj, trgXY );
-
-		console.log( 'mouseUp distance: ' + distance );
 
 		if ( distance > 10 ) 
 		{
 			srcObj.itemData.angle = MovementHelper.getAngleToTarget( srcObj, trgXY );
 
+			//var deltaTime = new Date().getTime() - CommonObjManager.mouseDownObj.time;
+			//var swipeSpeed = distance / deltaTime; // if ( swipeSpeed > 2.5 ), perform swipe..
+
 			CommonObjManager.drawLine_ForPeriod( srcObj, trgXY );
 			// var movement = MovementHelper.getMovementCalc( angle, srcObj.itemData.speed );		
 		}
 		else {
-			// click event? 
-			console.log( srcObj.itemData );
-			WorldRender.spanInfoText( 'Item Selected: ' + srcObj.itemData.name );
+			CommonObjManager.clickObjectEvent( srcObj );
 		}
 
 		// ----------------------
-		CommonObjManager.clearShape_Obj();
+		CommonObjManager.clearMouseDownShape();
 		CommonObjManager.mouseDownObj = undefined;
+
+		StageManager.stage.update();
 	}
 };
 
-CommonObjManager.drawShape_Obj = function ( container )
+// { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'circle' / 'square' )
+CommonObjManager.drawShapeLine_Obj = function ( container, option )
 {
+	if ( !option ) option = {};
+	var color = ( option.color ) ? option.color: 'green';
+	var sizeRate = ( option.sizeRate ) ? option.sizeRate: 1;
+	var sizeOffset = ( option.sizeOffset ) ? option.sizeOffset: 0;
+	var shape = ( option.shape ) ? option.shape: 'rect';
+
 	var itemData = container.itemData;
 
-	var offset = 4;
-	var size = itemData.width_half + offset;
-	var widthHeight = size * 2;
-
+	var width_halfUp = ( itemData.width_half + sizeOffset ) * sizeRate;
+	
 	var selectedShape = new createjs.Shape();
-	selectedShape.graphics.setStrokeStyle(1).beginStroke( CommonObjManager.selectedColor ).drawRect( -size, -size, widthHeight, widthHeight );
+	if ( shape === 'rect' )
+	{
+		var widthFull = width_halfUp * 2;
+		selectedShape.graphics.setStrokeStyle(1).beginStroke( color ).drawRect( -width_halfUp, -width_halfUp, widthFull, widthFull );
+	}
+	else if ( shape === 'circle' )
+	{	
+		selectedShape.graphics.setStrokeStyle(1).beginStroke( color ).drawCircle(0, 0, width_halfUp );
+	}
 
 	container.addChild( selectedShape );
 
 	return selectedShape;
 };
 
-CommonObjManager.clearShape_Obj = function ()
+CommonObjManager.clearMouseDownShape = function ()
 {
 	var mObjJson = CommonObjManager.mouseDownObj;
 
@@ -310,9 +307,9 @@ CommonObjManager.clearShape_Obj = function ()
 
 // ---------------------------------
 
-CommonObjManager.clickObjectEvent = function ( e ) 
+CommonObjManager.clickObjectEvent = function ( container ) 
 {
-	var container = e.currentTarget;
+	// var container = e.currentTarget;
 
 	if ( container.itemData ) 
 	{
@@ -325,21 +322,13 @@ CommonObjManager.clickObjectEvent = function ( e )
 		// Clear other selections..
 		CommonObjManager.clearPrevSelection();
 
-
 		CommonObjManager.selectedContainer = container;
 		
-		var offset = 4;
-		var size = itemData.width_half + offset;
-		var widthHeight = size * 2;
-
-		var selectedShape = new createjs.Shape();
-		selectedShape.graphics.setStrokeStyle(1).beginStroke( CommonObjManager.selectedColor ).drawRect( -size, -size, widthHeight, widthHeight );	
-		container.addChild( selectedShape );
+		var selectedShape = CommonObjManager.drawShapeLine_Obj( container, { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
 
 		CommonObjManager.selectedContainer_shape = selectedShape;
 
-
-		StageManager.stage.update(); // This could be optional
+		// StageManager.stage.update(); // This could be optional
 	}
 };
 

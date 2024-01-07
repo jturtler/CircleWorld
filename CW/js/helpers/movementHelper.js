@@ -254,6 +254,7 @@ MovementHelper.performDistanceProxyDraw = function ( container )
 	{
 		// Draw lines that falls into the proxy distance..
 		var proxyDistance = INFO.GlobalSettings.CircleSettings.proxyDetectionLogic.proxyDistance;
+		if ( container.itemData.behaviors.proxyDistance ) proxyDistance = container.itemData.behaviors.proxyDistance;
 
 		if ( proxyDistance )
 		{

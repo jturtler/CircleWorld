@@ -90,6 +90,8 @@ CircleManager.drawCircleShape = function( shape, itemData )
 
 CircleManager.ageIncreaseActions = function( container )
 {
+	console.log( 'CircleManager.ageIncreaseActions' );
+
 	var itemData = container.itemData;
 
 	var ageLogic = INFO.GlobalSettings.CircleSettings.ageLogic;
@@ -188,4 +190,14 @@ CircleManager.adjustSpeedMin = function( obj )
 CircleManager.adjustSizeMin = function( obj )
 {
 	if ( obj.itemData.width_half < 0 ) obj.itemData.width_half = 0;
+};
+
+CircleManager.adjustStrengthMax = function( obj )
+{
+	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
+	var itemData = obj.itemData;
+
+	var sizeMax = ( itemData.behaviors.strengthMax ) ? itemData.behaviors.strengthMax: sizeChangeLogic.strengthMax;
+
+	if ( itemData.strength > sizeMax ) obj.itemData.strength = sizeMax;
 };

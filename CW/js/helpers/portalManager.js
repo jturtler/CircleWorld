@@ -117,7 +117,7 @@ PortalManager.spawnCircle = function ( container )
 			// Label change
 			if ( container.ref_Label ) container.ref_Label.text = itemData.remainSpawnNum;
 
-			CommonObjManager.highlightForPeriod( container, { color: 'yellow', timeoutSec: 1, shape: 'rect', sizeRate: 1.5 } );
+			CommonObjManager.highlightForPeriod( container, { color: 'yellow', shape: 'rect', sizeRate: 2, sizeOffset: 1 } );
 		}
 	}
 };

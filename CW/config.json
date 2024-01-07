@@ -25,9 +25,10 @@
 						" INFO.TempVars.obj.itemData.strength += INFO.TempVars.obj.itemData.strengthChangeRate; ",
 						" INFO.TempVars.obj.itemData.width_half += INFO.C_Size.width_half_UpRateByAge; ",
 
-						" if ( INFO.TempVars.obj.width_half >= INFO.C_Size.width_halfMax ) { ", 
+						" if ( INFO.TempVars.obj.itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
 						"    INFO.TempVars.obj.itemData.behaviors.proxyDistance = 200; ",
-						"    INFO.TempVars.srcObj.itemData.team = ''; ",
+						"    INFO.TempVars.obj.itemData.team = ''; ",
+						"    CommonObjManager.drawShapeLine_Obj( INFO.TempVars.obj, { color: 'black', sizeRate: 1.1, sizeOffset: 1, shape: 'circle' } ); ",
 						" } "
 					],
 					"atAgeChanges": {
@@ -45,7 +46,7 @@
 					"bounceLogicEval": [
 						" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; ",
 						" INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
-						" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, shape: 'circle', sizeRate: 1.4 } ); "
+						" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, shape: 'circle', sizeRate: 1.3, sizeOffset: 1 } ); "
 					]
 				},
 				"innerCircle_W4CR": { 
@@ -65,26 +66,29 @@
 					"fightWinSizeChangeRate": 0.2,
 					"fightLoseSizeChangeRate": 0.7,
 					"winEval": [
-						" INFO.TempVars.winObj.itemData.strength++; ",
-						" INFO.TempVars.winObj.itemData.width_half += INFO.WIN_SizeUpR; ",
-						" INFO.TempVars.winObj.itemData.speed -= ( INFO.WIN_SizeUpR * INFO.WIN_SpeedDownR ); ",
-						" CircleManager.adjustSizeMax( INFO.TempVars.winObj ); ",
-						" CircleManager.adjustSpeedMin( INFO.TempVars.winObj ); ",
-						" if ( INFO.TempVars.winObj.ref_Shape ) CircleManager.drawCircleShape( INFO.TempVars.winObj.ref_Shape, INFO.TempVars.winObj.itemData ); "
+						" var winObjT = INFO.TempVars.winObj; ",
+						" winObjT.itemData.width_half += INFO.WIN_SizeUpR; ",
+						" winObjT.itemData.speed -= ( INFO.WIN_SizeUpR * INFO.WIN_SpeedDownR ); ",
+						" CircleManager.adjustSizeMax( winObjT ); ",
+						" CircleManager.adjustStrengthMax( winObjT ); ",
+						" CircleManager.adjustSpeedMin( winObjT ); ",
+						" if ( winObjT.ref_Shape ) CircleManager.drawCircleShape( winObjT.ref_Shape, winObjT.itemData ); "
 					],
 					"loseEval": [
-						" INFO.TempVars.loseObj.itemData.strength--; ",
-						" INFO.TempVars.loseObj.itemData.width_half -= INFO.LOS_SizeUpR; ",
-						" CircleManager.adjustSizeMin( INFO.TempVars.loseObj ); ",
-						" if ( INFO.TempVars.loseObj.itemData.strength <= 0 ) { INFO.TempVars.loseObj.itemData.strength = 0; INFO.TempVars.loseObj.itemData.width_half = 0; } ",
-						" if ( INFO.TempVars.loseObj.ref_Shape ) CircleManager.drawCircleShape( INFO.TempVars.loseObj.ref_Shape, INFO.TempVars.loseObj.itemData ); "
+						" var loseObjT = INFO.TempVars.loseObj; ",
+						" loseObjT.itemData.strength--; ",
+						" loseObjT.itemData.width_half -= INFO.LOS_SizeUpR; ",
+						" CircleManager.adjustSizeMin( loseObjT ); ",
+						" if ( loseObjT.itemData.strength <= 0 ) { loseObjT.itemData.strength = 0; loseObjT.itemData.width_half = 0; } ",
+						" if ( loseObjT.ref_Shape ) CircleManager.drawCircleShape( loseObjT.ref_Shape, loseObjT.itemData ); "
 					]
 				},
 				"sizeChangeLogic": {
 					"speedDownRate_bySizeUp": 0.2,
 					"speedMin": 3,
-					"width_halfMax": 25,
-					"width_half_UpRateByAge": 0.1
+					"width_halfMax": 30,
+					"width_half_UpRateByAge": 0.2,
+					"strengthMax": 150
 				}
 			},
 

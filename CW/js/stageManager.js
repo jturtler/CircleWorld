@@ -16,6 +16,7 @@ StageManager.startUp = function (infoJson, options)
 
 	// 1. create 'createjs' stage object
 	StageManager.stage = new createjs.Stage( infoJson.canvasName );
+	createjs.Touch.enable( StageManager.stage );
 
 	// 2. setUp the rendering of frames..
 	StageManager.setFramerate_Event();
