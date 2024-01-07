@@ -90,8 +90,6 @@ CircleManager.drawCircleShape = function( shape, itemData )
 
 CircleManager.ageIncreaseActions = function( container )
 {
-	console.log( 'CircleManager.ageIncreaseActions' );
-
 	var itemData = container.itemData;
 
 	var ageLogic = INFO.GlobalSettings.CircleSettings.ageLogic;
@@ -172,25 +170,18 @@ CircleManager.fightObjStatusChange = function( winObj, loseObj )
 	if ( fightLogic.loseEval ) Util.evalTryCatch( fightLogic.loseEval, { INFO_TempVars: { loseObj: loseObj } } );
 };
 
-
-CircleManager.adjustSizeMax = function( obj )
+/*
+CircleManager.adjustSizeMax = function( obj, addRate )
 {
 	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
+	var decreaseRateWhenMax = sizeChangeLogic.decreaseRateWhenMax;
+	var width_halfMax = sizeChangeLogic.width_halfMax;
 
-	if ( obj.itemData.width_half > sizeChangeLogic.width_halfMax ) obj.itemData.width_half = sizeChangeLogic.width_halfMax;
+	if ( obj.itemData.width_half >= width_halfMax ) addRate = addRate * decreaseRateWhenMax;
+	
+	obj.itemData.width_half += addRate;
 };
 
-CircleManager.adjustSpeedMin = function( obj )
-{
-	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
-
-	if ( obj.itemData.speed < sizeChangeLogic.speedMin ) obj.itemData.speed = sizeChangeLogic.speedMin;
-};
-
-CircleManager.adjustSizeMin = function( obj )
-{
-	if ( obj.itemData.width_half < 0 ) obj.itemData.width_half = 0;
-};
 
 CircleManager.adjustStrengthMax = function( obj )
 {
@@ -200,4 +191,68 @@ CircleManager.adjustStrengthMax = function( obj )
 	var sizeMax = ( itemData.behaviors.strengthMax ) ? itemData.behaviors.strengthMax: sizeChangeLogic.strengthMax;
 
 	if ( itemData.strength > sizeMax ) obj.itemData.strength = sizeMax;
+};
+*/
+
+CircleManager.decreaseSpeed = function( obj, change )
+{
+	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
+
+	obj.itemData.speed -= change;
+
+	if ( obj.itemData.speed < sizeChangeLogic.speedMin ) obj.itemData.speed = sizeChangeLogic.speedMin;
+};
+
+CircleManager.decreaseSize = function( obj, change )
+{
+	obj.itemData.width_half -= change;
+
+	if ( obj.itemData.width_half < 0 ) obj.itemData.width_half = 0;
+};
+
+CircleManager.decreseStrength = function( obj, change )
+{
+	obj.itemData.strength -= change;
+
+	if ( obj.itemData.strength < 0 ) obj.itemData.strength = 0;
+};
+
+
+CircleManager.winStatusChanges = function( obj )
+{
+	var INFO_CS = INFO.GlobalSettings.CircleSettings;
+	var SizeCL = INFO_CS.sizeChangeLogic;
+	var FightLG = INFO_CS.fightLogic;
+
+	obj.itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', FightLG.fightWinSizeChange);
+	obj.itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', FightLG.fightWinStrengthChange);
+
+	CircleManager.decreaseSpeed( obj, ( sizeUp * SizeCL.speedDownRate_bySizeUp ) );
+};
+
+CircleManager.loseStatusChanges = function( obj )
+{
+	var INFO_CS = INFO.GlobalSettings.CircleSettings;
+	// var SizeCL = INFO_CS.sizeChangeLogic;
+	var FightLG = INFO_CS.fightLogic;
+
+	CircleManager.decreseStrength( obj, FightLG.fightLoseStengthChange );
+	CircleManager.decreseSize( obj, FightLG.fightLoseSizeChange );
+};
+
+CircleManager.adjustUpWhenMax = function( obj, type, amount )
+{
+	var INFO_CS = INFO.GlobalSettings.CircleSettings;
+	var SizeCL = INFO_CS.sizeChangeLogic;
+
+	if ( type === 'width_half' )
+	{
+		if ( obj.itemData.width_half >= SizeCL.width_halfMax ) amount *= SizeCL.downRateWhenMax;
+	}
+	else if ( type === 'strength' )
+	{
+		if ( obj.itemData.strength >= SizeCL.strengthMax ) amount *= SizeCL.downRateWhenMax;
+	}
+	
+	return amount;
 };

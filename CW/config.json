@@ -10,9 +10,6 @@
 			"preRunEval": [
 				" /* ShortCut INFO variables to long named ones.. */ ",
 				" INFO.CIR_SETS = INFO.GlobalSettings.CircleSettings; ",
-				" INFO.WIN_SizeUpR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
-				" INFO.WIN_SpeedDownR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
-				" INFO.LOS_SizeUpR = INFO.CIR_SETS.fightLogic.fightLoseSizeChangeRate; ",
 				" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; "
 			],
 
@@ -22,14 +19,22 @@
 					"ageIncreaseCheckInTickEval": "( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;",
 					"NOTE": "Aged in every 'framerate'th time <-- which is once per second. ",
 					"ageIncreaseActionsEval": [
-						" INFO.TempVars.obj.itemData.strength += INFO.TempVars.obj.itemData.strengthChangeRate; ",
-						" INFO.TempVars.obj.itemData.width_half += INFO.C_Size.width_half_UpRateByAge; ",
+						" var itemData = INFO.TempVars.obj.itemData; ",
+						" itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', INFO.C_Size.width_half_UpByAge ); ",
+						" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthChangeRate ); ",
 
-						" if ( INFO.TempVars.obj.itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
-						"    INFO.TempVars.obj.itemData.behaviors.proxyDistance = 200; ",
-						"    INFO.TempVars.obj.itemData.team = ''; ",
+						" if ( !itemData.sizeMaxReached && itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
+						"    itemData.sizeMaxReached = true; ",
+						"    itemData.behaviors.proxyDistance += INFO.CIR_SETS.proxyDetectionLogic.proxyDistance; ",
+						"    itemData.team = ''; ",
 						"    CommonObjManager.drawShapeLine_Obj( INFO.TempVars.obj, { color: 'black', sizeRate: 1.1, sizeOffset: 1, shape: 'circle' } ); ",
+						" } ",
+
+						" if ( !itemData.strengthMaxReached && itemData.strength >= INFO.C_Size.strengthMax ) { ", 
+						"    itemData.strengthMaxReached = true; ",
+						"    CommonObjManager.drawShapeLine_Obj( INFO.TempVars.obj, { color: 'white', sizeRate: 1.2, sizeOffset: 2, shape: 'circle' } ); ",
 						" } "
+
 					],
 					"atAgeChanges": {
 						"5": [
@@ -63,23 +68,18 @@
 					"onCollision": "fight"
 				},
 				"fightLogic": {
-					"fightWinSizeChangeRate": 0.2,
-					"fightLoseSizeChangeRate": 0.7,
+					"fightWinSizeChange": 0.2,
+					"fightLoseSizeChange": 0.2,
+					"fightWinStengthChange": 0.2,
+					"fightLoseStengthChange": 0.2,
 					"winEval": [
 						" var winObjT = INFO.TempVars.winObj; ",
-						" winObjT.itemData.width_half += INFO.WIN_SizeUpR; ",
-						" winObjT.itemData.speed -= ( INFO.WIN_SizeUpR * INFO.WIN_SpeedDownR ); ",
-						" CircleManager.adjustSizeMax( winObjT ); ",
-						" CircleManager.adjustStrengthMax( winObjT ); ",
-						" CircleManager.adjustSpeedMin( winObjT ); ",
+						" CircleManager.winStatusChanges( winObjT ); ",
 						" if ( winObjT.ref_Shape ) CircleManager.drawCircleShape( winObjT.ref_Shape, winObjT.itemData ); "
 					],
 					"loseEval": [
 						" var loseObjT = INFO.TempVars.loseObj; ",
-						" loseObjT.itemData.strength--; ",
-						" loseObjT.itemData.width_half -= INFO.LOS_SizeUpR; ",
-						" CircleManager.adjustSizeMin( loseObjT ); ",
-						" if ( loseObjT.itemData.strength <= 0 ) { loseObjT.itemData.strength = 0; loseObjT.itemData.width_half = 0; } ",
+						" CircleManager.loseStatusChanges( loseObjT ); ",
 						" if ( loseObjT.ref_Shape ) CircleManager.drawCircleShape( loseObjT.ref_Shape, loseObjT.itemData ); "
 					]
 				},
@@ -87,8 +87,9 @@
 					"speedDownRate_bySizeUp": 0.2,
 					"speedMin": 3,
 					"width_halfMax": 30,
-					"width_half_UpRateByAge": 0.2,
-					"strengthMax": 150
+					"width_half_UpByAge": 0.5,
+					"strengthMax": 200,
+					"downRateWhenMax": 0.1
 				}
 			},
 
@@ -100,7 +101,7 @@
 			"speed": " Util.getRandomInRange(5, 8); ",
 			"width_half": " Util.getRandomInRange(8, 13); ",
 			"strength": " Util.getRandomInRange(8, 13); ",
-			"strengthChangeRate": " Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
+			"strengthChangeRate": " Util.getRandomInRange( 2, 5 ); ",
 			"angle": " Util.getRandomInRange( 0, 360 ); ",
 			"color": " INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color.color; ",
 			"team": " INFO.TempVars_color; ",
