@@ -58,7 +58,7 @@ CircleManager.createCircleObj = function ( inputObjProp )
 	itemData.onFrameMove_ClassBase = container => { };
 	itemData.onAgeIncrease = container => CircleManager.ageIncreaseActions( container );
 	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => MovementHelper.moveNext( container );
-	// if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
+	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
 	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
 	container.addEventListener('mousedown', CommonObjManager.objMouseDownAction );
       	
@@ -84,6 +84,11 @@ CircleManager.setCircleShapes = function ( container )
 CircleManager.drawCircleShape = function( shape, itemData )
 {
 	shape.graphics.clear().beginFill(itemData.color).drawCircle( 0, 0, itemData.width_half);
+};
+
+CircleManager.sizeChangeRedraw = function( container )
+{
+	if ( container.ref_Shape ) CircleManager.drawCircleShape( container.ref_Shape, container.itemData );
 };
 
 // ---------------------------------
@@ -159,7 +164,6 @@ CircleManager.addInnerCircle = function ( container, innerCircleJson )
 
 // ------------------------------------------
 
-
 CircleManager.fightObjStatusChange = function( winObj, loseObj )
 {
 	var cSettings = INFO.GlobalSettings.CircleSettings;
@@ -170,29 +174,6 @@ CircleManager.fightObjStatusChange = function( winObj, loseObj )
 	if ( fightLogic.loseEval ) Util.evalTryCatch( fightLogic.loseEval, { INFO_TempVars: { loseObj: loseObj } } );
 };
 
-/*
-CircleManager.adjustSizeMax = function( obj, addRate )
-{
-	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
-	var decreaseRateWhenMax = sizeChangeLogic.decreaseRateWhenMax;
-	var width_halfMax = sizeChangeLogic.width_halfMax;
-
-	if ( obj.itemData.width_half >= width_halfMax ) addRate = addRate * decreaseRateWhenMax;
-	
-	obj.itemData.width_half += addRate;
-};
-
-
-CircleManager.adjustStrengthMax = function( obj )
-{
-	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
-	var itemData = obj.itemData;
-
-	var sizeMax = ( itemData.behaviors.strengthMax ) ? itemData.behaviors.strengthMax: sizeChangeLogic.strengthMax;
-
-	if ( itemData.strength > sizeMax ) obj.itemData.strength = sizeMax;
-};
-*/
 
 CircleManager.decreaseSpeed = function( obj, change )
 {
@@ -224,7 +205,9 @@ CircleManager.winStatusChanges = function( obj )
 	var SizeCL = INFO_CS.sizeChangeLogic;
 	var FightLG = INFO_CS.fightLogic;
 
-	obj.itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', FightLG.fightWinSizeChange);
+	var sizeUp = CircleManager.adjustUpWhenMax( obj, 'width_half', FightLG.fightWinSizeChange);
+
+	obj.itemData.width_half += sizeUp;
 	obj.itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', FightLG.fightWinStrengthChange);
 
 	CircleManager.decreaseSpeed( obj, ( sizeUp * SizeCL.speedDownRate_bySizeUp ) );
@@ -236,8 +219,8 @@ CircleManager.loseStatusChanges = function( obj )
 	// var SizeCL = INFO_CS.sizeChangeLogic;
 	var FightLG = INFO_CS.fightLogic;
 
-	CircleManager.decreseStrength( obj, FightLG.fightLoseStengthChange );
-	CircleManager.decreseSize( obj, FightLG.fightLoseSizeChange );
+	CircleManager.decreseStrength( obj, FightLG.fightLoseStrengthChange );
+	CircleManager.decreaseSize( obj, FightLG.fightLoseSizeChange );
 };
 
 CircleManager.adjustUpWhenMax = function( obj, type, amount )
@@ -247,11 +230,11 @@ CircleManager.adjustUpWhenMax = function( obj, type, amount )
 
 	if ( type === 'width_half' )
 	{
-		if ( obj.itemData.width_half >= SizeCL.width_halfMax ) amount *= SizeCL.downRateWhenMax;
+		if ( obj.itemData.width_half >= SizeCL.width_halfMax ) amount = amount * SizeCL.downRateWhenMax;
 	}
 	else if ( type === 'strength' )
 	{
-		if ( obj.itemData.strength >= SizeCL.strengthMax ) amount *= SizeCL.downRateWhenMax;
+		if ( obj.itemData.strength >= SizeCL.strengthMax ) amount = amount * SizeCL.downRateWhenMax;
 	}
 	
 	return amount;

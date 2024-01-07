@@ -7,9 +7,7 @@ GlobalSettings.DefaultJson = {
 	"preRunEval": [
 		" /* ShortCut INFO variables to long named ones.. */ ",
 		" INFO.CIR_SETS = INFO.GlobalSettings.CircleSettings; ",
-		" INFO.WIN_SizeUpR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
-		" INFO.WIN_SpeedDownR = INFO.CIR_SETS.fightLogic.fightWinSizeChangeRate; ",
-		" INFO.LOS_SizeUpR = INFO.CIR_SETS.fightLogic.fightLoseSizeChangeRate; "
+		" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; "
 	],
 
 	"CircleSettings": 
@@ -17,7 +15,25 @@ GlobalSettings.DefaultJson = {
 		"ageLogic": {
 			"ageIncreaseCheckInTickEval": "( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;",
 			"NOTE": "Aged in every 'framerate'th time <-- which is once per second. ",
-			"ageIncreaseActionsEval": " INFO.TempVars.obj.itemData.strength += INFO.TempVars.obj.itemData.strengthChangeRate; ",
+			"ageIncreaseActionsEval": [
+				" var obj = INFO.TempVars.obj; ",
+				" var itemData = obj.itemData; ",
+				" itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', INFO.C_Size.width_half_UpByAge ); ",
+				" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthChangeRate ); ",
+
+				" if ( !itemData.sizeMaxReached && itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
+				"    itemData.sizeMaxReached = true; ",
+				"    itemData.behaviors.proxyDistance += INFO.CIR_SETS.proxyDetectionLogic.proxyDistance; ",
+				"    itemData.team = ''; ",
+				"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'black', sizeRate: 1.3, sizeOffset: 1, shape: 'circle' } ); ",
+				" } ",
+
+				" if ( !itemData.strengthMaxReached && itemData.strength >= INFO.C_Size.strengthMax ) { ", 
+				"    itemData.strengthMaxReached = true; ",
+				"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'white', sizeRate: 1.7, sizeOffset: 2, shape: 'circle' } ); ",
+				" } "
+
+			],
 			"atAgeChanges": {
 				"5": [
 					{ "bounceActionBehaviorSet": true }
@@ -31,8 +47,9 @@ GlobalSettings.DefaultJson = {
 		},
 		"bounceActionLogic": {
 			"bounceLogicEval": [
-				" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
-				" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, timeoutSec: 1, shape: 'circle', sizeRate: 1.4 } ); "
+				" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; ",
+				" INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
+				" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: 'yellow', shape: 'circle', endCount: 10, sizeRate: 1.3, sizeOffset: 1 } ); "
 			]
 		},
 		"innerCircle_W4CR": { 
@@ -43,36 +60,37 @@ GlobalSettings.DefaultJson = {
 			"proxyDistance": 100
 		},
 		"chaseActionLogic": {
-			"angleChangeMax_perTick": 0.4,					
-			"chaseTargetEval": " ( INFO.TempVars.srcObj.itemData.color !== INFO.TempVars.trgObj.itemData.color && INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half ) ",
+			"angleChangeMax_perTick": 0.4,
+			"chaseTargetEval": " ( ( !INFO.TempVars.srcObj.itemData.team || INFO.TempVars.srcObj.itemData.team !== INFO.TempVars.trgObj.itemData.team ) && ( INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half || INFO.TempVars.srcObj.itemData.width_half >= INFO.C_Size.width_halfMax ) ) ",
 			"chaseMovementEval": " 'NOT YET IMPLEMENTED.. ' ", 
 			"onCollision": "fight"
 		},
 		"fightLogic": {
-			"fightWinSizeChangeRate": 0.2,
-			"fightLoseSizeChangeRate": 0.7,
+			"fightWinSizeChange": 0.3,
+			"fightLoseSizeChange": 0.6,
+			"fightWinStrengthChange": 0.3,
+			"fightLoseStrengthChange": 0.6,
 			"winEval": [
-				" INFO.TempVars.winObj.itemData.strength++; ",
-				" INFO.TempVars.winObj.itemData.width_half += INFO.WIN_SizeUpR; ",
-				" INFO.TempVars.winObj.itemData.speed -= ( INFO.WIN_SizeUpR * INFO.WIN_SpeedDownR ); ",
-				" CircleManager.adjustSizeMax( INFO.TempVars.winObj ); ",
-				" CircleManager.adjustSpeedMin( INFO.TempVars.winObj ); ",
-				" if ( INFO.TempVars.winObj.ref_Shape ) CircleManager.drawCircleShape( INFO.TempVars.winObj.ref_Shape, INFO.TempVars.winObj.itemData ); "
+				" var winObjT = INFO.TempVars.winObj; ",
+				" CircleManager.winStatusChanges( winObjT ); ",
+				" if ( winObjT.ref_Shape ) CircleManager.drawCircleShape( winObjT.ref_Shape, winObjT.itemData ); "
 			],
 			"loseEval": [
-				" INFO.TempVars.loseObj.itemData.strength--; ",
-				" INFO.TempVars.loseObj.itemData.width_half -= INFO.LOS_SizeUpR; ",
-				" CircleManager.adjustSizeMin( INFO.TempVars.loseObj ); ",
-				" if ( INFO.TempVars.loseObj.itemData.strength <= 0 ) { INFO.TempVars.loseObj.itemData.strength = 0; INFO.TempVars.loseObj.itemData.width_half = 0; } ",
-				" if ( INFO.TempVars.loseObj.ref_Shape ) CircleManager.drawCircleShape( INFO.TempVars.loseObj.ref_Shape, INFO.TempVars.loseObj.itemData ); "
+				" var loseObjT = INFO.TempVars.loseObj; ",
+				" CircleManager.loseStatusChanges( loseObjT ); ",
+				" if ( loseObjT.ref_Shape ) CircleManager.drawCircleShape( loseObjT.ref_Shape, loseObjT.itemData ); "
 			]
 		},
 		"sizeChangeLogic": {
-			"speedDownRate_bySizeUp": 0.2,
-			"speedMin": 2.5,
-			"width_halfMax": 25
+			"speedDownRate_bySizeUp": 0.1,
+			"speedMin": 4,
+			"width_halfMax": 30,
+			"width_half_UpByAge": 0.4,
+			"strengthMax": 150,
+			"downRateWhenMax": 0.2
 		}
 	}
+
 };
 
 // Used to set as INFO.GlobalSettings and use the values through out the App code.

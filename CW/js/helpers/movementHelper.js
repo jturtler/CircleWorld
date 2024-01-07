@@ -2,10 +2,6 @@ function MovementHelper() { };
 
 // ------------------------------------
 
-MovementHelper.detectLineColor = "yellow";
-MovementHelper.attackLineColor = "red";
-MovementHelper.circleHighlightColor = "red";
-
 MovementHelper.PROXY_LINES = [];
 MovementHelper.TEMP_LINES = [];
 
@@ -71,18 +67,18 @@ MovementHelper.moveNext = function (container)
 
 			if ( behaviors.proxyDetection && INFO_G_C.proxyDetectionLogic ) 
 			{
-				MovementHelper.performDistanceProxyDraw( container );
+				MovementHelper.performDistanceProxyDraw( container, INFO_G_C.proxyDetectionLogic );
 			
-				chaseTarget = MovementHelper.getNearestChaseTarget( container, { linePaint: true, paintColor: MovementHelper.attackLineColor } );	
+				chaseTarget = MovementHelper.getNearestChaseTarget( container, INFO_G_C.chaseActionLogic );
 			}
 			
 
 			// onCollison or onChase
-			var obj_inCollision = MovementHelper.checkCollision( container );
+			var inCollisionObj = MovementHelper.checkCollision( container );
 
-			if ( obj_inCollision )
+			if ( inCollisionObj )
 			{
-				if ( chaseTarget && behaviors.chaseAction && INFO_G_C.chaseActionLogic?.onCollision === 'fight' )
+				if ( chaseTarget && inCollisionObj === chaseTarget && behaviors.chaseAction && INFO_G_C.chaseActionLogic?.onCollision === 'fight' )
 				{
 					itemData.statusList.push( 'fight' );
 
@@ -107,6 +103,9 @@ MovementHelper.moveNext = function (container)
 	
 					itemData.angle = MovementHelper.getAngle_fromMovement( movement );
 			
+					// After one 'bounce' collision, add to the collisionList for avoiding collision with this item for some ticks.
+					MovementHelper.collisionExceptions_Add( itemData, inCollisionObj );
+
 					movementCaseMet = true;
 				}
 			}
@@ -148,6 +147,23 @@ MovementHelper.decrementTurns = function( list )
 		}
 	}
 };
+
+
+MovementHelper.collisionExceptions_Add = function( itemData, inCollisionObj )
+{
+	if ( !itemData.collisionExceptions ) itemData.collisionExceptions = [];
+
+	Util.RemoveFromArrayAll( itemData.collisionExceptions, 'obj', inCollisionObj, { runFunc: ( item ) => {
+		clearTimeout( item.timeoutRef );
+	} } );
+	
+	var timeoutRef = setTimeout(() => {
+		Util.RemoveFromArrayAll( itemData.collisionExceptions, 'obj', inCollisionObj );		
+	}, 500 );
+
+	itemData.collisionExceptions.push( { obj: inCollisionObj, timeoutRef: timeoutRef } );
+};
+
 
 // -----------------------------------
 
@@ -246,7 +262,7 @@ MovementHelper.getDistance = function( obj1, obj2 )
 // --- Distance between objects
 
 // Populating newly created 'distances' obj array data with nearby object detection lines (drawn)
-MovementHelper.performDistanceProxyDraw = function ( container )
+MovementHelper.performDistanceProxyDraw = function ( container, proxyDetectionLogic )
 {
 	var itemData = container.itemData;
 
@@ -264,12 +280,16 @@ MovementHelper.performDistanceProxyDraw = function ( container )
 	
 				if ( distanceJson.distance <= proxyDistance )
 				{
-					var ref_line = MovementHelper.checkNGetTargetDistanceLine( container, distanceJson.ref_target );
+					distanceJson.proxyDetected = true;
 
-					// If 'target' has ref_line aready, use that reference in this obj's distanceJson.  Otherwise, create the line & set ref.
-					// We are not saving the new line's ref to both objects, since other object probably didn't have distances created, yet.
-					if ( ref_line ) distanceJson.ref_line = ref_line;
-					else distanceJson.ref_line = MovementHelper.drawProxyLine( container, distanceJson.ref_target, MovementHelper.detectLineColor );
+					if ( proxyDetectionLogic.showDetectionLines )
+					{
+						var ref_line = MovementHelper.checkNGetTargetDistanceLine( container, distanceJson.ref_target );
+
+						// 'ref_line' could be in either source or target obj's distances. If in other obj, reuse that to get 'ref_line'.
+						if ( ref_line ) distanceJson.ref_line = ref_line;
+						else distanceJson.ref_line = MovementHelper.drawProxyLine( container, distanceJson.ref_target, proxyDetectionLogic.detectionLineColor );	
+					}
 				}
 			}	
 		}
@@ -277,10 +297,8 @@ MovementHelper.performDistanceProxyDraw = function ( container )
 };
 
 
-MovementHelper.getNearestChaseTarget = function( container, option )
+MovementHelper.getNearestChaseTarget = function( container, chaseActionLogic )
 {
-	if ( !option ) option = {};
-
 	// Condition - the target need to be smaller (seems).  The 'line' is shared, however we can flag in the distance?  or in the obj?
 	var itemData = container.itemData;
 	var chaseTarget;
@@ -292,12 +310,13 @@ MovementHelper.getNearestChaseTarget = function( container, option )
 			var distanceJson = itemData.distances[i];
 
 			// Get nearest object with attack condition. (size equal or smaller)
-			if ( distanceJson.ref_line && MovementHelper.checkChaseTarget( container, distanceJson.ref_target ) )
+			if ( distanceJson.proxyDetected && MovementHelper.checkChaseTarget( container, distanceJson.ref_target ) )
 			{
 				distanceJson.chasable = true;
 				chaseTarget = distanceJson.ref_target;
 
-				if ( option.linePaint && distanceJson.ref_line ) MovementHelper.drawLine( distanceJson.ref_line, option.paintColor, container, distanceJson.ref_target );
+				if ( !distanceJson.ref_line ) distanceJson.ref_line = MovementHelper.drawProxyLine( container, distanceJson.ref_target, chaseActionLogic.chaseLineColor );				
+				else MovementHelper.drawLine( distanceJson.ref_line, chaseActionLogic.chaseLineColor, container, distanceJson.ref_target );
 
 				break;
 			}
@@ -386,31 +405,32 @@ MovementHelper.collectDistances = function( currObj, targets )
 
 MovementHelper.checkCollision = function( container )
 {
-	var obj_inCollision;
+	var inCollisionObj;
 	var itemData = container.itemData;
 
 	if ( itemData.distances && itemData.distances.length > 0 )
 	{
 		for ( var i = 0; i < itemData.distances.length; i++ )
 		{
-			var otherItemDistance = itemData.distances[i];
+			var distanceJson = itemData.distances[i];
 
-			// If exists in 'collisionExceptions', do not check the 'targetInTouch'/collision
-			if ( itemData.collisionExceptions && itemData.collisionExceptions.find( item => item.target === otherItemDistance.ref_target ) ) { }
-			else if ( itemData.color === otherItemDistance.ref_target.itemData.color ) { }  // Same color, no collision..
-			else if ( MovementHelper.targetInTouch( otherItemDistance.distance, itemData.width_half, otherItemDistance.ref_target.itemData.width_half ) )
+			// If exists in 'collisionExceptions', do not check the 'targetInCollision'/collision
+			
+			if ( itemData.collisionExceptions && itemData.collisionExceptions.find( item => item.obj === distanceJson.ref_target ) ) { }
+			else if ( itemData.color === distanceJson.ref_target.itemData.color ) { }  // Same color, no collision..
+			else if ( MovementHelper.targetInCollision( distanceJson.distance, itemData.width_half, distanceJson.ref_target.itemData.width_half ) )
 			{
-				obj_inCollision = otherItemDistance.ref_target;
-				itemData.statusList.push( 'onCollision' );
+				inCollisionObj = distanceJson.ref_target;
+				itemData.statusList.push( 'inCollision' );
 				break;
 			}
 		}
 	}
 
-	return obj_inCollision;
+	return inCollisionObj;
 };
 
-MovementHelper.targetInTouch = function( distance, currWidth_half, targetWidth_half )
+MovementHelper.targetInCollision = function( distance, currWidth_half, targetWidth_half )
 {
 	return ( distance <= ( currWidth_half + targetWidth_half ) );
 };

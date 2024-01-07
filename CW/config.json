@@ -10,16 +10,17 @@
 			"preRunEval": [
 				" /* ShortCut INFO variables to long named ones.. */ ",
 				" INFO.CIR_SETS = INFO.GlobalSettings.CircleSettings; ",
-				" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; "
+				" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; ",
+				" INFO.C_W4CR = INFO.CIR_SETS.innerCircle_W4CR; "
 			],
-
 			"CircleSettings": 
 			{
 				"ageLogic": {
 					"ageIncreaseCheckInTickEval": "( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;",
 					"NOTE": "Aged in every 'framerate'th time <-- which is once per second. ",
 					"ageIncreaseActionsEval": [
-						" var itemData = INFO.TempVars.obj.itemData; ",
+						" var obj = INFO.TempVars.obj; ",
+						" var itemData = obj.itemData; ",
 						" itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', INFO.C_Size.width_half_UpByAge ); ",
 						" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthChangeRate ); ",
 
@@ -27,12 +28,12 @@
 						"    itemData.sizeMaxReached = true; ",
 						"    itemData.behaviors.proxyDistance += INFO.CIR_SETS.proxyDetectionLogic.proxyDistance; ",
 						"    itemData.team = ''; ",
-						"    CommonObjManager.drawShapeLine_Obj( INFO.TempVars.obj, { color: 'black', sizeRate: 1.1, sizeOffset: 1, shape: 'circle' } ); ",
+						"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'aqua', width_half: INFO.C_W4CR.width_half + 2, shape: 'circle' } ); ",
 						" } ",
 
 						" if ( !itemData.strengthMaxReached && itemData.strength >= INFO.C_Size.strengthMax ) { ", 
 						"    itemData.strengthMaxReached = true; ",
-						"    CommonObjManager.drawShapeLine_Obj( INFO.TempVars.obj, { color: 'white', sizeRate: 1.2, sizeOffset: 2, shape: 'circle' } ); ",
+						"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'purple', width_half: INFO.C_W4CR.width_half + 3, shape: 'circle' } ); ",
 						" } "
 
 					],
@@ -48,10 +49,11 @@
 					}
 				},
 				"bounceActionLogic": {
+					"collisionAgainAvoidTicks": 10,
 					"bounceLogicEval": [
 						" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; ",
 						" INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
-						" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: MovementHelper.circleHighlightColor, shape: 'circle', sizeRate: 1.3, sizeOffset: 1 } ); "
+						" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: 'yellow', shape: 'circle', endCount: 6, sizeOffset: 2 } ); "
 					]
 				},
 				"innerCircle_W4CR": { 
@@ -59,41 +61,49 @@
 					"color": "[RandomColorHex]"
 				},
 				"proxyDetectionLogic": {
-					"proxyDistance": 100
+					"proxyDistance": 100,
+					"showDetectionLines": false,
+					"detectionLineColor": "yellow"
 				},
 				"chaseActionLogic": {
 					"angleChangeMax_perTick": 0.4,
 					"chaseTargetEval": " ( ( !INFO.TempVars.srcObj.itemData.team || INFO.TempVars.srcObj.itemData.team !== INFO.TempVars.trgObj.itemData.team ) && ( INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half || INFO.TempVars.srcObj.itemData.width_half >= INFO.C_Size.width_halfMax ) ) ",
+					"chaseLineColor": "red",
 					"chaseMovementEval": " 'NOT YET IMPLEMENTED.. ' ", 
 					"onCollision": "fight"
 				},
 				"fightLogic": {
-					"fightWinSizeChange": 0.2,
-					"fightLoseSizeChange": 0.2,
-					"fightWinStengthChange": 0.2,
-					"fightLoseStengthChange": 0.2,
+					"fightWinSizeChange": 0.3,
+					"fightLoseSizeChange": 0.6,
+					"fightWinStrengthChange": 0.3,
+					"fightLoseStrengthChange": 0.6,
 					"winEval": [
 						" var winObjT = INFO.TempVars.winObj; ",
 						" CircleManager.winStatusChanges( winObjT ); ",
-						" if ( winObjT.ref_Shape ) CircleManager.drawCircleShape( winObjT.ref_Shape, winObjT.itemData ); "
+						" CircleManager.sizeChangeRedraw( winObjT ); ",
+						" CommonObjManager.highlightForPeriod( winObjT, { color: 'red', shape: 'circle', endCount: 2, sizeOffset: 4 } ); "
 					],
 					"loseEval": [
 						" var loseObjT = INFO.TempVars.loseObj; ",
 						" CircleManager.loseStatusChanges( loseObjT ); ",
-						" if ( loseObjT.ref_Shape ) CircleManager.drawCircleShape( loseObjT.ref_Shape, loseObjT.itemData ); "
+						" CircleManager.sizeChangeRedraw( loseObjT ); ",
+						" CommonObjManager.highlightForPeriod( loseObjT, { color: 'gray', shape: 'circle', endCount: 2, sizeOffset: 4 } ); "
 					]
 				},
 				"sizeChangeLogic": {
-					"speedDownRate_bySizeUp": 0.2,
-					"speedMin": 3,
+					"speedDownRate_bySizeUp": 0.1,
+					"speedMin": 4,
 					"width_halfMax": 30,
-					"width_half_UpByAge": 0.5,
-					"strengthMax": 200,
-					"downRateWhenMax": 0.1
+					"width_half_UpByAge": 0.4,
+					"strengthMax": 150,
+					"downRateWhenMax": 0.2
+				},
+				"uiLogic": {
+					"clickHighlightColor": "green",
+					"swipeDirectionLineColor": "yellow",
+					"swipeForceDirectionMS": 700
 				}
-			},
-
-			"NEXT": " Need to add 'ageChangeAction': --> in age 6, add inner circle, with behavior on, ghostmode off.."
+			}
 		},
 
 		"circlePropMin": { 

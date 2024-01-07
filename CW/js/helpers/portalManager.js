@@ -108,11 +108,14 @@ PortalManager.spawnCircle = function ( container )
 			spawnCircleProp.color = itemData.color;
 			spawnCircleProp.team = itemData.team;			
 			spawnCircleProp.startPosition = { x: container.x, y: container.y };
-			spawnCircleProp.collisionExceptions = [ { target: container, turns: 4 } ];  // <-- circular loop on Util.traverseEval
+			//spawnCircleProp.collisionExceptions = [ { target: container, turns: 4 } ];  // <-- circular loop on Util.traverseEval
 			spawnCircleProp.onObjCreate_EvalFields_Exceptions = [ 'itemData.color', 'itemData.team', 'itemData.startPosition' ];
 
-			CircleManager.createCircleObj( spawnCircleProp );
+			var circleObj = CircleManager.createCircleObj( spawnCircleProp );
 			itemData.remainSpawnNum--;
+
+			MovementHelper.collisionExceptions_Add( circleObj.itemData, container );
+
 
 			// Label change
 			if ( container.ref_Label ) container.ref_Label.text = itemData.remainSpawnNum;

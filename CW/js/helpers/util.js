@@ -175,6 +175,24 @@ Util.getFromList = function (list, propertyName, value) {
 	return item;
 };
 
+Util.RemoveFromArrayAll = function (list, propertyName, value, option ) 
+{
+	if ( !option ) option = {};
+
+	try {
+		if (list) {
+			for (var i = list.length - 1; i >= 0; i--) {
+				var arrItem = list[i];
+
+				if (arrItem[propertyName] === value) {
+					if ( option.runFunc ) runFunc( arrItem );
+					list.splice(i, 1);
+				}
+			}
+		}
+	}
+	catch (errMsg) { console.log('ERROR in Util.RemoveFromArrayAll, ' + errMsg); }
+};
 
 Util.sortByKey = function (array, key, noCase, order, emptyStringLast) 
 {

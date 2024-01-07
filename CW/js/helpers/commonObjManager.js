@@ -1,9 +1,10 @@
 
 function CommonObjManager() { };
 
+CommonObjManager.mouseDownTime_StagePaused; 
 CommonObjManager.mouseDownObj; // = { stageX, stageY,  }  // on mouse down, pause the stage..
-CommonObjManager.selectedContainer;
-CommonObjManager.selectedContainer_shape;
+CommonObjManager.clickedContainer;
+CommonObjManager.clickedContainer_shape;
 CommonObjManager.selectedColor = 'green';
 
 CommonObjManager.createdObjCount = 0;
@@ -167,6 +168,18 @@ CommonObjManager.drawLine_ForPeriod = function( sourceObj, targetObj, option )
 };
 
 
+CommonObjManager.removeAllTempLines = function()
+{
+	for ( var i = MovementHelper.TEMP_LINES.length - 1; i >= 0; i--) 
+	{ 
+		var lineShape = MovementHelper.TEMP_LINES[i];
+
+		StageManager.stage.removeChild( lineShape );
+
+		MovementHelper.TEMP_LINES.splice( i, 1 );
+	}
+};
+
 // ---------------------------------
 // Add long click?  double click?  --> to open Up 'Panel' with the obj selection?
 
@@ -177,10 +190,15 @@ CommonObjManager.objMouseDownAction = function ( e )
 
 	if ( itemData ) 
 	{
+		CommonObjManager.mouseDownTime_StagePaused = createjs.Ticker.paused;
+
 		StageManager.stageStopStart( { bStop: true } );
 
 		// Clear previouew
 		CommonObjManager.clearMouseDownShape();
+		CommonObjManager.removeAllTempLines();
+
+		var uiLogic = INFO.GlobalSettings.CircleSettings.uiLogic;
 
 		// Select object <-- paint it..	- record position, time
 		CommonObjManager.mouseDownObj = {
@@ -189,7 +207,7 @@ CommonObjManager.objMouseDownAction = function ( e )
 			stageY: e.stageY,
 			time: new Date().getTime(),
 			status: 'mouseDown',
-			selectShape: CommonObjManager.drawShapeLine_Obj( container, { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
+			selectShape: CommonObjManager.drawShapeLine_Obj( container, { color: uiLogic.clickHighlightColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
 		}; 
 
 		StageManager.stage.update();
@@ -200,8 +218,6 @@ CommonObjManager.objMouseDownAction = function ( e )
 // Stage Event
 CommonObjManager.objMouseUpAction = function ( e )
 {
-	StageManager.stageStopStart( { bStop: false } );
-
 	if ( CommonObjManager.mouseDownObj )
 	{
 		var srcObj = CommonObjManager.mouseDownObj.obj;
@@ -213,15 +229,14 @@ CommonObjManager.objMouseUpAction = function ( e )
 		if ( distance > 10 ) 
 		{
 			srcObj.itemData.angle = MovementHelper.getAngleToTarget( srcObj, trgXY );
-
 			//var deltaTime = new Date().getTime() - CommonObjManager.mouseDownObj.time;
 			//var swipeSpeed = distance / deltaTime; // if ( swipeSpeed > 2.5 ), perform swipe..
 
-			CommonObjManager.drawLine_ForPeriod( srcObj, trgXY );
+			CommonObjManager.drawLine_ForPeriod( srcObj, trgXY, { color: INFO.GlobalSettings.CircleSettings.uiLogic.swipeDirectionLineColor } );
 			// var movement = MovementHelper.getMovementCalc( angle, srcObj.itemData.speed );		
 		}
 		else {
-			CommonObjManager.clickObjectEvent( srcObj );
+			// CommonObjManager.clickObjectEvent( srcObj );
 		}
 
 		// ----------------------
@@ -229,6 +244,12 @@ CommonObjManager.objMouseUpAction = function ( e )
 		CommonObjManager.mouseDownObj = undefined;
 
 		StageManager.stage.update();
+
+		// ----------------------------
+
+		// Only if the stage was not in 'paused' at the time of 'mouseDown', run the stage again with 'paused' false.
+		if ( !CommonObjManager.mouseDownTime_StagePaused ) StageManager.stageStopStart( { bStop: false } );
+	
 	}
 };
 
@@ -236,6 +257,9 @@ CommonObjManager.objMouseUpAction = function ( e )
 CommonObjManager.drawShapeLine_Obj = function ( container, option )
 {
 	if ( !option ) option = {};
+
+	option = Util.cloneJson( option ); // Debugging - for some reason, this option is being reused?  shared?
+
 	var color = ( option.color ) ? option.color: 'green';
 	var sizeRate = ( option.sizeRate ) ? option.sizeRate: 1;
 	var sizeOffset = ( option.sizeOffset ) ? option.sizeOffset: 0;
@@ -244,6 +268,7 @@ CommonObjManager.drawShapeLine_Obj = function ( container, option )
 	var itemData = container.itemData;
 
 	var width_halfUp = ( itemData.width_half + sizeOffset ) * sizeRate;
+	if ( option.width_half ) width_halfUp = option.width_half; // If direct size were entered, set it with that size..
 	
 	var selectedShape = new createjs.Shape();
 	if ( shape === 'rect' )
@@ -271,45 +296,11 @@ CommonObjManager.clearMouseDownShape = function ()
 	}
 };
 
-
-/*
-    document.onmousemove = handleMouseMove;
-    setInterval(getMousePosition, 100); // setInterval repeats every X ms
-
-    function handleMouseMove(event) {
-        var dot, eventDoc, doc, body, pageX, pageY;
-
-        event = event || window.event; // IE-ism
-
-        // If pageX/Y aren't available and clientX/Y are,
-        // calculate pageX/Y - logic taken from jQuery.
-        // (This is to support old IE)
-        if (event.pageX == null && event.clientX != null) {
-            eventDoc = (event.target && event.target.ownerDocument) || document;
-            doc = eventDoc.documentElement;
-            body = eventDoc.body;
-
-            event.pageX = event.clientX +
-              (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-              (doc && doc.clientLeft || body && body.clientLeft || 0);
-            event.pageY = event.clientY +
-              (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
-              (doc && doc.clientTop  || body && body.clientTop  || 0 );
-        }
-
-        mousePos = {
-            x: event.pageX,
-            y: event.pageY
-        };
-    }
-
-*/
-
 // ---------------------------------
 
-CommonObjManager.clickObjectEvent = function ( container ) 
+CommonObjManager.clickObjectEvent = function ( e ) 
 {
-	// var container = e.currentTarget;
+	var container = e.currentTarget;
 
 	if ( container.itemData ) 
 	{
@@ -322,21 +313,21 @@ CommonObjManager.clickObjectEvent = function ( container )
 		// Clear other selections..
 		CommonObjManager.clearPrevSelection();
 
-		CommonObjManager.selectedContainer = container;
+		CommonObjManager.clickedContainer = container;
 		
 		var selectedShape = CommonObjManager.drawShapeLine_Obj( container, { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
 
-		CommonObjManager.selectedContainer_shape = selectedShape;
+		CommonObjManager.clickedContainer_shape = selectedShape;
 
-		// StageManager.stage.update(); // This could be optional
+		StageManager.stage.update(); // This could be optional
 	}
 };
 
 CommonObjManager.clearPrevSelection = function () 
 {
-	if ( CommonObjManager.selectedContainer && CommonObjManager.selectedContainer_shape )
+	if ( CommonObjManager.clickedContainer && CommonObjManager.clickedContainer_shape )
 	{
-		CommonObjManager.selectedContainer.removeChild( CommonObjManager.selectedContainer_shape );
+		CommonObjManager.clickedContainer.removeChild( CommonObjManager.clickedContainer_shape );
 	}
 };
 
