@@ -59,11 +59,13 @@ PortalManager.createPortalObj = function ( inputJson )
 	// -- SET EVENTS SECTION ---
 	//		- Default event handler ('onFrameMove', 'onClick' )
 	itemData.onFrameMove_ClassBase = container => {};
+	if ( !itemData.onCanvasSizeChanged ) itemData.onCanvasSizeChanged = container => PortalManager.repositionContainer( container );
 	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => PortalManager.spawnCircle( container );
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
-	if ( !itemData.onCanvasSizeChanged ) itemData.onCanvasSizeChanged = container => PortalManager.repositionContainer( container );
-	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
+	if ( !itemData.onDblClick ) itemData.onDblClick = ( e ) => {  CommonObjManager.dblClickObjectEvent( e );  };
 
+	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
+	if ( itemData.onDblClick ) container.addEventListener("dblclick", itemData.onDblClick );
 	
 	PortalManager.repositionPortals( PortalManager.getPortalContainers() ); // When portal number increases, reposition the portal positions.
 

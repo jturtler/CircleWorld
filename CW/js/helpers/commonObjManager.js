@@ -5,6 +5,7 @@ CommonObjManager.mouseDownTime_StagePaused;
 CommonObjManager.mouseDownObj; // = { stageX, stageY,  }  // on mouse down, pause the stage..
 CommonObjManager.clickedContainer;
 CommonObjManager.clickedContainer_shape;
+CommonObjManager.clickedContainerClearTimeoutId;
 CommonObjManager.selectedColor = 'green';
 
 CommonObjManager.createdObjCount = 0;
@@ -306,30 +307,59 @@ CommonObjManager.clickObjectEvent = function ( e )
 	{
 		var itemData = container.itemData;
 		console.log( itemData );
-
 		WorldRender.spanInfoText( 'Item Selected: ' + itemData.name );
 
-
 		// Clear other selections..
-		CommonObjManager.clearPrevSelection();
+		CommonObjManager.clearClickSelection_NTimeout();
 
 		CommonObjManager.clickedContainer = container;
 		
 		var selectedShape = CommonObjManager.drawShapeLine_Obj( container, { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
-
 		CommonObjManager.clickedContainer_shape = selectedShape;
 
 		StageManager.stage.update(); // This could be optional
+
+		// After set period of time, hide the selection shape obj
+		CommonObjManager.clickedContainerClearTimeoutId = setTimeout(() => {
+			CommonObjManager.clearClickSelection_NTimeout();
+		}, 5000 );	// Make it configurable later?
 	}
 };
 
-CommonObjManager.clearPrevSelection = function () 
+CommonObjManager.clearClickSelection_NTimeout = function () 
 {
-	if ( CommonObjManager.clickedContainer && CommonObjManager.clickedContainer_shape )
+	if ( CommonObjManager.clickedContainer && CommonObjManager.clickedContainer_shape ) CommonObjManager.clickedContainer.removeChild( CommonObjManager.clickedContainer_shape );
+
+	if ( CommonObjManager.clickedContainerClearTimeoutId ) clearTimeout( CommonObjManager.clickedContainerClearTimeoutId );
+};
+
+// -----------------------------------
+
+CommonObjManager.dblClickObjectEvent = function ( e ) 
+{
+	var container = e.currentTarget;
+
+	if ( container.itemData ) 
 	{
-		CommonObjManager.clickedContainer.removeChild( CommonObjManager.clickedContainer_shape );
+		var itemData = container.itemData;
+		console.log( itemData );
+		WorldRender.spanInfoText( 'Item DoubleClicked: ' + itemData.name );
+
+		
+		StageManager.stageStopStart( { bStop: true } );
+
+		$( '#btnInfoPanel' ).click();
+
+		var infoLineTag_itemData = $( '<div class="infoLine"></div>' ).append( 'name: ' + itemData.name + ', width_half: ' + itemData.width_half + ', strength: ' + itemData.strength );
+		$( '.divMainContent' ).remove( '.infoLine' ).append( infoLineTag_itemData );
+
+		// Clear other selections..
+		//CommonObjManager.clearClickSelection_NTimeout();
+
+		CommonObjManager.dblClickedContainer = container;
 	}
 };
+
 
 // --------------------------------------------
 

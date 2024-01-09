@@ -59,7 +59,10 @@ CircleManager.createCircleObj = function ( inputObjProp )
 	itemData.onAgeIncrease = container => CircleManager.ageIncreaseActions( container );
 	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => MovementHelper.moveNext( container );
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
+	if ( !itemData.onDblClick ) itemData.onDblClick = ( e ) => {  CommonObjManager.dblClickObjectEvent( e );  };
+
 	if ( itemData.onClick ) container.addEventListener("click", itemData.onClick );
+	if ( itemData.onDblClick ) container.addEventListener("dblclick", itemData.onDblClick );
 	container.addEventListener('mousedown', CommonObjManager.objMouseDownAction );
       	
 
@@ -164,6 +167,23 @@ CircleManager.addInnerCircle = function ( container, innerCircleJson )
 
 // ------------------------------------------
 
+CircleManager.setAgeAdjustedProxyDistance = function( itemData )
+{
+	var distance;
+
+	var proxyDistLogic = INFO.GlobalSettings.CircleSettings.proxyDetectionLogic;
+	distance = proxyDistLogic.proxyDistance;
+
+	var ageWidthDist = itemData.width_half * proxyDistLogic.proxyDistanceAgeRate;
+	
+	if ( distance < ageWidthDist ) distance = ageWidthDist;
+
+	return distance;
+};
+
+
+// ------------------------------------------
+
 CircleManager.fightObjStatusChange = function( winObj, loseObj )
 {
 	var cSettings = INFO.GlobalSettings.CircleSettings;
@@ -239,3 +259,4 @@ CircleManager.adjustUpWhenMax = function( obj, type, amount )
 	
 	return amount;
 };
+

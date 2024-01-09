@@ -40,14 +40,12 @@ WorldRender.setUp_Tag_Events = function()
 	$( '#btnInfoPanel' ).click( function()
 	{		
 		// Open the info panel dialog/popup..
-
 		AppUtil.openDivPopupArea($('#divPopupArea'), function (divMainContentTag) 
 		{
 			//divMainContentTag.attr('style', 'overflow: scroll;height: 90%; margin-top: 2px; background-color: #eee;padding: 3px;');
-
 			// ---------------
-			divMainContentTag.append('<div class="infoLine" style="opacity: 0;">- </div>');
-			divMainContentTag.append('<div class="infoLine">------------------------</div>');
+			// divMainContentTag.append('<div class="infoLine" style="opacity: 0;">- </div>');
+			// divMainContentTag.append('<div class="infoLine">------------------------</div>');
 		});
 
 	});

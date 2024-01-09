@@ -23,10 +23,10 @@
 						" var itemData = obj.itemData; ",
 						" itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', INFO.C_Size.width_half_UpByAge ); ",
 						" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthChangeRate ); ",
+						" itemData.behaviors.proxyDistance = CircleManager.setAgeAdjustedProxyDistance( itemData ); ",
 
 						" if ( !itemData.sizeMaxReached && itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
 						"    itemData.sizeMaxReached = true; ",
-						"    itemData.behaviors.proxyDistance += INFO.CIR_SETS.proxyDetectionLogic.proxyDistance; ",
 						"    itemData.team = ''; ",
 						"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'aqua', width_half: INFO.C_W4CR.width_half + 2, shape: 'circle' } ); ",
 						" } ",
@@ -62,6 +62,7 @@
 				},
 				"proxyDetectionLogic": {
 					"proxyDistance": 100,
+					"proxyDistanceAgeRate": 3.0,
 					"showDetectionLines": false,
 					"detectionLineColor": "yellow"
 				},
@@ -180,6 +181,7 @@
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
 
+				" INFO.GlobalSettings.CircleSettings.proxyDetectionLogic.showDetectionLines = true; ",
 				" INFO.GlobalSettings.CircleSettings.chaseActionLogic = ''; "
 			],
 			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "			
