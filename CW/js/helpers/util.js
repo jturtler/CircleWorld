@@ -256,6 +256,19 @@ Util.sortCompare = function (x, y) {
 	return returnVal;
 };
 
+
+Util.RemoveValInArray = function (list, value) {
+	var index;
+
+	if (list && value !== undefined) 
+	{		
+		var index = list.indexOf( value );
+		if ( index >= 0 ) list.splice( index, 1 );
+	}
+
+	return index;
+};
+
 // --------------------------
 
 Util.populateSelect = function ( selectTag, selectText, jsonArr ) 

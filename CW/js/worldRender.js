@@ -53,6 +53,7 @@ WorldRender.setUp_Tag_Events = function()
 	// Add Circle
 	$( '#btnAddObj' ).click( function() 
 	{
+		// Can be overridden from config appMode
 		var dataInfo = { color: 'black', startPosition: AppUtil.getPosition_Center() };
 
 		CircleManager.createCircleObj( dataInfo );

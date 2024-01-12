@@ -68,7 +68,11 @@
 				},
 				"chaseActionLogic": {
 					"angleChangeMax_perTick": 0.4,
-					"chaseTargetEval": " ( ( !INFO.TempVars.srcObj.itemData.team || INFO.TempVars.srcObj.itemData.team !== INFO.TempVars.trgObj.itemData.team ) && ( INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half || INFO.TempVars.srcObj.itemData.width_half >= INFO.C_Size.width_halfMax ) ) ",
+					"chaseTargetEval": [ " ( ( !INFO.TempVars.srcObj.itemData.team || INFO.TempVars.srcObj.itemData.team !== INFO.TempVars.trgObj.itemData.team ) ",
+						"  && ( INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half || INFO.TempVars.srcObj.itemData.width_half >= INFO.C_Size.width_halfMax ) ", 
+						"  && ( INFO.TempVars.srcObj.itemData.objType === CircleManager.objType && INFO.TempVars.trgObj.itemData.objType === CircleManager.objType ) ",
+						" ) " 
+					],
 					"chaseLineColor": "red",
 					"chaseMovementEval": " 'NOT YET IMPLEMENTED.. ' ", 
 					"onCollision": "fight"
@@ -128,17 +132,30 @@
 			" INFO.maxCircleSpawnNum = 30; ",
 			" INFO.circleSpawnCount = 0; ",
 
-			" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); "
+			" INFO.circleProp = Util.cloneJson( INFO.circlePropMin ); ",
+
+			" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 		],
 		"onStageFrameMoveEval_Circle": [
 			" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
 			" { ",
-			"   var circleContainer = CircleManager.createCircleObj(); ",
+			"   var circleContainer = CircleManager.createCircleObj( INFO.circleProp ); ",
 			"   INFO.circleSpawnCount++; ",
 			"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
 			" } ",
 			" ",
 			" INFO.frameCount++; "	
+		],
+		"onAddCircleKeyClick": [
+			" var dataInfo = { color: 'black', startPosition: AppUtil.getPosition_Center() }; ",
+			" dataInfo = Util.mergeJson( Util.cloneJson( INFO.circlePropMin ), dataInfo ); ",
+			" Util.RemoveValInArray( dataInfo.onObjCreate_EvalFields, 'itemData.color' ); ",
+			" Util.RemoveValInArray( dataInfo.onObjCreate_EvalFields, 'itemData.startPosition' ); ",
+			
+			" CircleManager.createCircleObj( dataInfo ); ",
+	
+			" /* If the stage is paused, show the added circle right away by updating stage. */ ",
+			" if ( createjs.Ticker.paused ) StageManager.stage.update(); "
 		]
 	},
 	"appModes":
@@ -151,15 +168,17 @@
 				" INFO.maxCircleSpawnNum = 30; ",
 				" INFO.circleSpawnCount = 0; ",
 				" ",
-				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); ",
+				" INFO.circleProp = Util.cloneJson( INFO.circlePropMin ); ",
 				" ",
 				" /* ---- Disable Features ---- */ ",
-				" INFO.GlobalSettings.CircleSettings.ageLogic.atAgeChanges = ''; "
+				" INFO.GlobalSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
+				" ",
+				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
 			"onStageFrameMoveEval": [
 				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
 				" { ",
-				"   var circleContainer = CircleManager.createCircleObj(); ",
+				"   var circleContainer = CircleManager.createCircleObj( INFO.circleProp ); ",
 				"   INFO.circleSpawnCount++; ",
 				"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
 				" } ",
@@ -212,9 +231,11 @@
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
 				" ",
-				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); ",
+				" var circleProp = Util.cloneJson( INFO.circlePropMin ); ",
 				" ",
-				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: INFO.baseCircleProp } ); "
+				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: circleProp } ); ",
+
+				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
 			"onStageFrameMoveEval": [ ]	
 		},
@@ -223,9 +244,11 @@
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
 				" ",
-				" INFO.baseCircleProp = Util.cloneJson( INFO.circlePropMin ); ",
+				" var circleProp = Util.cloneJson( INFO.circlePropMin ); ",
 				" ",
-				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: INFO.baseCircleProp } ); "
+				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: circleProp } ); ",
+
+				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
 			"onStageFrameMoveEval": [ ]	
 		}
