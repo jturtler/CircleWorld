@@ -3,13 +3,15 @@
 	{
 		"colorTeamList": [ "blue", "orange", "gray", "white", "black", "purple" ],
 
-		"GlobalSettings": 
+		"printClickedObj": true,
+
+		"ObjSettings": 
 		{
 			"NOTE": "This overrides the default setting value in code.  In code, there are default values.",
 
 			"preRunEval": [
 				" /* ShortCut INFO variables to long named ones.. */ ",
-				" INFO.CIR_SETS = INFO.GlobalSettings.CircleSettings; ",
+				" INFO.CIR_SETS = INFO.ObjSettings.CircleSettings; ",
 				" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; ",
 				" INFO.C_W4CR = INFO.CIR_SETS.innerCircle_W4CR; "
 			],
@@ -21,6 +23,8 @@
 					"ageIncreaseActionsEval": [
 						" var obj = INFO.TempVars.obj; ",
 						" var itemData = obj.itemData; ",
+
+						" /* --- float addition produce long decimal number, ignore it. --- */ ",
 						" itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', INFO.C_Size.width_half_UpByAge ); ",
 						" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthChangeRate ); ",
 						" itemData.behaviors.proxyDistance = CircleManager.setAgeAdjustedProxyDistance( itemData ); ",
@@ -30,6 +34,8 @@
 						"    itemData.team = ''; ",
 						"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'aqua', width_half: INFO.C_W4CR.width_half + 2, shape: 'circle' } ); ",
 						" } ",
+
+						" if ( itemData.sizeMaxReached ) itemData.color = Util.getRandomColorHex(); ",
 
 						" if ( !itemData.strengthMaxReached && itemData.strength >= INFO.C_Size.strengthMax ) { ", 
 						"    itemData.strengthMaxReached = true; ",
@@ -171,7 +177,7 @@
 				" INFO.circleProp = Util.cloneJson( INFO.circlePropMin ); ",
 				" ",
 				" /* ---- Disable Features ---- */ ",
-				" INFO.GlobalSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
+				" INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
 				" ",
 				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
@@ -191,7 +197,7 @@
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
 
-				" delete INFO.GlobalSettings.CircleSettings.ageLogic.atAgeChanges['10']; "
+				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['10']; "
 			],
 			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
 		},
@@ -200,8 +206,8 @@
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
 
-				" INFO.GlobalSettings.CircleSettings.proxyDetectionLogic.showDetectionLines = true; ",
-				" INFO.GlobalSettings.CircleSettings.chaseActionLogic = ''; "
+				" INFO.ObjSettings.CircleSettings.proxyDetectionLogic.showDetectionLines = true; ",
+				" INFO.ObjSettings.CircleSettings.chaseActionLogic = ''; "
 			],
 			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "			
 		},
@@ -255,6 +261,7 @@
 	],
 	"structureNotes":
 	{
+		"NOTE": "Below Information is OLD, OutDated..",
 		"circle_Example": 
 		{
 			"container":

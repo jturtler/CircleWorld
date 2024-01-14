@@ -100,7 +100,7 @@ CircleManager.ageIncreaseActions = function( container )
 {
 	var itemData = container.itemData;
 
-	var ageLogic = INFO.GlobalSettings.CircleSettings.ageLogic;
+	var ageLogic = INFO.ObjSettings.CircleSettings.ageLogic;
 
 	if ( ageLogic.ageIncreaseActionsEval ) Util.evalTryCatch( ageLogic.ageIncreaseActionsEval, { INFO_TempVars: { obj: container } } );
 
@@ -111,7 +111,7 @@ CircleManager.atAgeChanges = function ( container )
 {
 	var itemData = container.itemData;
 
-	var cSets = INFO.GlobalSettings.CircleSettings;
+	var cSets = INFO.ObjSettings.CircleSettings;
 	var ageLogic = cSets.ageLogic;
 
 	if ( ageLogic.atAgeChanges )
@@ -171,7 +171,7 @@ CircleManager.setAgeAdjustedProxyDistance = function( itemData )
 {
 	var distance;
 
-	var proxyDistLogic = INFO.GlobalSettings.CircleSettings.proxyDetectionLogic;
+	var proxyDistLogic = INFO.ObjSettings.CircleSettings.proxyDetectionLogic;
 	distance = proxyDistLogic.proxyDistance;
 
 	var ageWidthDist = itemData.width_half * proxyDistLogic.proxyDistanceAgeRate;
@@ -186,7 +186,7 @@ CircleManager.setAgeAdjustedProxyDistance = function( itemData )
 
 CircleManager.fightObjStatusChange = function( winObj, loseObj )
 {
-	var cSettings = INFO.GlobalSettings.CircleSettings;
+	var cSettings = INFO.ObjSettings.CircleSettings;
 	var fightLogic = cSettings.fightLogic;
 	// var sizeChangeLogic = cSettings.sizeChangeLogic;
 
@@ -197,7 +197,7 @@ CircleManager.fightObjStatusChange = function( winObj, loseObj )
 
 CircleManager.decreaseSpeed = function( obj, change )
 {
-	var sizeChangeLogic = INFO.GlobalSettings.CircleSettings.sizeChangeLogic;
+	var sizeChangeLogic = INFO.ObjSettings.CircleSettings.sizeChangeLogic;
 
 	obj.itemData.speed -= change;
 
@@ -221,7 +221,7 @@ CircleManager.decreseStrength = function( obj, change )
 
 CircleManager.winStatusChanges = function( obj )
 {
-	var INFO_CS = INFO.GlobalSettings.CircleSettings;
+	var INFO_CS = INFO.ObjSettings.CircleSettings;
 	var SizeCL = INFO_CS.sizeChangeLogic;
 	var FightLG = INFO_CS.fightLogic;
 
@@ -230,12 +230,12 @@ CircleManager.winStatusChanges = function( obj )
 	obj.itemData.width_half += sizeUp;
 	obj.itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', FightLG.fightWinStrengthChange);
 
-	CircleManager.decreaseSpeed( obj, ( sizeUp * SizeCL.speedDownRate_bySizeUp ) );
+	CircleManager.decreaseSpeed( obj, Util.decimalSet( sizeUp * SizeCL.speedDownRate_bySizeUp, 2 ) );
 };
 
 CircleManager.loseStatusChanges = function( obj )
 {
-	var INFO_CS = INFO.GlobalSettings.CircleSettings;
+	var INFO_CS = INFO.ObjSettings.CircleSettings;
 	// var SizeCL = INFO_CS.sizeChangeLogic;
 	var FightLG = INFO_CS.fightLogic;
 
@@ -245,7 +245,7 @@ CircleManager.loseStatusChanges = function( obj )
 
 CircleManager.adjustUpWhenMax = function( obj, type, amount )
 {
-	var INFO_CS = INFO.GlobalSettings.CircleSettings;
+	var INFO_CS = INFO.ObjSettings.CircleSettings;
 	var SizeCL = INFO_CS.sizeChangeLogic;
 
 	if ( type === 'width_half' )
@@ -259,4 +259,3 @@ CircleManager.adjustUpWhenMax = function( obj, type, amount )
 	
 	return amount;
 };
-

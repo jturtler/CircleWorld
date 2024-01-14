@@ -1,12 +1,12 @@
-function GlobalSettings() { };
+function ObjSettings() { };
 
 // ------------------------------------
 
-GlobalSettings.DefaultJson = {
+ObjSettings.DefaultJson = {
 
 	"preRunEval": [
 		" /* ShortCut INFO variables to long named ones.. */ ",
-		" INFO.CIR_SETS = INFO.GlobalSettings.CircleSettings; ",
+		" INFO.CIR_SETS = INFO.ObjSettings.CircleSettings; ",
 		" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; "
 	],
 
@@ -93,7 +93,7 @@ GlobalSettings.DefaultJson = {
 
 };
 
-// Used to set as INFO.GlobalSettings and use the values through out the App code.
+// Used to set as INFO.ObjSettings and use the values through out the App code.
 // In Config.json, this can be overwritten..
 
 // ------------------------------------

@@ -199,7 +199,7 @@ CommonObjManager.objMouseDownAction = function ( e )
 		CommonObjManager.clearMouseDownShape();
 		CommonObjManager.removeAllTempLines();
 
-		var uiLogic = INFO.GlobalSettings.CircleSettings.uiLogic;
+		var uiLogic = INFO.ObjSettings.CircleSettings.uiLogic;
 
 		// Select object <-- paint it..	- record position, time
 		CommonObjManager.mouseDownObj = {
@@ -233,7 +233,7 @@ CommonObjManager.objMouseUpAction = function ( e )
 			//var deltaTime = new Date().getTime() - CommonObjManager.mouseDownObj.time;
 			//var swipeSpeed = distance / deltaTime; // if ( swipeSpeed > 2.5 ), perform swipe..
 
-			CommonObjManager.drawLine_ForPeriod( srcObj, trgXY, { color: INFO.GlobalSettings.CircleSettings.uiLogic.swipeDirectionLineColor } );
+			CommonObjManager.drawLine_ForPeriod( srcObj, trgXY, { color: INFO.ObjSettings.CircleSettings.uiLogic.swipeDirectionLineColor } );
 			// var movement = MovementHelper.getMovementCalc( angle, srcObj.itemData.speed );		
 		}
 		else {
@@ -380,4 +380,114 @@ CommonObjManager.getUniqueObjName = function ( option )
 CommonObjManager.getObjByName = function ( name )
 {
 	return StageManager.getStageChildrenContainers().find( obj => obj.itemData?.name === name );
+};
+
+// --------------------------------------------
+
+CommonObjManager.drawLine = function( option ) //color, xyJson_from, xyJson_to ) 
+{
+	if ( !option ) option = {};
+	var color = ( option.color ) ? option.color: 'yellow';
+	var xyJson_from = ( option.xyJson_from ) ? option.xyJson_from: '';
+	var xyJson_to = ( option.xyJson_to ) ? option.xyJson_to: '';
+
+	if ( !xyJson_from || !xyJson_to ) throw 'xyJson_from / xyJson_to are required';
+
+	var lineShape = new createjs.Shape();
+
+	lineShape.graphics.setStrokeStyle(1)
+		.beginStroke( color )
+		.moveTo( xyJson_from.x, xyJson_from.y )
+		.lineTo( xyJson_to.x, xyJson_to.y )
+		.endStroke();
+
+	return lineShape;
+};
+
+
+
+CommonObjManager.drawShape = function( option ) 
+{
+	if ( !option ) option = {};
+	var color = ( option.color ) ? option.color: 'yellow';
+	var shapeType = ( option.shapeType ) ? option.shapeType: 'circle';
+	var width_half = ( option.width_half ) ? option.width_half: 5;	
+	var position = ( option.position ) ? option.position: { x: 100, y: 100 };	
+	// option.existingContainer
+	// option.existingShape
+	// option.lineStroke
+	// option.position
+	// option.skipAddToStage
+	// option.skipAddToContainer
+	// option.updateStage // Draw the shape right away..  not efficient
+
+
+	container.x = itemData.startPosition.x;
+	container.y = itemData.startPosition.y;
+
+
+	var container = ( option.existingContainer ) ? option.existingContainer : new createjs.Container();
+
+	var shape = ( option.existingShape ) ? option.existingShape : new createjs.Shape();
+
+	if ( shapeType === 'rect' )
+	{
+		var height_half = ( option.height_half ) ? option.height_half : width_half;
+
+		if ( option.lineStroke ) shape.graphics.setStrokeStyle(1).beginStroke( color ).drawRect( -width_half, -height_half, width_half * 2, height_half * 2 );
+		else shape.graphics.beginFill( color ).drawRect( -width_half, -height_half, width_half * 2, height_half * 2 );
+	}
+	else if ( shapeType === 'circle' )
+	{	
+		if ( option.lineStroke ) shape.graphics.setStrokeStyle(1).beginStroke( color ).drawCircle(0, 0, width_half );
+		else shape.graphics.beginFill( color ).drawCircle( 0, 0, width_half );
+	}
+	
+	if ( !option.skipAddToContainer ) container.addChild( shape );
+	if ( !option.skipAddToStage ) StageManager.stage.addChild( container );
+	if ( option.updateStage ) StageManager.stage.update();
+
+	return shape;
+};
+
+
+// -------------------------------------
+
+// If object is selected.. on each frame(?), we can print on info panel..
+// Or, we can choose to print
+// Only print last 100 ones.. in panel..
+// try this on console.log 1st?
+
+// TODO: Want to print this in real time.. in log..
+CommonObjManager.printObjInfo = function( obj, option ) 
+{
+	var outputStr = '';
+
+	if ( !option ) option = {};
+
+	if ( obj )
+	{
+		// x, y, age, width_half, strength, speed, team, sizeMax, strengthMax, 
+		// fight win/lose, others?
+		try
+		{
+			outputStr += 'x: ' + obj.x + ', y: ' + obj.y;
+
+			var itemData = obj.itemData;
+			if ( itemData )
+			{
+				var dataSubset = Util.getObjSubset( itemData, [ 'name', 'age', 'team', 'color', 'width_half', 'stength', 'speed', 'sizeMaxReached', 'strengthMaxReached' ] );
+				outputStr += ', itemData: ' + JSON.stringify( dataSubset, null, 2 );
+			}
+		}
+		catch( errMsg )
+		{
+			console.log( 'ERROR in CommonObjManager.getObjStatusStr, ' + errMsg );
+			outputStr += ' [ERROR] - ' + errMsg;
+		}
+
+		if ( option.type === 'console.log' ) console.log( outputStr );
+	}
+
+	return outputStr;
 };

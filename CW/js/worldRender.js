@@ -23,7 +23,7 @@ WorldRender.startUp = function ()
 {
 	AppUtil.fitCanvasSize( WorldRender.infoJson ); // Adjust Canvas Size to fit the browser size
 	
-	WorldRender.setINFO_GlobalSettings_withDefault( GlobalSettings.DefaultJson );
+	WorldRender.setINFO_ObjSettings_withDefault( ObjSettings.DefaultJson );
 
 	StageManager.startUp( WorldRender.infoJson );
 
@@ -198,7 +198,7 @@ WorldRender.resetAppData = function( )
 
 	// 4. reset 'INFO' all - except 'configJson'
 	INFO = { configJson: INFO.configJson };
-	WorldRender.setConfig_INFO_Vars( INFO.configJson.INFO_Vars ); // Reload 'GlobalSettings' under config 'INFO'
+	WorldRender.setConfig_INFO_Vars( INFO.configJson.INFO_Vars ); // Reload 'ObjSettings' under config 'INFO'
 }; 
 
 
@@ -215,24 +215,24 @@ WorldRender.setConfig_INFO_Vars = function( INFO_Vars )
 	// In case the config 'INFO_Vars' did not set INFO.colorTeamList, set it here..(?)
 	if ( !INFO.colorTeamList ) INFO.colorTeamList = Util.cloneJson( CircleManager.colorTeamList_DEFAULT );
 
-	WorldRender.setINFO_GlobalSettings_withDefault( GlobalSettings.DefaultJson );	
+	WorldRender.setINFO_ObjSettings_withDefault( ObjSettings.DefaultJson );	
 };
 
 // ---------------------------------
 
-WorldRender.setINFO_GlobalSettings_withDefault = function( GlobalSettings_DefaultJson )
+WorldRender.setINFO_ObjSettings_withDefault = function( ObjSettings_DefaultJson )
 {
-	if ( !INFO.GlobalSettings ) INFO.GlobalSettings = {}; // Normally, this gets set by configJson's appMode selection, 'INFO_vars'
+	if ( !INFO.ObjSettings ) INFO.ObjSettings = {}; // Normally, this gets set by configJson's appMode selection, 'INFO_vars'
 
-	var gSettingsJson = Util.cloneJson( GlobalSettings_DefaultJson );
+	var gSettingsJson = Util.cloneJson( ObjSettings_DefaultJson );
 
-	// Merge deep..  Base is 'GlobalSettings_DefaultJson' from 'GlobalSettings' class.
-	Util.mergeDeep( gSettingsJson, INFO.GlobalSettings, { arrOverwrite: true } );
+	// Merge deep..  Base is 'ObjSettings_DefaultJson' from 'ObjSettings' class.
+	Util.mergeDeep( gSettingsJson, INFO.ObjSettings, { arrOverwrite: true } );
 
-	INFO.GlobalSettings = gSettingsJson;
+	INFO.ObjSettings = gSettingsJson;
 
 	// Run 'preRunEval' for quick shortcut INFO variables creation.
-	if ( INFO.GlobalSettings.preRunEval ) Util.evalTryCatch( INFO.GlobalSettings.preRunEval );
+	if ( INFO.ObjSettings.preRunEval ) Util.evalTryCatch( INFO.ObjSettings.preRunEval );
 };
 
 // ---------------------------------

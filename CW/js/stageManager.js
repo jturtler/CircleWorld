@@ -41,7 +41,7 @@ StageManager.frameMove = function ( e )
 {
 	if ( !e.paused )
 	{
-		var aged = eval( INFO.GlobalSettings.CircleSettings.ageLogic.ageIncreaseCheckInTickEval );		
+		var aged = eval( INFO.ObjSettings.CircleSettings.ageLogic.ageIncreaseCheckInTickEval );		
 
 		// 1. Proxy 'lines' remove (for new stage frame drawing), and clear all obj's 'distances' data.
 		MovementHelper.removeAllProxyLines();
@@ -85,6 +85,9 @@ StageManager.frameMove = function ( e )
 
 		StageManager.stage.update();
 
+
+		// Print the selected/clicked obj info on console.log <-- if the flag is set: INFO.printClickedObj = true;
+		if ( INFO.printClickedObj && CommonObjManager.clickedContainer ) CommonObjManager.printObjInfo( CommonObjManager.clickedContainer, { type: 'console.log' } );
 
 		// Frame Count..
 		StageManager.frameCount++;

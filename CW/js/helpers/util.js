@@ -344,3 +344,17 @@ Util.mergeDeep = function (dest, obj, option)
 		}
 	});
 };
+
+// --------------------------------
+
+Util.getObjSubset = function( dataJson, propList )
+{
+	var objSubset = {};
+
+	for( var propName in dataJson )
+	{
+		if ( propList.indexOf( propName ) >= 0 ) objSubset[ propName ] = dataJson[ propName ];
+	}
+
+	return objSubset;
+};

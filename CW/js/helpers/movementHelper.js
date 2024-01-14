@@ -39,7 +39,7 @@ MovementHelper.moveNext = function (container)
 	var chaseTarget;
 
 	var movement = MovementHelper.getMovementCalc( itemData.angle, itemData.speed );
-	var INFO_G_C = INFO.GlobalSettings.CircleSettings;
+	var INFO_G_C = INFO.ObjSettings.CircleSettings;
 
 	
 	// Priority #1. - If 'WallTouched' case, change the 'movement'
@@ -210,8 +210,8 @@ MovementHelper.getMovementCalc = function( angle, speed )
 
 	var anglePi = Math.PI * ( angle / 180 );
 
-	movement.x = Math.cos(anglePi) * speed;
-	movement.y = Math.sin(anglePi) * speed;
+	movement.x = Util.decimalSet( Math.cos(anglePi) * speed, 2 );
+	movement.y = Util.decimalSet( Math.sin(anglePi) * speed, 2 );
 
 	return movement;
 };
@@ -219,7 +219,7 @@ MovementHelper.getMovementCalc = function( angle, speed )
 // getAngleFromDirectionXY
 MovementHelper.getAngle_fromMovement = function( movement )
 {
-  var angle = ( Math.atan2( movement.y, movement.x ) / Math.PI ) * 180;
+  var angle = Util.decimalSet( ( Math.atan2( movement.y, movement.x ) / Math.PI ) * 180, 2 );
 
   // QUESTION: Why I have to do this? 0 - 270.. somehow, 280 => -10..  () -0 ~ -90
   if ( angle < 0 ) angle = angle + 360;
@@ -254,7 +254,7 @@ MovementHelper.getDistance = function( obj1, obj2 )
 	var xDiff = xA - xB;
 	var yDiff = yA - yB;
 
-	return Math.sqrt( ( xDiff * xDiff ) + ( yDiff * yDiff ) );
+	return Util.decimalSet( Math.sqrt( ( xDiff * xDiff ) + ( yDiff * yDiff ) ), 2 );
 };
 
 
@@ -269,7 +269,7 @@ MovementHelper.performDistanceProxyDraw = function ( container, proxyDetectionLo
 	if ( itemData.behaviors?.proxyDetection && itemData.distances )
 	{
 		// Draw lines that falls into the proxy distance..
-		var proxyDistance = INFO.GlobalSettings.CircleSettings.proxyDetectionLogic.proxyDistance;
+		var proxyDistance = INFO.ObjSettings.CircleSettings.proxyDetectionLogic.proxyDistance;
 		if ( itemData.behaviors.proxyDistance ) proxyDistance = itemData.behaviors.proxyDistance;
 
 		if ( proxyDistance )
@@ -329,7 +329,7 @@ MovementHelper.getNearestChaseTarget = function( container, chaseActionLogic )
 
 MovementHelper.checkChaseTarget = function( sourceObj, targetObj )
 {
-	var chaseTargetEval = INFO.GlobalSettings.CircleSettings.chaseActionLogic.chaseTargetEval;
+	var chaseTargetEval = INFO.ObjSettings.CircleSettings.chaseActionLogic.chaseTargetEval;
 
 	if ( chaseTargetEval ) return Util.evalTryCatch( chaseTargetEval, { INFO_TempVars: { srcObj: sourceObj, trgObj: targetObj } } );
 	// else return ( sourceObj.itemData.color !== targetObj.itemData.color && sourceObj.itemData.width_half > targetObj.itemData.width_half );
@@ -440,9 +440,9 @@ MovementHelper.targetInCollision = function( distance, currWidth_half, targetWid
 
 MovementHelper.setDirection_moveTowardTarget = function( sourceObj, targetObj, speed )
 {
-  var angleToTarget = MovementHelper.getAngleToTarget( sourceObj, targetObj );
+  var angleToTarget =  Util.decimalSet( MovementHelper.getAngleToTarget( sourceObj, targetObj ), 2 );
 
-  var angleChange = MovementHelper.getAngleTowardTarget( angleToTarget, sourceObj.itemData.angle, INFO.GlobalSettings.CircleSettings.chaseActionLogic.angleChangeMax_perTick );
+  var angleChange = MovementHelper.getAngleTowardTarget( angleToTarget, sourceObj.itemData.angle, INFO.ObjSettings.CircleSettings.chaseActionLogic.angleChangeMax_perTick );
 
   var newAngle = ( sourceObj.itemData.angle + angleChange + 360 ) % 360;
 			 
