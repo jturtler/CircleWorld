@@ -78,6 +78,7 @@ WorldRender.setUp_Tag_Events = function()
 		}); 		
 	});
 
+	$( document ).on( 'mousemove', CommonObjManager.onMouseMove );
 
 	WorldRender.framerateChange_Setup( $('#inputFramerate'), $('#btnFramerateUp'), $('#btnFramerateDown') );
 

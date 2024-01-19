@@ -3,7 +3,7 @@
 	{
 		"colorTeamList": [ "blue", "orange", "gray", "white", "black", "purple" ],
 
-		"printClickedObj": true,
+		"printClickedObj": false,
 
 		"ObjSettings": 
 		{
@@ -31,11 +31,10 @@
 
 						" if ( !itemData.sizeMaxReached && itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
 						"    itemData.sizeMaxReached = true; ",
-						"    itemData.team = ''; ",
 						"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'aqua', width_half: INFO.C_W4CR.width_half + 2, shape: 'circle' } ); ",
-						" } ",
 
-						" if ( itemData.sizeMaxReached ) itemData.color = Util.getRandomColorHex(); ",
+						"    if ( !INFO.appMode_portal ) {  itemData.team = '';  itemData.color = Util.getRandomColorHex();  } ",
+						" } ",
 
 						" if ( !itemData.strengthMaxReached && itemData.strength >= INFO.C_Size.strengthMax ) { ", 
 						"    itemData.strengthMaxReached = true; ",
@@ -68,7 +67,7 @@
 				},
 				"proxyDetectionLogic": {
 					"proxyDistance": 100,
-					"proxyDistanceAgeRate": 3.0,
+					"proxyDistanceWidthTimes": 4.0,
 					"showDetectionLines": false,
 					"detectionLineColor": "yellow"
 				},
@@ -236,7 +235,7 @@
 			"modeName": "portal2",
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
-				" ",
+				" INFO.appMode_portal = true; ",
 				" var circleProp = Util.cloneJson( INFO.circlePropMin ); ",
 				" ",
 				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: circleProp } ); ",
@@ -249,7 +248,7 @@
 			"modeName": "portal4",
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
-				" ",
+				" INFO.appMode_portal = true; ",
 				" var circleProp = Util.cloneJson( INFO.circlePropMin ); ",
 				" ",
 				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: circleProp } ); ",

@@ -37,11 +37,21 @@ MovementHelper.moveNext = function (container)
 	var itemData = container.itemData;
 	var behaviors = itemData.behaviors;
 	var chaseTarget;
-
-	var movement = MovementHelper.getMovementCalc( itemData.angle, itemData.speed );
 	var INFO_G_C = INFO.ObjSettings.CircleSettings;
 
+	// Normal movement if not overwritten by other case.
+	var movement = MovementHelper.getMovementCalc( itemData.angle, itemData.speed );
+	var forcedPosition = '';
 	
+
+	// ForceMove case
+	if ( itemData.forceMoves && itemData.forceMoves.length > 0 ) {
+		forcedPosition = itemData.forceMoves.shift();
+		if ( forcedPosition && forcedPosition.lineShape ) StageManager.stage.removeChild( forcedPosition.lineShape );
+		movementCaseMet = true;
+	}
+
+
 	// Priority #1. - If 'WallTouched' case, change the 'movement'
 	if ( !movementCaseMet )
 	{
@@ -126,10 +136,17 @@ MovementHelper.moveNext = function (container)
 	}
 
 
-	// Set the new movements..
-	container.x += movement.x;
-	container.y += movement.y;	
-
+	if ( forcedPosition )
+	{
+		container.x = forcedPosition.x;
+		container.y = forcedPosition.y;
+	}
+	else
+	{
+		// Set the new movements..
+		container.x += movement.x;
+		container.y += movement.y;	
+	}
 
 	// Section: decrement turns of various lists
 	MovementHelper.decrementTurns( itemData.collisionExceptions );  // collisionExceptions: [ { target: container, turns: 1 }
@@ -316,8 +333,8 @@ MovementHelper.getNearestChaseTarget = function( container, chaseActionLogic )
 				chaseTarget = distanceJson.ref_target;
 
 				if ( !distanceJson.ref_line ) distanceJson.ref_line = MovementHelper.drawProxyLine( container, distanceJson.ref_target, chaseActionLogic.chaseLineColor );				
-				else MovementHelper.drawLine( distanceJson.ref_line, chaseActionLogic.chaseLineColor, container, distanceJson.ref_target );
-
+				else CommonObjManager.drawLine( { from: container, to: distanceJson.ref_target, color: chaseActionLogic.chaseLineColor, lineShape: distanceJson.ref_line, clear: true } );
+				
 				break;
 			}
 		}
@@ -358,11 +375,7 @@ MovementHelper.drawProxyLine = function( sourceObj, targetObj, color )
 
 	try
 	{
-		lineShape = new createjs.Shape();
-
-		MovementHelper.drawLine( lineShape, color, sourceObj, targetObj );
-
-		StageManager.stage.addChild( lineShape );
+		lineShape = CommonObjManager.drawLine( { from: sourceObj, to: targetObj, color: color, addToStage: true } );
 
 		MovementHelper.PROXY_LINES.push( lineShape );
 	}
@@ -371,18 +384,6 @@ MovementHelper.drawProxyLine = function( sourceObj, targetObj, color )
 	return lineShape;
 };
 
-
-MovementHelper.drawLine = function( lineShape, color, sourceObj, targetObj ) 
-{
-	if ( !color ) color = 'yellow';
-
-	lineShape.graphics.clear()
-		.setStrokeStyle(1)
-		.beginStroke( color )
-		.moveTo( sourceObj.x, sourceObj.y )
-		.lineTo( targetObj.x, targetObj.y )
-		.endStroke();
-};
 
 MovementHelper.collectDistances = function( currObj, targets )
 {

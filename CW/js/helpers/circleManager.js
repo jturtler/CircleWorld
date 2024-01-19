@@ -174,7 +174,7 @@ CircleManager.setAgeAdjustedProxyDistance = function( itemData )
 	var proxyDistLogic = INFO.ObjSettings.CircleSettings.proxyDetectionLogic;
 	distance = proxyDistLogic.proxyDistance;
 
-	var ageWidthDist = itemData.width_half * proxyDistLogic.proxyDistanceAgeRate;
+	var ageWidthDist = itemData.width_half * proxyDistLogic.proxyDistanceWidthTimes;
 	
 	if ( distance < ageWidthDist ) distance = ageWidthDist;
 

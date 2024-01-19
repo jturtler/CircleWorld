@@ -13,8 +13,8 @@ PortalManager.portalProp_DEFAULT = {
 	name: " CommonObjManager.getUniqueObjName( { type: PortalManager.objType } ); ",
 	width_half: 8,
 	speed: 0,
-	strength: 1000,
-	strengthChangeRate: 0,	
+	strength: 150,	// Make it decrease as it is attacked by circle?   slow increase rate?
+	strengthChangeRate: 1,
 	color: " INFO.TempVars_color = PortalManager.getNextPortalTeamColor( PortalManager.getPortalContainers().length ); INFO.TempVars_color; ",
 	team: " INFO.TempVars_color; ",
 

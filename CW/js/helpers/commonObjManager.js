@@ -3,6 +3,9 @@ function CommonObjManager() { };
 
 CommonObjManager.mouseDownTime_StagePaused; 
 CommonObjManager.mouseDownObj; // = { stageX, stageY,  }  // on mouse down, pause the stage..
+
+//CommonObjManager.forceMoveObj = []; // <-- should put it on obj..
+
 CommonObjManager.clickedContainer;
 CommonObjManager.clickedContainer_shape;
 CommonObjManager.clickedContainerClearTimeoutId;
@@ -149,17 +152,13 @@ CommonObjManager.drawLine_ForPeriod = function( sourceObj, targetObj, option )
 	var lineShape;
 
 	if ( !option ) option = {};
-	if ( !option.color ) option.color = 'yellow';
+	// if ( !option.color ) option.color = 'yellow';
 	if ( !option.endCount ) option.endCount = Math.round( createjs.Ticker.framerate / 2 );
 
 	try
 	{
-		lineShape = new createjs.Shape();
-
-		MovementHelper.drawLine( lineShape, option.color, sourceObj, targetObj );
+		lineShape = CommonObjManager.drawLine( { from: sourceObj, to: targetObj, color: option.color, addToStage: true } );
 		lineShape.endCount = option.endCount;
-
-		StageManager.stage.addChild( lineShape );
 
 		MovementHelper.TEMP_LINES.push( lineShape );
 	}
@@ -208,6 +207,7 @@ CommonObjManager.objMouseDownAction = function ( e )
 			stageY: e.stageY,
 			time: new Date().getTime(),
 			status: 'mouseDown',
+			moveTraces: [],
 			selectShape: CommonObjManager.drawShapeLine_Obj( container, { color: uiLogic.clickHighlightColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
 		}; 
 
@@ -215,6 +215,27 @@ CommonObjManager.objMouseDownAction = function ( e )
 	}
 };
 
+CommonObjManager.onMouseMove = function( e )
+{
+	if ( CommonObjManager.mouseDownObj ) 
+	{
+		var posX = e.clientX;
+		var posY = e.clientY;
+
+		var srcObj = CommonObjManager.mouseDownObj.obj;
+
+		if ( !srcObj.itemData.forceMoves ) srcObj.itemData.forceMoves = [];
+		var movesLength = srcObj.itemData.forceMoves.length;
+
+		var newPosition = { x: posX, y: posY };
+		var prevPosition = ( movesLength > 0 ) ? srcObj.itemData.forceMoves[ movesLength - 1 ] : undefined;
+		var lineColor = INFO.ObjSettings.CircleSettings.uiLogic.swipeDirectionLineColor;
+
+		if ( prevPosition ) newPosition.lineShape = CommonObjManager.drawLine( { from: prevPosition, to: newPosition, color: lineColor, addToStage: true } );
+
+		srcObj.itemData.forceMoves.push( newPosition );
+	}
+}
 
 // Stage Event
 CommonObjManager.objMouseUpAction = function ( e )
@@ -223,6 +244,7 @@ CommonObjManager.objMouseUpAction = function ( e )
 	{
 		var srcObj = CommonObjManager.mouseDownObj.obj;
 
+		/*
 		// Calculate + paint the line of new direction??
 		var trgXY = { x: e.stageX, y: e.stageY };
 		var distance = MovementHelper.getDistance( srcObj, trgXY );
@@ -230,16 +252,15 @@ CommonObjManager.objMouseUpAction = function ( e )
 		if ( distance > 10 ) 
 		{
 			srcObj.itemData.angle = MovementHelper.getAngleToTarget( srcObj, trgXY );
-			//var deltaTime = new Date().getTime() - CommonObjManager.mouseDownObj.time;
-			//var swipeSpeed = distance / deltaTime; // if ( swipeSpeed > 2.5 ), perform swipe..
 
 			CommonObjManager.drawLine_ForPeriod( srcObj, trgXY, { color: INFO.ObjSettings.CircleSettings.uiLogic.swipeDirectionLineColor } );
-			// var movement = MovementHelper.getMovementCalc( angle, srcObj.itemData.speed );		
 		}
 		else {
 			// CommonObjManager.clickObjectEvent( srcObj );
 		}
+		*/
 
+		
 		// ----------------------
 		CommonObjManager.clearMouseDownShape();
 		CommonObjManager.mouseDownObj = undefined;
@@ -384,26 +405,22 @@ CommonObjManager.getObjByName = function ( name )
 
 // --------------------------------------------
 
-CommonObjManager.drawLine = function( option ) //color, xyJson_from, xyJson_to ) 
+CommonObjManager.drawLine = function( option ) //color, from, to ) 
 {
 	if ( !option ) option = {};
 	var color = ( option.color ) ? option.color: 'yellow';
-	var xyJson_from = ( option.xyJson_from ) ? option.xyJson_from: '';
-	var xyJson_to = ( option.xyJson_to ) ? option.xyJson_to: '';
+	var from = ( option.from ) ? option.from: '';
+	var to = ( option.to ) ? option.to: '';
+	var lineShape = ( option.lineShape ) ? option.lineShape: new createjs.Shape();
 
-	if ( !xyJson_from || !xyJson_to ) throw 'xyJson_from / xyJson_to are required';
+	if ( !from || !to ) throw 'from / to are required';
+	if ( option.addToStage ) StageManager.stage.addChild( lineShape );
 
-	var lineShape = new createjs.Shape();
-
-	lineShape.graphics.setStrokeStyle(1)
-		.beginStroke( color )
-		.moveTo( xyJson_from.x, xyJson_from.y )
-		.lineTo( xyJson_to.x, xyJson_to.y )
-		.endStroke();
+	if ( option.clear ) lineShape.graphics.clear();
+	lineShape.graphics.setStrokeStyle(1).beginStroke( color ).moveTo( from.x, from.y ).lineTo( to.x, to.y ).endStroke();
 
 	return lineShape;
 };
-
 
 
 CommonObjManager.drawShape = function( option ) 
