@@ -11,7 +11,7 @@ PortalManager.remainSpawnNum = 15; //StageManager.framerate * 2;
 
 PortalManager.portalProp_DEFAULT = {
 	name: " CommonObjManager.getUniqueObjName( { type: PortalManager.objType } ); ",
-	width_half: 8,
+	width_half: 10,
 	speed: 0,
 	strength: 150,	// Make it decrease as it is attacked by circle?   slow increase rate?
 	strengthChangeRate: 1,
@@ -93,6 +93,11 @@ PortalManager.setPortalShapes = function ( container )
 	label.textBaseline = 'middle';
 	container.ref_Label = label;
 	container.addChild( label );
+
+	if ( INFO.ObjSettings.CircleSettings.uiLogic.strengthShow )
+	{
+		container.ref_StgLabel = CommonObjManager.drawStrengthLabel( container, { container: container } );
+	}
 };
 
 

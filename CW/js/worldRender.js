@@ -47,7 +47,11 @@ WorldRender.setUp_Tag_Events = function()
 			// divMainContentTag.append('<div class="infoLine" style="opacity: 0;">- </div>');
 			// divMainContentTag.append('<div class="infoLine">------------------------</div>');
 		});
+	});
 
+	$( '#btnReloadApp' ).click( function() 
+	{
+		AppUtil.appReloadWtMsg( 'Reloading app, checking updates..' );
 	});
 
 	// Add Circle
@@ -78,9 +82,9 @@ WorldRender.setUp_Tag_Events = function()
 		}); 		
 	});
 
-	$( document ).on( 'mousemove', CommonObjManager.onMouseMove );
+	//$( document ).on( 'mousemove', CommonObjManager.onMouseMove ); // Moved to StageManager
 
-	WorldRender.framerateChange_Setup( $('#inputFramerate'), $('#btnFramerateUp'), $('#btnFramerateDown') );
+	WorldRender.framerateChange_Setup( $('#spanFramerate'), $('#btnFramerateUp'), $('#btnFramerateDown') );
 
 
 	// KeyDown ShortCut to other function/feature
@@ -115,21 +119,21 @@ WorldRender.resizeCanvas = function ()
 };
 
 
-WorldRender.framerateChange_Setup = function ( inputFramerateTag, btnFramerateUpTag, btnFramerateDownTag ) 
+WorldRender.framerateChange_Setup = function ( spanFramerateTag, btnFramerateUpTag, btnFramerateDownTag ) 
 {
 	var framerateChangeRate = 5;
 
-	inputFramerateTag.val( Math.round( createjs.Ticker.framerate ) );  // Load this value from 'config'
+	spanFramerateTag.text( Math.round( createjs.Ticker.framerate ) );  // Load this value from 'config'
 
 	btnFramerateUpTag.click( () => {
 		createjs.Ticker.framerate = Math.round( createjs.Ticker.framerate + framerateChangeRate );
-		inputFramerateTag.val( createjs.Ticker.framerate );
+		spanFramerateTag.text( Math.round( createjs.Ticker.framerate ) );
 	});
 
 	btnFramerateDownTag.click( () => {
 		createjs.Ticker.framerate = Math.round( createjs.Ticker.framerate - framerateChangeRate );
 		if (createjs.Ticker.framerate < 1) createjs.Ticker.framerate = 1;
-		inputFramerateTag.val( createjs.Ticker.framerate );
+		spanFramerateTag.text( Math.round( createjs.Ticker.framerate ) );
 	});
 };
 
@@ -171,7 +175,7 @@ WorldRender.switchAppMode = function( e )
 
 		if ( appModeConfig.onStartRunEval ) Util.evalTryCatch( appModeConfig.onStartRunEval );
 
-		$('#inputFramerate').val( Math.round( createjs.Ticker.framerate ) );  // Load this value from 'config'
+		$('#spanFramerate').val( Math.round( createjs.Ticker.framerate ) );  // Load this value from 'config'
 	}
 
 	// If empty selection, display 'tomato' color for attention.

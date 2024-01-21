@@ -358,3 +358,20 @@ Util.getObjSubset = function( dataJson, propList )
 
 	return objSubset;
 };
+
+
+Util.getArrProp_UniqueVals = function ( arr, prop ) 
+{
+	var uniqueVals = [];
+
+	arr.forEach( item => 
+	{
+		var val = item[ prop ];
+
+		if ( val ) {
+			if ( uniqueVals.indexOf( val ) === -1 ) uniqueVals.push( val );
+		}
+	});
+
+	return uniqueVals;
+};

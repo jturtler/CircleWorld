@@ -100,15 +100,16 @@
 		<canvas id="demoCanvas" style="background-color: #FDD; margin: 0px; vertical-align: middle; text-align: top;"></canvas>
 	</div>
 	<div id="commands" style="overflow: auto; text-wrap: nowrap; margin-top: 1px;">
-		<select id="selAppMode" style="font-size: 11px;"></select>
+		<select id="selAppMode" style="font-size: 11px; width: 60px;"></select>
 		<span class="spanDivider">|</span>
 		<button id="btnInfoPanel" class="btnPanelStyle" style="padding-inline: 0px;"><b>[I]</b></button>
+		<span class="spanDivider">|</span>
 		<button id="btnAddObj" class="btnPanelStyle"><b>[A]</b>dd</button>
 		<button id="btnStopStart" class="btnPanelStyle"><b>[S]</b><span id="spanStopStart">top</span></button>
 		<span class="spanDivider">|</span>
-		<input id="inputFramerate" readonly style="margin-left: 2px; width: 17px; font-size: 11px; background-color: #f3f3f3;" />
 		<button id="btnFramerateDown" class="btnPanelStyle">&lt;</button>
-		<button id="btnFramerateUp" class="btnPanelStyle">&gt;</button>
+		<span id="spanFramerate" style="font-size: 11px;">0</span>
+  		<button id="btnFramerateUp" class="btnPanelStyle">&gt;</button>
 		<span class="spanDivider">|</span>
 		<span id="spanInfo" style="color: #555; font-size: 11px;"></span>	
 	</div>
@@ -119,7 +120,8 @@
 	<!-- LV1. Overlay gray layer for clicks -->
 	<div id="divPopupArea" class="popupAreaCss" style="display:none;">
 		<div class="divMainLayout" style="height:100%;">
-			<div style="text-align: right;">
+			<div id="btnReloadApp" style="text-align: left; display: inline-block;"><button>reload app</button></div>
+			<div style="text-align: right; display: block; float: right;">
 				<div class="close" style="text-align: center;background-color: silver;width: 13px;height: 13px;display: inline-block;border: solid 1px #999;cursor: pointer;">
 					<span style="vertical-align: top; font-size: 12px;">X</span>
 				</div>

@@ -82,6 +82,12 @@ CircleManager.setCircleShapes = function ( container )
 
 	container.ref_Shape = shape;
 	container.addChild( shape );
+
+
+	if ( INFO.ObjSettings.CircleSettings.uiLogic.strengthShow )
+	{
+		container.ref_StgLabel = CommonObjManager.drawStrengthLabel( container, { container: container } );		
+	}
 };
  
 CircleManager.drawCircleShape = function( shape, itemData )
@@ -92,6 +98,7 @@ CircleManager.drawCircleShape = function( shape, itemData )
 CircleManager.sizeChangeRedraw = function( container )
 {
 	if ( container.ref_Shape ) CircleManager.drawCircleShape( container.ref_Shape, container.itemData );
+	if ( container.ref_StgLabel ) CommonObjManager.drawStrengthLabel( container );
 };
 
 // ---------------------------------

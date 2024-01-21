@@ -39,8 +39,9 @@
 						" if ( !itemData.strengthMaxReached && itemData.strength >= INFO.C_Size.strengthMax ) { ", 
 						"    itemData.strengthMaxReached = true; ",
 						"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'purple', width_half: INFO.C_W4CR.width_half + 3, shape: 'circle' } ); ",
-						" } "
+						" } ",
 
+						" CircleManager.sizeChangeRedraw( obj ); "
 					],
 					"atAgeChanges": {
 						"5": [
@@ -110,8 +111,18 @@
 				},
 				"uiLogic": {
 					"clickHighlightColor": "green",
-					"swipeDirectionLineColor": "yellow",
-					"swipeForceDirectionMS": 700
+					"swipeDirectionLineColor": "#8E44AD",
+					"swipeForceDirectionMS": 700,
+					"strengthShow": true
+				},
+				"endWinnerogic": {
+					"endWinCondition": [
+						" if ( !INFO.appMode_portal ) ( CircleManager.getCircleContainers().length === 1 ); ",
+						" else ( Util.getArrProp_UniqueVals( CircleManager.getCircleContainers().map( item => item.itemData ), 'team' ).length === 1 ); "
+					],
+					"winEndAction": [
+						"alert( 'End Winner!!' ); "
+					]
 				}
 			}
 		},
@@ -128,6 +139,8 @@
 			"startPosition": " AppUtil.getPosition_Center(); ",
 			"behaviors": {	},
 			"innerCircle": { },
+			"info": { "fearObjs": [], "killCount": 0 },
+			"k_Note": "should remember (for a while) the obj that hurt you.  And after 10 kill, it can transform..",
 			"onObjCreate_EvalFields": [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.strength", "itemData.strengthChangeRate", "itemData.angle", "itemData.color", "itemData.team", "itemData.startPosition" ]
 		},
 
@@ -161,6 +174,12 @@
 	
 			" /* If the stage is paused, show the added circle right away by updating stage. */ ",
 			" if ( createjs.Ticker.paused ) StageManager.stage.update(); "
+		],
+		"onStageFrameMoveEval_EndWin": [
+			" if ( ( ( INFO.frameCount % createjs.Ticker.framerate ) === 0 ) ) ", 
+			" { ",
+			"    if ( Util.evalTryCatch( INFO.endWinCondition ) ) Util.evalTryCatch( INFO.winEndAction ); ",
+			" } "
 		]
 	},
 	"appModes":
@@ -217,19 +236,11 @@
 
 				" INFO.maxCircleSpawnNum = 50; "
 			],
-			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
-		},
-		{
-			"modeName": "c6_King",
-			"onStartRunEval": [
-				" alert( 'Not Ready, Yet.' ); "
-			]
-		},
-		{
-			"modeName": "c6_Spec",
-			"onStartRunEval": [
-				" alert( 'Not Ready, Yet.' ); "
-			]
+			"onStageFrameMoveEval": [
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); ",
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
+			],
+			"NOTES": "MORE ONES: c6_King, c6_Spec"
 		},
 		{
 			"modeName": "portal2",
@@ -242,7 +253,9 @@
 
 				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
-			"onStageFrameMoveEval": [ ]	
+			"onStageFrameMoveEval": [
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
+			 ]	
 		},
 		{
 			"modeName": "portal4",
@@ -255,7 +268,35 @@
 
 				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
-			"onStageFrameMoveEval": [ ]	
+			"onStageFrameMoveEval": [ 
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
+			]	
+		},
+		{
+			"modeName": "c6_ZMove",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 20; ",
+				" INFO.frameCount = 0; ",
+				" INFO.maxCircleSpawnNum = 1; ",
+				" INFO.circleSpawnCount = 0; ",
+				" ",
+				" INFO.circleProp = Util.cloneJson( INFO.circlePropMin ); ",
+				" ",
+				" /* ---- Disable Features ---- */ ",
+				" INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
+				" ",
+				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
+			],
+			"onStageFrameMoveEval": [
+				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
+				" { ",
+				"   var circleContainer = CircleManager.createCircleObj( INFO.circleProp ); ",
+				"   INFO.circleSpawnCount++; ",
+				"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext_ZigZag( container ); ",
+				" } ",
+				" ",
+				" INFO.frameCount++; "				
+			]
 		}
 	],
 	"structureNotes":

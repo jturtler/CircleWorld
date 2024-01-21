@@ -182,6 +182,14 @@ MovementHelper.collisionExceptions_Add = function( itemData, inCollisionObj )
 };
 
 
+MovementHelper.moveNext_ZigZag = function( container )
+{
+	// Random movement?  Remembering visited place?  by nearBy position xy / section area?
+
+
+};
+
+
 // -----------------------------------
 
 MovementHelper.getWallReached = function (obj, movement, canvasHTML ) 

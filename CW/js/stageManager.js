@@ -19,19 +19,21 @@ StageManager.startUp = function (infoJson, options)
 	createjs.Touch.enable( StageManager.stage );
 
 	// 2. setUp the rendering of frames..
-	StageManager.setFramerate_Event();
+	StageManager.setStage_Events();
 };
 
 // --------------------
 // --- Frame Run
 
-StageManager.setFramerate_Event = function () 
+StageManager.setStage_Events = function () 
 {
 	// createjs.Ticker.framerate = framerate;
 	createjs.Ticker.removeEventListener( 'tick', StageManager.frameMove );
 	createjs.Ticker.addEventListener( 'tick', StageManager.frameMove );
 
 	StageManager.stage.addEventListener( 'stagemouseup', CommonObjManager.objMouseUpAction )
+
+	StageManager.stage.addEventListener( 'stagemousemove', CommonObjManager.onMouseMove )
 };
 
 // ----------------------------------------------
@@ -125,11 +127,13 @@ StageManager.stageStopStart = function ( option )
 	{
 		if ( spanMsg ) WorldRender.spanInfoTag.text( 'Stopped.. ' );
 		$( '#spanStopStart' ).text( 'tart' ); // set button text as 'start' for indicating 'start' again by button click.
+		$( '#btnStopStart' ).css( 'background-color', 'tomato' );
 	}
 	else 
 	{
 		if ( spanMsg ) WorldRender.spanInfoTag.text( 'Started Again.. ' );
 		$( '#spanStopStart' ).text( 'top' ); // set button text as 'start' for indicating 'start' again by button click.
+		$( '#btnStopStart' ).css( 'background-color', '' )
 	}
 };
 

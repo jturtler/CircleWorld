@@ -183,6 +183,33 @@ CommonObjManager.removeAllTempLines = function()
 // ---------------------------------
 // Add long click?  double click?  --> to open Up 'Panel' with the obj selection?
 
+CommonObjManager.onMouseMove = function( e )
+{
+	if ( CommonObjManager.mouseDownObj ) 
+	{
+		var posX = e.stageX;
+		var posY = e.stageY;
+
+		var srcObj = CommonObjManager.mouseDownObj.obj;
+
+		if ( !srcObj.itemData.forceMoves ) srcObj.itemData.forceMoves = [];
+		var movesLength = srcObj.itemData.forceMoves.length;
+
+		var newPosition = { x: posX, y: posY };
+		var prevPosition = ( movesLength > 0 ) ? srcObj.itemData.forceMoves[ movesLength - 1 ] : undefined;
+		var lineColor = INFO.ObjSettings.CircleSettings.uiLogic.swipeDirectionLineColor;
+
+		// if previous position exists, draw line between prev to now position.
+		if ( prevPosition ) {
+			newPosition.lineShape = CommonObjManager.drawLine( { from: prevPosition, to: newPosition, color: lineColor, addToStage: true } );
+			StageManager.stage.update(); // Draw lines on each move?
+		}
+
+		srcObj.itemData.forceMoves.push( newPosition );
+	}
+};
+
+
 CommonObjManager.objMouseDownAction = function ( e )
 {
 	var container = e.currentTarget;
@@ -207,35 +234,12 @@ CommonObjManager.objMouseDownAction = function ( e )
 			stageY: e.stageY,
 			time: new Date().getTime(),
 			status: 'mouseDown',
-			moveTraces: [],
 			selectShape: CommonObjManager.drawShapeLine_Obj( container, { color: uiLogic.clickHighlightColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
 		}; 
 
 		StageManager.stage.update();
 	}
 };
-
-CommonObjManager.onMouseMove = function( e )
-{
-	if ( CommonObjManager.mouseDownObj ) 
-	{
-		var posX = e.clientX;
-		var posY = e.clientY;
-
-		var srcObj = CommonObjManager.mouseDownObj.obj;
-
-		if ( !srcObj.itemData.forceMoves ) srcObj.itemData.forceMoves = [];
-		var movesLength = srcObj.itemData.forceMoves.length;
-
-		var newPosition = { x: posX, y: posY };
-		var prevPosition = ( movesLength > 0 ) ? srcObj.itemData.forceMoves[ movesLength - 1 ] : undefined;
-		var lineColor = INFO.ObjSettings.CircleSettings.uiLogic.swipeDirectionLineColor;
-
-		if ( prevPosition ) newPosition.lineShape = CommonObjManager.drawLine( { from: prevPosition, to: newPosition, color: lineColor, addToStage: true } );
-
-		srcObj.itemData.forceMoves.push( newPosition );
-	}
-}
 
 // Stage Event
 CommonObjManager.objMouseUpAction = function ( e )
@@ -249,18 +253,12 @@ CommonObjManager.objMouseUpAction = function ( e )
 		var trgXY = { x: e.stageX, y: e.stageY };
 		var distance = MovementHelper.getDistance( srcObj, trgXY );
 
-		if ( distance > 10 ) 
-		{
+		if ( distance > 10 ) {
 			srcObj.itemData.angle = MovementHelper.getAngleToTarget( srcObj, trgXY );
-
 			CommonObjManager.drawLine_ForPeriod( srcObj, trgXY, { color: INFO.ObjSettings.CircleSettings.uiLogic.swipeDirectionLineColor } );
-		}
-		else {
-			// CommonObjManager.clickObjectEvent( srcObj );
 		}
 		*/
 
-		
 		// ----------------------
 		CommonObjManager.clearMouseDownShape();
 		CommonObjManager.mouseDownObj = undefined;
@@ -273,39 +271,6 @@ CommonObjManager.objMouseUpAction = function ( e )
 		if ( !CommonObjManager.mouseDownTime_StagePaused ) StageManager.stageStopStart( { bStop: false } );
 	
 	}
-};
-
-// { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'circle' / 'square' )
-CommonObjManager.drawShapeLine_Obj = function ( container, option )
-{
-	if ( !option ) option = {};
-
-	option = Util.cloneJson( option ); // Debugging - for some reason, this option is being reused?  shared?
-
-	var color = ( option.color ) ? option.color: 'green';
-	var sizeRate = ( option.sizeRate ) ? option.sizeRate: 1;
-	var sizeOffset = ( option.sizeOffset ) ? option.sizeOffset: 0;
-	var shape = ( option.shape ) ? option.shape: 'rect';
-
-	var itemData = container.itemData;
-
-	var width_halfUp = ( itemData.width_half + sizeOffset ) * sizeRate;
-	if ( option.width_half ) width_halfUp = option.width_half; // If direct size were entered, set it with that size..
-	
-	var selectedShape = new createjs.Shape();
-	if ( shape === 'rect' )
-	{
-		var widthFull = width_halfUp * 2;
-		selectedShape.graphics.setStrokeStyle(1).beginStroke( color ).drawRect( -width_halfUp, -width_halfUp, widthFull, widthFull );
-	}
-	else if ( shape === 'circle' )
-	{	
-		selectedShape.graphics.setStrokeStyle(1).beginStroke( color ).drawCircle(0, 0, width_halfUp );
-	}
-
-	container.addChild( selectedShape );
-
-	return selectedShape;
 };
 
 CommonObjManager.clearMouseDownShape = function ()
@@ -325,17 +290,21 @@ CommonObjManager.clickObjectEvent = function ( e )
 	var container = e.currentTarget;
 
 	if ( container.itemData ) 
-	{
+	{		
 		var itemData = container.itemData;
 		console.log( itemData );
 		WorldRender.spanInfoText( 'Item Selected: ' + itemData.name );
+
+		// Stop the movement when clicked.
+		StageManager.stageStopStart( { bStop: true } );
+
 
 		// Clear other selections..
 		CommonObjManager.clearClickSelection_NTimeout();
 
 		CommonObjManager.clickedContainer = container;
 		
-		var selectedShape = CommonObjManager.drawShapeLine_Obj( container, { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'rect' } )
+		var selectedShape = CommonObjManager.drawShapeLine_Obj( container, { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 2, shape: 'rect' } )
 		CommonObjManager.clickedContainer_shape = selectedShape;
 
 		StageManager.stage.update(); // This could be optional
@@ -467,6 +436,73 @@ CommonObjManager.drawShape = function( option )
 	return shape;
 };
 
+
+// { color: CommonObjManager.selectedColor, sizeRate: 1.0, sizeOffset: 4, shape: 'circle' / 'square' )
+CommonObjManager.drawShapeLine_Obj = function ( container, option )
+{
+	if ( !option ) option = {};
+
+	option = Util.cloneJson( option ); // Debugging - for some reason, this option is being reused?  shared?
+
+	var color = ( option.color ) ? option.color: 'green';
+	var sizeRate = ( option.sizeRate ) ? option.sizeRate: 1;
+	var sizeOffset = ( option.sizeOffset ) ? option.sizeOffset: 0;
+	var shape = ( option.shape ) ? option.shape: 'rect';
+
+	var itemData = container.itemData;
+
+	var width_halfUp = ( itemData.width_half + sizeOffset ) * sizeRate;
+	if ( option.width_half ) width_halfUp = option.width_half; // If direct size were entered, set it with that size..
+	
+	var selectedShape = new createjs.Shape();
+	if ( shape === 'rect' )
+	{
+		var widthFull = width_halfUp * 2;
+		selectedShape.graphics.setStrokeStyle(1).beginStroke( color ).drawRect( -width_halfUp, -width_halfUp, widthFull, widthFull );
+	}
+	else if ( shape === 'circle' )
+	{	
+		selectedShape.graphics.setStrokeStyle(1).beginStroke( color ).drawCircle(0, 0, width_halfUp );
+	}
+
+	container.addChild( selectedShape );
+
+	return selectedShape;
+};
+
+CommonObjManager.drawLabel = function( option ) //color, from, to ) 
+{
+	if ( !option ) option = {};
+	var color = ( option.color ) ? option.color: 'Blue';
+	var text = ( option.text ) ? option.text: '';
+	var yPos = ( option.yPos ) ? option.yPos: 15;
+
+	var label = ( option.label ) ? option.label : new createjs.Text( text, 'normal 10px Arial', color );
+
+	label.text = text;
+	label.textAlign = 'center';
+	label.textBaseline = 'middle';
+	label.y = yPos;
+	if ( option.container ) option.container.addChild( label );	
+
+	return label;
+};
+
+
+CommonObjManager.drawStrengthLabel = function( container, option )
+{
+	if ( !option ) option = {};
+
+	var itemData = container.itemData;
+
+	option.text = Math.round( container.itemData.strength );
+	option.label = container.ref_StgLabel;
+
+	option.yPos = Math.round( itemData.width_half / 2.0 );
+	if ( itemData.sizeMaxReached ) option.color = 'white'; // if max reached, the color is likely darker colr..
+
+	return CommonObjManager.drawLabel( option );
+};
 
 // -------------------------------------
 
