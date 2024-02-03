@@ -57,9 +57,9 @@ WorldRender.setUp_Tag_Events = function()
 	// Add Circle
 	$( '#btnAddObj' ).click( function() 
 	{
+		// NOT BEING USED --> Used in 'config.json' instead..
 		// Can be overridden from config appMode
 		var dataInfo = { color: 'black', startPosition: AppUtil.getPosition_Center() };
-
 		CircleManager.createCircleObj( dataInfo );
 
 		// If the stage is paused, show the added circle right away by updating stage.

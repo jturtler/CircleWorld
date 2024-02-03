@@ -13,7 +13,8 @@
 				" /* ShortCut INFO variables to long named ones.. */ ",
 				" INFO.CIR_SETS = INFO.ObjSettings.CircleSettings; ",
 				" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; ",
-				" INFO.C_W4CR = INFO.CIR_SETS.innerCircle_W4CR; "
+				" INFO.C_W4CR = INFO.CIR_SETS.innerCircle_W4CR; ",
+				" INFO.C_AgeL = INFO.CIR_SETS.ageLogic; "
 			],
 			"CircleSettings": 
 			{
@@ -26,7 +27,7 @@
 
 						" /* --- float addition produce long decimal number, ignore it. --- */ ",
 						" itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', INFO.C_Size.width_half_UpByAge ); ",
-						" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthChangeRate ); ",
+						" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthIncrease ); ",
 						" itemData.behaviors.proxyDistance = CircleManager.setAgeAdjustedProxyDistance( itemData ); ",
 
 						" if ( !itemData.sizeMaxReached && itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
@@ -84,10 +85,10 @@
 					"onCollision": "fight"
 				},
 				"fightLogic": {
-					"fightWinSizeChange": 0.3,
-					"fightLoseSizeChange": 0.6,
-					"fightWinStrengthChange": 0.3,
-					"fightLoseStrengthChange": 0.6,
+					"fightWinSizeChange": 0.2,
+					"fightLoseSizeChange": -0.5,
+					"fightWinStrengthChange": 0.1,
+					"fightLoseStrengthChange": -0.5,
 					"winEval": [
 						" var winObjT = INFO.TempVars.winObj; ",
 						" CircleManager.winStatusChanges( winObjT ); ",
@@ -132,7 +133,7 @@
 			"speed": " Util.getRandomInRange(5, 8); ",
 			"width_half": " Util.getRandomInRange(8, 13); ",
 			"strength": " Util.getRandomInRange(8, 13); ",
-			"strengthChangeRate": " Util.getRandomInRange( 2, 5 ); ",
+			"strengthIncrease": " Util.getRandomInRange( 1, 3 ); ",
 			"angle": " Util.getRandomInRange( 0, 360 ); ",
 			"color": " INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color.color; ",
 			"team": " INFO.TempVars_color; ",
@@ -141,7 +142,7 @@
 			"innerCircle": { },
 			"info": { "fearObjs": [], "killCount": 0 },
 			"k_Note": "should remember (for a while) the obj that hurt you.  And after 10 kill, it can transform..",
-			"onObjCreate_EvalFields": [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.strength", "itemData.strengthChangeRate", "itemData.angle", "itemData.color", "itemData.team", "itemData.startPosition" ]
+			"onObjCreate_EvalFields": [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.strength", "itemData.strengthIncrease", "itemData.angle", "itemData.color", "itemData.team", "itemData.startPosition" ]
 		},
 
 		"onStartRunEval_Circle": [
@@ -150,25 +151,25 @@
 			" INFO.maxCircleSpawnNum = 30; ",
 			" INFO.circleSpawnCount = 0; ",
 
-			" INFO.circleProp = Util.cloneJson( INFO.circlePropMin ); ",
-
 			" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 		],
 		"onStageFrameMoveEval_Circle": [
 			" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
 			" { ",
-			"   var circleContainer = CircleManager.createCircleObj( INFO.circleProp ); ",
+			"   var circleContainer = CircleManager.createCircleObj( Util.cloneJson( INFO.circlePropMin ) ); ",
 			"   INFO.circleSpawnCount++; ",
-			"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
+			"   circleContainer.itemData.onFrameChange = container => MovementHelper.moveNext( container ); ",
 			" } ",
 			" ",
 			" INFO.frameCount++; "	
 		],
 		"onAddCircleKeyClick": [
-			" var dataInfo = { color: 'black', startPosition: AppUtil.getPosition_Center() }; ",
+			" var dataInfo = { color: 'black', startPosition: AppUtil.getPosition_Center(), width_half: CircleManager.getAverage( 'width_half' ), strength: CircleManager.getAverage( 'strength' ) }; ",
 			" dataInfo = Util.mergeJson( Util.cloneJson( INFO.circlePropMin ), dataInfo ); ",
 			" Util.RemoveValInArray( dataInfo.onObjCreate_EvalFields, 'itemData.color' ); ",
 			" Util.RemoveValInArray( dataInfo.onObjCreate_EvalFields, 'itemData.startPosition' ); ",
+			" Util.RemoveValInArray( dataInfo.onObjCreate_EvalFields, 'itemData.width_half' ); ",
+			" Util.RemoveValInArray( dataInfo.onObjCreate_EvalFields, 'itemData.strength' ); ",
 			
 			" CircleManager.createCircleObj( dataInfo ); ",
 	
@@ -192,19 +193,17 @@
 				" INFO.maxCircleSpawnNum = 30; ",
 				" INFO.circleSpawnCount = 0; ",
 				" ",
-				" INFO.circleProp = Util.cloneJson( INFO.circlePropMin ); ",
-				" ",
 				" /* ---- Disable Features ---- */ ",
-				" INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
+				" INFO.C_AgeL.atAgeChanges = ''; ",
 				" ",
 				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
 			"onStageFrameMoveEval": [
 				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
 				" { ",
-				"   var circleContainer = CircleManager.createCircleObj( INFO.circleProp ); ",
+				"   var circleContainer = CircleManager.createCircleObj( Util.cloneJson( INFO.circlePropMin ) ); ",
 				"   INFO.circleSpawnCount++; ",
-				"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext( container ); ",
+				"   circleContainer.itemData.onFrameChange = container => MovementHelper.moveNext( container ); ",
 				" } ",
 				" ",
 				" INFO.frameCount++; "				
@@ -247,9 +246,9 @@
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
 				" INFO.appMode_portal = true; ",
-				" var circleProp = Util.cloneJson( INFO.circlePropMin ); ",
+				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['5']; ",
 				" ",
-				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: circleProp } ); ",
+				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: Util.cloneJson( INFO.circlePropMin ) } ); ",
 
 				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
@@ -262,9 +261,9 @@
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
 				" INFO.appMode_portal = true; ",
-				" var circleProp = Util.cloneJson( INFO.circlePropMin ); ",
+				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['5']; ",
 				" ",
-				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: circleProp } ); ",
+				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: Util.cloneJson( INFO.circlePropMin ) } ); ",
 
 				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
 			],
@@ -273,26 +272,26 @@
 			]	
 		},
 		{
-			"modeName": "c6_ZMove",
+			"modeName": "c6_ZLife",
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
 				" INFO.frameCount = 0; ",
 				" INFO.maxCircleSpawnNum = 1; ",
 				" INFO.circleSpawnCount = 0; ",
 				" ",
-				" INFO.circleProp = Util.cloneJson( INFO.circlePropMin ); ",
-				" ",
 				" /* ---- Disable Features ---- */ ",
 				" INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
 				" ",
-				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
+				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); ",
+				" ",
+				" /* Create a circle.. with some features.. */ ",
+				" "
 			],
 			"onStageFrameMoveEval": [
-				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
+				" /* circleContainer.itemData.onFrameChange = container => MovementHelper.moveNext_Target( container ); */ ",
+
+				" if ( ( INFO.frameCount % 30 ) === 0 ) ", 
 				" { ",
-				"   var circleContainer = CircleManager.createCircleObj( INFO.circleProp ); ",
-				"   INFO.circleSpawnCount++; ",
-				"   circleContainer.itemData.onFrameMove = container => MovementHelper.moveNext_ZigZag( container ); ",
 				" } ",
 				" ",
 				" INFO.frameCount++; "				
@@ -315,7 +314,7 @@
 					"name": "circle_blue_1",
 					"angle": 127,
 					"strength": 7,
-					"strengthChangeRate": 0.20,
+					"strengthIncrease": 0.20,
 					"innerCircle": { "width_half": 4, "color": "black" },
 					"behaviors": { "proxyDetection": true, "bounceAction": true, "chaseAction": true }
 				},
@@ -336,7 +335,7 @@
 					"speed": 0,
 					"name": "portal_blue_1",
 					"strength": 1000,
-					"strengthChangeRate": 0,
+					"strengthIncrease": 0,
 					"spawnFreqency": 3,
 					"remainSpawnNum": 15,
 					"positionFixed": false					

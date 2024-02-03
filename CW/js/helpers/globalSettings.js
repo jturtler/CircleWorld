@@ -19,7 +19,7 @@ ObjSettings.DefaultJson = {
 				" var obj = INFO.TempVars.obj; ",
 				" var itemData = obj.itemData; ",
 				" itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', INFO.C_Size.width_half_UpByAge ); ",
-				" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthChangeRate ); ",
+				" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthIncrease ); ",
 
 				" if ( !itemData.sizeMaxReached && itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
 				"    itemData.sizeMaxReached = true; ",

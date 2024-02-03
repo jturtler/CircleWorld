@@ -11,7 +11,7 @@ OtherObjManager.otherObjProp_DEFAULT = {
 	width_half: 8,
 	speed: 0,
 	strength: 0.1,
-	strengthChangeRate: 0,
+	strengthIncrease: 0,
 	color: "black",
 	team: "",
 	onObjCreate_EvalFields: [ "itemData.name" ] //, "itemData.color", "itemData.team" ]	
@@ -50,7 +50,7 @@ OtherObjManager.createObj = function ( inputJson )
 
 
 	// -- SET EVENTS SECTION ---
-	//		- Default event handler ('onFrameMove', 'onClick' )
+	//		- Default event handler ('onFrameChange', 'onClick' )
 	itemData.onFrameMove_ClassBase = container => {};
 	//if ( !itemData.onCanvasSizeChanged ) itemData.onCanvasSizeChanged = container => OtherObjManager.repositionContainer( container );
 

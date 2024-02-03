@@ -14,7 +14,7 @@ PortalManager.portalProp_DEFAULT = {
 	width_half: 10,
 	speed: 0,
 	strength: 150,	// Make it decrease as it is attacked by circle?   slow increase rate?
-	strengthChangeRate: 1,
+	strengthIncrease: 1,
 	color: " INFO.TempVars_color = PortalManager.getNextPortalTeamColor( PortalManager.getPortalContainers().length ); INFO.TempVars_color; ",
 	team: " INFO.TempVars_color; ",
 
@@ -43,7 +43,7 @@ PortalManager.createPortalObj = function ( inputJson )
 {
 	if ( !inputJson ) inputJson = {};
  
-	var portalProp = ( INFO.baseProtalProp ) ? Util.cloneJson( INFO.baseProtalProp ): Util.cloneJson( PortalManager.portalProp_DEFAULT );
+	var portalProp = Util.cloneJson( PortalManager.portalProp_DEFAULT );
 	Util.mergeJson( portalProp, inputJson );
 	
 	Util.onObjCreate_EvalFields( portalProp );
@@ -57,10 +57,10 @@ PortalManager.createPortalObj = function ( inputJson )
 
 
 	// -- SET EVENTS SECTION ---
-	//		- Default event handler ('onFrameMove', 'onClick' )
+	//		- Default event handler ('onFrameChange', 'onClick' )
 	itemData.onFrameMove_ClassBase = container => {};
 	if ( !itemData.onCanvasSizeChanged ) itemData.onCanvasSizeChanged = container => PortalManager.repositionContainer( container );
-	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => PortalManager.spawnCircle( container );
+	if ( !itemData.onFrameChange ) itemData.onFrameChange = container => PortalManager.spawnCircle( container );
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
 	if ( !itemData.onDblClick ) itemData.onDblClick = ( e ) => {  CommonObjManager.dblClickObjectEvent( e );  };
 

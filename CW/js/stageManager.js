@@ -69,10 +69,10 @@ StageManager.frameMove = function ( e )
 						if ( itemData.onAgeIncrease ) itemData.onAgeIncrease( container );	
 					}
 					if ( itemData.onFrameMove_ClassBase ) itemData.onFrameMove_ClassBase( container );	
-					if ( itemData.onFrameMove ) itemData.onFrameMove( container );		
+					if ( itemData.onFrameChange ) itemData.onFrameChange( container );		
 				}
 			}
-			catch( errMsg ) {  console.error( 'ERROR in StageManager.frameMove, in children container onFrameMove, ' + errMsg ); }
+			catch( errMsg ) {  console.error( 'ERROR in StageManager.frameMove, in children container onFrameChange, ' + errMsg ); }
 		});
 
 			

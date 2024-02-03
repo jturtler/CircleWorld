@@ -13,11 +13,11 @@ CircleManager.circleProp_DEFAULT = {
 	width_half: "Util.getRandomInRange(8, 13)",
 	angle: "Util.getRandomInRange( 0, 360 )",
 	strength: " Util.getRandomInRange(8, 13); ",
-	strengthChangeRate: " Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
+	strengthIncrease: " Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
 	color: " INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color; ",
 	team: " INFO.TempVars_color; ",
 	behaviors: { },
-	onObjCreate_EvalFields: [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.strength", "itemData.strengthChangeRate", "itemData.color", "itemData.team" ]
+	onObjCreate_EvalFields: [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.strength", "itemData.strengthIncrease", "itemData.color", "itemData.team" ]
 };
 
 // -----------------------------
@@ -40,7 +40,7 @@ CircleManager.createCircleObj = function ( inputObjProp )
 	if ( !inputObjProp ) inputObjProp = {};
  
 	// Circle related 'prop' default - overwritten by 'inputObjProp' is has any of the properties..
-	var circleProp = ( INFO.baseCircleProp ) ? Util.cloneJson( INFO.baseCircleProp ): Util.cloneJson( CircleManager.circleProp_DEFAULT );
+	var circleProp = Util.cloneJson( CircleManager.circleProp_DEFAULT );  // ( INFO.baseCircleProp ) ? Util.cloneJson( INFO.baseCircleProp ): 
 	Util.mergeJson( circleProp, inputObjProp );
 
 	Util.onObjCreate_EvalFields( circleProp );
@@ -53,11 +53,11 @@ CircleManager.createCircleObj = function ( inputObjProp )
 
 
 	// -- SET EVENTS SECTION ---
-	//		- Default 'circle' event handler ('onFrameMove', 'onClick' )
-	// 'onFrameMove_ClassBase' - Not overridable / always run(?) 'onFrameMove' ClassBase version
+	//		- Default 'circle' event handler ('onFrameChange', 'onClick' )
+	// 'onFrameMove_ClassBase' - Not overridable / always run(?) 'onFrameChange' ClassBase version
 	itemData.onFrameMove_ClassBase = container => { };
 	itemData.onAgeIncrease = container => CircleManager.ageIncreaseActions( container );
-	if ( !itemData.onFrameMove ) itemData.onFrameMove = container => MovementHelper.moveNext( container );
+	if ( !itemData.onFrameChange ) itemData.onFrameChange = container => MovementHelper.moveNext( container );
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
 	if ( !itemData.onDblClick ) itemData.onDblClick = ( e ) => {  CommonObjManager.dblClickObjectEvent( e );  };
 
@@ -213,14 +213,14 @@ CircleManager.decreaseSpeed = function( obj, change )
 
 CircleManager.decreaseSize = function( obj, change )
 {
-	obj.itemData.width_half -= change;
+	obj.itemData.width_half += change; // 'change' has minus value
 
 	if ( obj.itemData.width_half < 0 ) obj.itemData.width_half = 0;
 };
 
 CircleManager.decreseStrength = function( obj, change )
 {
-	obj.itemData.strength -= change;
+	obj.itemData.strength += change;
 
 	if ( obj.itemData.strength < 0 ) obj.itemData.strength = 0;
 };
@@ -265,4 +265,15 @@ CircleManager.adjustUpWhenMax = function( obj, type, amount )
 	}
 	
 	return amount;
+};
+
+
+CircleManager.getAverage = function( prop )
+{
+	var list = CircleManager.getCircleContainers();
+	var total = 0;
+
+	list.forEach( item => total += item[prop] );
+
+	return Math.round( total / list.length );
 };
