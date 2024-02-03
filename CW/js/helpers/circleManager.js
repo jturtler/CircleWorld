@@ -55,7 +55,7 @@ CircleManager.createCircleObj = function ( inputObjProp )
 	// -- SET EVENTS SECTION ---
 	//		- Default 'circle' event handler ('onFrameChange', 'onClick' )
 	// 'onFrameMove_ClassBase' - Not overridable / always run(?) 'onFrameChange' ClassBase version
-	itemData.onFrameMove_ClassBase = container => { };
+	//itemData.onFrameMove_ClassBase = container => { };
 	itemData.onAgeIncrease = container => CircleManager.ageIncreaseActions( container );
 	if ( !itemData.onFrameChange ) itemData.onFrameChange = container => MovementHelper.moveNext( container );
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };

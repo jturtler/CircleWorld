@@ -25,10 +25,15 @@ AppUtil.appReloadWtMsg = function( msg, option )
 };
 
 		
-AppUtil.fitCanvasSize = function( infoJson )
+AppUtil.fitCanvasSize = function( infoJson, option )
 {
-	infoJson.canvasHtml.width = infoJson.winTag.width() - AppUtil.OFFSET_WIDTH;
-	infoJson.canvasHtml.height = infoJson.winTag.height() - AppUtil.OFFSET_HEIGHT;
+	if ( !option ) option = {};
+
+	var offset_width = ( option.offset_width ) ? option.offset_width: AppUtil.OFFSET_WIDTH;
+	var offset_height = ( option.offset_height ) ? option.offset_height: AppUtil.OFFSET_HEIGHT;
+
+	infoJson.canvasHtml.width = infoJson.winTag.width() - offset_width;
+	infoJson.canvasHtml.height = infoJson.winTag.height() - offset_height;
 };
 
 
@@ -64,6 +69,20 @@ AppUtil.getPosition_Random = function()
 	};
 };
 
+
+AppUtil.getPosition_Type = function( option )
+{
+	if ( !option ) option = {};
+	var offset = ( option.offset ) ? option.offset: 100;
+
+	var canvasHtml = WorldRender.infoJson.canvasHtml;	
+	
+	if ( !option.type ) return AppUtil.getPosition_Center();
+	else if ( option.type === 'topLeft' ) return { x: offset, y: offset };
+	else if ( option.type === 'topRight' ) return { x: canvasHtml.width - offset, y: offset };
+	else if ( option.type === 'bottomRight' ) return { x: canvasHtml.width - offset, y: canvasHtml.height - offset };
+	else if ( option.type === 'bottomLeft' ) return { x: offset, y: canvasHtml.height - offset };
+};
 
 // ==========================================
 // ====  BLOCK / UNBLOCK PAGE

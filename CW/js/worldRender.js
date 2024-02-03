@@ -112,9 +112,11 @@ WorldRender.setUp_Tag_Events = function()
 // -------------------------------
 // --- Event Related Methods
 
-WorldRender.resizeCanvas = function () 
+WorldRender.resizeCanvas = function ( option ) 
 {
-	AppUtil.fitCanvasSize(WorldRender.infoJson);
+	if ( !option ) option = {};
+
+	AppUtil.fitCanvasSize(WorldRender.infoJson, option );
 	StageManager.adjustCanvasSize( WorldRender.infoJson );
 };
 

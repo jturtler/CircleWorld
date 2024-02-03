@@ -68,7 +68,7 @@ StageManager.frameMove = function ( e )
 						itemData.age++;
 						if ( itemData.onAgeIncrease ) itemData.onAgeIncrease( container );	
 					}
-					if ( itemData.onFrameMove_ClassBase ) itemData.onFrameMove_ClassBase( container );	
+					//if ( itemData.onFrameMove_ClassBase ) itemData.onFrameMove_ClassBase( container );	
 					if ( itemData.onFrameChange ) itemData.onFrameChange( container );		
 				}
 			}

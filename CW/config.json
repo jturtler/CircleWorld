@@ -276,25 +276,64 @@
 			"onStartRunEval": [
 				" createjs.Ticker.framerate = 20; ",
 				" INFO.frameCount = 0; ",
-				" INFO.maxCircleSpawnNum = 1; ",
-				" INFO.circleSpawnCount = 0; ",
+				
+				" WorldRender.resizeCanvas( { offset_height: 60 } ); ",
 				" ",
+				" var mainObjProp = { ",
+				"    name: CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ), ",
+				"    speed: Util.getRandomInRange(1, 3), ",
+				"    width_half: Util.getRandomInRange(1, 2), ",
+				"    strength: Util.getRandomInRange(1, 2), ",
+				"    strengthIncrease: Util.getRandomInRange( 1, 2 ), ",
+				"    angle: Util.getRandomInRange( 10, 80 ), ",
+				"    color: Util.getRandomInList( INFO.colorTeamList ), ",
+				"    team: 'mainCircle', ",
+				"    startPosition: AppUtil.getPosition_Type( { type: 'bottomLeft', offset: 4 } ), ",
+				"    behaviors: {}, ",
+				"    innerCircle: {}, ",
+				"    info: { fearObjs: [], killCount: 0 }, ",
+				"    k_Note: 'should remember (for a while) the obj that hurt you.  And after 10 kill, it can transform..' ",
+				" }; ",
+
+				" var shelterProp = { ",
+				"    name: CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ) + '_Shelter', ",
+				"    speed: 0, ",
+				"    width_half: 30, ",
+				"    strength: 2000, ",
+				"    strengthIncrease: 0, ",
+				"    angle: 0, ",
+				"    color: Util.getRandomInList( INFO.colorTeamList ), ",
+				"    team: 'mainCircle', ",
+				"    startPosition: AppUtil.getPosition_Type( { type: 'bottomLeft', offset: 4 } ), ",
+				"    behaviors: {}, ",
+				"    innerCircle: {}, ",
+				"    info: { fearObjs: [], killCount: 0 }, ",
+				"    k_Note: 'should remember (for a while) the obj that hurt you.  And after 10 kill, it can transform..' ",
+				" }; ",
+
 				" /* ---- Disable Features ---- */ ",
 				" INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
 				" ",
 				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); ",
 				" ",
 				" /* Create a circle.. with some features.. */ ",
-				" "
+				" INFO.mainObj = CircleManager.createCircleObj( Util.cloneJson( mainObjProp ) ); ",
+				" INFO.mainObj.itemData.onFrameChange = container => MovementHelper.moveNext( container ); ",
+
+				" INFO.shelterObj = CircleManager.createCircleObj( Util.cloneJson( shelterProp ) ); ",
+				" INFO.shelterObj.itemData.onFrameChange = container => { }; ",
+				" INFO.shelterObj.itemData.onDraw = container => { }; ",
+				" INFO.shelterObj.itemData.proxyShape = CommonObjManager.drawShapeLine_Obj( INFO.shelterObj, { color: INFO.shelterObj.itemData.color, sizeRate: 1.0, sizeOffset: 200, shape: 'circle' } ); "
 			],
 			"onStageFrameMoveEval": [
-				" /* circleContainer.itemData.onFrameChange = container => MovementHelper.moveNext_Target( container ); */ ",
-
 				" if ( ( INFO.frameCount % 30 ) === 0 ) ", 
 				" { ",
 				" } ",
 				" ",
-				" INFO.frameCount++; "				
+				" INFO.frameCount++; ",
+				" /* Need to display year, info, etc.. Higher bottom or side div? */ ",
+				" /* Mode: 'moveToShelter', 'MoveToTarget',  */ "
+				
 			]
 		}
 	],

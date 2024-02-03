@@ -51,7 +51,7 @@ OtherObjManager.createObj = function ( inputJson )
 
 	// -- SET EVENTS SECTION ---
 	//		- Default event handler ('onFrameChange', 'onClick' )
-	itemData.onFrameMove_ClassBase = container => {};
+	//itemData.onFrameMove_ClassBase = container => {};
 	//if ( !itemData.onCanvasSizeChanged ) itemData.onCanvasSizeChanged = container => OtherObjManager.repositionContainer( container );
 
 	if ( !itemData.onClick ) itemData.onClick = ( e ) => {  CommonObjManager.clickObjectEvent( e );  };
