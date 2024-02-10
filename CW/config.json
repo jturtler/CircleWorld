@@ -278,6 +278,7 @@
 				" INFO.frameCount = 0; ",
 				
 				" WorldRender.resizeCanvas( { offset_height: 60 } ); ",
+				" INFO.TempVars_distanceRange = 200; ",
 				" ",
 				" var mainObjProp = { ",
 				"    name: CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ), ",
@@ -292,6 +293,7 @@
 				"    behaviors: {}, ",
 				"    innerCircle: {}, ",
 				"    info: { fearObjs: [], killCount: 0 }, ",
+				"    onObjCreate_EvalFields: [], ",
 				"    k_Note: 'should remember (for a while) the obj that hurt you.  And after 10 kill, it can transform..' ",
 				" }; ",
 
@@ -308,6 +310,7 @@
 				"    behaviors: {}, ",
 				"    innerCircle: {}, ",
 				"    info: { fearObjs: [], killCount: 0 }, ",
+				"    onObjCreate_EvalFields: [], ",
 				"    k_Note: 'should remember (for a while) the obj that hurt you.  And after 10 kill, it can transform..' ",
 				" }; ",
 
@@ -323,11 +326,13 @@
 				" INFO.shelterObj = CircleManager.createCircleObj( Util.cloneJson( shelterProp ) ); ",
 				" INFO.shelterObj.itemData.onFrameChange = container => { }; ",
 				" INFO.shelterObj.itemData.onDraw = container => { }; ",
-				" INFO.shelterObj.itemData.proxyShape = CommonObjManager.drawShapeLine_Obj( INFO.shelterObj, { color: INFO.shelterObj.itemData.color, sizeRate: 1.0, sizeOffset: 200, shape: 'circle' } ); "
+				" var shObjProp = { color: INFO.shelterObj.itemData.color, sizeRate: 1.0, sizeOffset: INFO.TempVars_distanceRange, shape: 'circle' }; ",
+				" INFO.shelterObj.itemData.proxyShape = CommonObjManager.drawShapeLine_Obj( INFO.shelterObj, shObjProp ); "
 			],
 			"onStageFrameMoveEval": [
 				" if ( ( INFO.frameCount % 30 ) === 0 ) ", 
 				" { ",
+				"    LocationPingManager.pingRandomLocation( { dist_min: 10, dist_max: INFO.TempVars_distanceRange } ); ",
 				" } ",
 				" ",
 				" INFO.frameCount++; ",

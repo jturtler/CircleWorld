@@ -408,11 +408,8 @@ CommonObjManager.drawShape = function( option )
 	// option.updateStage // Draw the shape right away..  not efficient
 
 
-	container.x = itemData.startPosition.x;
-	container.y = itemData.startPosition.y;
-
-
 	var container = ( option.existingContainer ) ? option.existingContainer : new createjs.Container();
+	if ( !option.existingContainer ) {  container.x = position.x;  container.y = position.y;  }
 
 	var shape = ( option.existingShape ) ? option.existingShape : new createjs.Shape();
 
