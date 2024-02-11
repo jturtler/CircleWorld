@@ -66,6 +66,30 @@ MovementHelper.moveNext = function (container)
 	}
 
 	
+	// Priority #1. Go toward to the 'moveTarget'
+	if ( !movementCaseMet )
+	{
+		if ( behaviors && behaviors.moveTarget && behaviors.moveTarget.targetObj )
+		{
+			var clearConditionCheck = Util.evalTryCatch( behaviors.moveTarget.clearConditionEval
+				, { INFO_TempVars: { container: container, targetObj: behaviors.moveTarget.targetObj } } );
+
+			if ( clearConditionCheck ) Util.evalTryCatch( behaviors.moveTarget.clearActionEval
+				, { INFO_TempVars: { container: container, targetObj: behaviors.moveTarget.targetObj } } );
+			else
+			{
+				itemData.statusList.push( 'moveTarget' );
+
+				var changedData = MovementHelper.setDirection_moveTowardTarget( container, behaviors.moveTarget.targetObj, itemData.speed );
+				itemData.angle = changedData.newAngle;
+				movement = changedData.newMovement;
+		
+				movementCaseMet = true;	
+			}
+		}
+	}
+
+
 	// Priority #2. If on Object Collision, Bounce/Attack
 	//			- Otherwise, check for 'Chase' action
 	if ( !movementCaseMet )
@@ -449,12 +473,16 @@ MovementHelper.targetInCollision = function( distance, currWidth_half, targetWid
 
 MovementHelper.setDirection_moveTowardTarget = function( sourceObj, targetObj, speed )
 {
-  var angleToTarget =  Util.decimalSet( MovementHelper.getAngleToTarget( sourceObj, targetObj ), 2 );
-
+	var angleToTarget =  Util.decimalSet( MovementHelper.getAngleToTarget( sourceObj, targetObj ), 2 );
+	// var angleToTarget = MovementHelper.getAngleToTarget( sourceObj, targetObj );
+	
   var angleChange = MovementHelper.getAngleTowardTarget( angleToTarget, sourceObj.itemData.angle, INFO.ObjSettings.CircleSettings.chaseActionLogic.angleChangeMax_perTick );
 
   var newAngle = ( sourceObj.itemData.angle + angleChange + 360 ) % 360;
-			 
+
+  console.log( 'angleToTarget: ' + angleToTarget + ', angleChange: ' + angleChange + ', newAngle: ' + newAngle );
+
+
   var movement = MovementHelper.getMovementCalc( newAngle, speed );
 
   return { newAngle: newAngle, newMovement: movement};
@@ -478,6 +506,7 @@ MovementHelper.getAngleTowardTarget = function( targetAngle, currAngle, maxAngle
 {
   // 1. Get simple angle diff number;
   var angleDiff = targetAngle - currAngle;
+  
 
   // 2. Switch angle diff direction (if large) to smaller angle diff direction.
   if ( angleDiff > 180 ) angleDiff = angleDiff - 360;

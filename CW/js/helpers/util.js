@@ -1,6 +1,7 @@
 
 function Util() { };
 
+Util.rtes1 = 11;
 // ---------------------------
 // GET & CHECK Variable Types Check
 

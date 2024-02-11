@@ -1,6 +1,9 @@
 
 function CommonObjManager() { };
 
+// NEW CHANGES
+
+
 CommonObjManager.mouseDownTime_StagePaused; 
 CommonObjManager.mouseDownObj; // = { stageX, stageY,  }  // on mouse down, pause the stage..
 
@@ -14,6 +17,8 @@ CommonObjManager.selectedColor = 'green';
 CommonObjManager.createdObjCount = 0;
 CommonObjManager.objNameIndex = 0;
 CommonObjManager.objNameList = [];
+
+CommonObjManager.temp1 = 23;
 
 CommonObjManager.itemJsonDefault = {
 	startPosition: { x: 200, y: 200 }, // position can change afterwards if obj is not in stationary one.
@@ -55,6 +60,10 @@ CommonObjManager.createObj = function ( inputJson )
 	Util.mergeJson( itemData, inputJson );
 
 
+	if ( !itemData.behaviors ) itemData.behaviors = {};
+	if ( !itemData.conditionActions ) itemData.conditionActions = [];  // Conditionally Activating Action List
+
+	
 	// Create 'container' (children of 'stage') with 'itemData' in it.
 	var container = CommonObjManager.createStageItem( itemData ); // return 'container'
 
@@ -79,6 +88,32 @@ CommonObjManager.createStageItem = function (itemData)
 	return container;
 };
 
+
+// ------------------------------------
+
+CommonObjManager.conditionActionsPerform = function ( container )
+{
+	if ( container.itemData && container.itemData.conditionActions.length > 0 )
+	{
+		container.itemData.conditionActions.forEach( item => 
+		{
+			try
+			{
+				var checkCondition = true;
+
+				if ( item.conditionEval )
+				{
+					checkCondition = false;
+					checkCondition = Util.evalTryCatch( item.conditionEval, { INFO_TempVars: { obj: container } } );
+				}
+				
+				if ( checkCondition && item.actionEval ) Util.evalTryCatch( actionEval );
+
+			}
+			catch( errMsg ) {  console.log( 'ERROR in CommonObjManager.conditionActionsPerform, ' + errMsg );  }
+		});
+	}
+};
 
 // ------------------------------------
 

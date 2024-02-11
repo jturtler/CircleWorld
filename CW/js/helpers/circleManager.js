@@ -51,7 +51,7 @@ CircleManager.createCircleObj = function ( inputObjProp )
 	var itemData = container.itemData;
 	itemData.objType = CircleManager.objType;
 
-
+	
 	// -- SET EVENTS SECTION ---
 	//		- Default 'circle' event handler ('onFrameChange', 'onClick' )
 	// 'onFrameMove_ClassBase' - Not overridable / always run(?) 'onFrameChange' ClassBase version

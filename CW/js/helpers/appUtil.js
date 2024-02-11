@@ -9,6 +9,8 @@ AppUtil.OFFSET_HEIGHT = 30; // For bottom control space
 AppUtil.appReloading = false;  
 AppUtil.callOnlyOnce_timeoutId;
 
+AppUtil.test1 = 12;
+
 // ==== Methods ======================
 
 AppUtil.appReloadWtMsg = function( msg, option )

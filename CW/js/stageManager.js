@@ -63,6 +63,8 @@ StageManager.frameMove = function ( e )
 				{
 					itemData.statusList = []; // TODO: Move this to other place in later time.. <-- Later, keep last 10 status?
 					CommonObjManager.highlightShapeCountCheck_NClear( container );
+					CommonObjManager.conditionActionsPerform( container );
+					
 
 					if ( itemData.age && aged ) {						
 						itemData.age++;
