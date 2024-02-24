@@ -480,7 +480,7 @@ MovementHelper.setDirection_moveTowardTarget = function( sourceObj, targetObj, s
 
   var newAngle = ( sourceObj.itemData.angle + angleChange + 360 ) % 360;
 
-  console.log( 'angleToTarget: ' + angleToTarget + ', angleChange: ' + angleChange + ', newAngle: ' + newAngle );
+  if ( INFO.debug_angles ) console.log( 'angleToTarget: ' + angleToTarget + ', angleChange: ' + angleChange + ', newAngle: ' + newAngle );
 
 
   var movement = MovementHelper.getMovementCalc( newAngle, speed );

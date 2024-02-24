@@ -151,7 +151,7 @@
 			" INFO.maxCircleSpawnNum = 30; ",
 			" INFO.circleSpawnCount = 0; ",
 
-			" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
+			" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
 		],
 		"onStageFrameMoveEval_Circle": [
 			" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
@@ -186,49 +186,6 @@
 	"appModes":
 	[
 		{
-			"modeName": "c1_Spawn30",
-			"onStartRunEval": [
-				" createjs.Ticker.framerate = 20; /* 20 frames run in a seconds.. */ ",
-				" INFO.frameCount = 0; ",
-				" INFO.maxCircleSpawnNum = 30; ",
-				" INFO.circleSpawnCount = 0; ",
-				" ",
-				" /* ---- Disable Features ---- */ ",
-				" INFO.C_AgeL.atAgeChanges = ''; ",
-				" ",
-				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
-			],
-			"onStageFrameMoveEval": [
-				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
-				" { ",
-				"   var circleContainer = CircleManager.createCircleObj( Util.cloneJson( INFO.circlePropMin ) ); ",
-				"   INFO.circleSpawnCount++; ",
-				"   circleContainer.itemData.onFrameChange = container => MovementHelper.moveNext( container ); ",
-				" } ",
-				" ",
-				" INFO.frameCount++; "				
-			]
-		},
-		{
-			"modeName": "c2_Bounce",
-			"onStartRunEval": [
-				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
-
-				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['10']; "
-			],
-			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
-		},
-		{
-			"modeName": "c3_Age10",
-			"onStartRunEval": [
-				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
-
-				" INFO.ObjSettings.CircleSettings.proxyDetectionLogic.showDetectionLines = true; ",
-				" INFO.ObjSettings.CircleSettings.chaseActionLogic = ''; "
-			],
-			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "			
-		},
-		{
 			"modeName": "c5_Chase",
 			"onStartRunEval": [
 				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
@@ -250,7 +207,7 @@
 				" ",
 				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: Util.cloneJson( INFO.circlePropMin ) } ); ",
 
-				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
 			],
 			"onStageFrameMoveEval": [
 				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
@@ -265,7 +222,7 @@
 				" ",
 				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: Util.cloneJson( INFO.circlePropMin ) } ); ",
 
-				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); "
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
 			],
 			"onStageFrameMoveEval": [ 
 				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
@@ -323,7 +280,7 @@
 				" /* ---- Disable Features ---- */ ",
 				" INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
 				" ",
-				" $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); ",
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ ",
 				" ",
 				" /* Create a circle.. with some features.. */ ",
 				" INFO.mainObj = CircleManager.createCircleObj( Util.cloneJson( mainObjProp ) ); ",
@@ -356,6 +313,67 @@
 				" ",
 				" INFO.frameCount++; "				
 			]
+		}
+	],
+	"appModes_OLD":
+	[
+		{
+			"modeName": "c1_Spawn30",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 20; /* 20 frames run in a seconds.. */ ",
+				" INFO.frameCount = 0; ",
+				" INFO.maxCircleSpawnNum = 30; ",
+				" INFO.circleSpawnCount = 0; ",
+				" ",
+				" /* ---- Disable Features ---- */ ",
+				" INFO.C_AgeL.atAgeChanges = ''; ",
+				" ",
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
+			],
+			"onStageFrameMoveEval": [
+				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
+				" { ",
+				"   var circleContainer = CircleManager.createCircleObj( Util.cloneJson( INFO.circlePropMin ) ); ",
+				"   INFO.circleSpawnCount++; ",
+				"   circleContainer.itemData.onFrameChange = container => MovementHelper.moveNext( container ); ",
+				" } ",
+				" ",
+				" INFO.frameCount++; "				
+			]
+		},
+		{
+			"modeName": "c2_Bounce",
+			"onStartRunEval": [
+				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
+
+				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['10']; "
+			],
+			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
+		},
+		{
+			"modeName": "c3_Age10",
+			"onStartRunEval": [
+				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
+
+				" INFO.ObjSettings.CircleSettings.proxyDetectionLogic.showDetectionLines = true; ",
+				" INFO.ObjSettings.CircleSettings.chaseActionLogic = ''; "
+			],
+			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "			
+		},
+		{
+			"modeName": "portal2",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 20; ",
+				" INFO.appMode_portal = true; ",
+				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['5']; ",
+				" ",
+				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: Util.cloneJson( INFO.circlePropMin ) } ); ",
+
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
+			],
+			"onStageFrameMoveEval": [
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
+			 ]	
 		}
 	],
 	"structureNotes":
