@@ -335,6 +335,16 @@
 				" var shObjProp = { color: INFO.shelterObj.itemData.color, sizeRate: 1.0, sizeOffset: INFO.TempVars_distanceRange, shape: 'circle' }; ",
 				" INFO.shelterObj.itemData.proxyShape = CommonObjManager.drawShapeLine_Obj( INFO.shelterObj, shObjProp ); ",
 
+
+				" /* var pingShapeInfoJson = { existingContainer: pingObj, updateStage: true, color: 'red', width_half: 2 }; ",
+
+				" container.itemData.behaviors.moveTarget = { ",
+				"  targetObj: pingObj, ",
+				"  clearConditionEval: [ ' ( MovementHelper.getDistance( INFO.TempVars.container, INFO.TempVars.targetObj ) <= LocationPingManager.touchOffset( INFO.TempVars.container )  ) ' ], ",
+				"  clearActionEval: [ ' LocationPingManager.clearExistingPing( INFO.TempVars.container, INFO.TempVars.targetObj );  LocationPingManager.pingRandomLocation( { dist_min: 10, dist_max: INFO.TempVars_distanceRange }, INFO.mainObj ); ' ] ",
+				" }; */ ",
+			
+
 				" LocationPingManager.pingRandomLocation( { dist_min: 10, dist_max: INFO.TempVars_distanceRange }, INFO.mainObj ); ",
 
 				" /* TODO: Change Size Increase Logic:  */ "
