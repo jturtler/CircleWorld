@@ -10,19 +10,18 @@ PortalManager.remainSpawnNum = 15; //StageManager.framerate * 2;
 
 
 PortalManager.portalProp_DEFAULT = {
-	name: " CommonObjManager.getUniqueObjName( { type: PortalManager.objType } ); ",
+	name: "[EVAL] CommonObjManager.getUniqueObjName( { type: PortalManager.objType } ); ",
 	width_half: 10,
 	speed: 0,
 	strength: 150,	// Make it decrease as it is attacked by circle?   slow increase rate?
 	strengthIncrease: 1,
-	color: " INFO.TempVars_color = PortalManager.getNextPortalTeamColor( PortalManager.getPortalContainers().length ); INFO.TempVars_color; ",
-	team: " INFO.TempVars_color; ",
+	color: "[EVAL] INFO.TempVars_color = PortalManager.getNextPortalTeamColor( PortalManager.getPortalContainers().length ); INFO.TempVars_color; ",
+	team: "[EVAL] INFO.TempVars_color; ",
 
 	spawnFreqency: PortalManager.portalSpawnFrequency, // every 3 tick, create new itemData..
 	remainSpawnNum: PortalManager.remainSpawnNum,
 	positionFixed: false,
-	spawnCircleProp: { },
-	onObjCreate_EvalFields: [ "itemData.name", "itemData.color", "itemData.team" ]	
+	spawnCircleProp: { }
 };
 
 // ------------------------------------
@@ -116,7 +115,6 @@ PortalManager.spawnCircle = function ( container )
 			spawnCircleProp.team = itemData.team;			
 			spawnCircleProp.startPosition = { x: container.x, y: container.y };
 			//spawnCircleProp.collisionExceptions = [ { target: container, turns: 4 } ];  // <-- circular loop on Util.traverseEval
-			spawnCircleProp.onObjCreate_EvalFields_Exceptions = [ 'itemData.color', 'itemData.team', 'itemData.startPosition' ];
 
 			var circleObj = CircleManager.createCircleObj( spawnCircleProp );
 			itemData.remainSpawnNum--;

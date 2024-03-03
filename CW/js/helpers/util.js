@@ -66,33 +66,18 @@ Util.onObjCreate_EvalFields = function( itemData )
 {
 	try
 	{
-		// itemData.onObjCreate_EvalFields = [ 'itemData.name', 'itemData.color' ];
-		// spawnCircleProp.onObjCreate_EvalFields_Exceptions = [ 'itemData.color', 'itemData.team', 'itemData.startPosition' ];
-
-		if ( !itemData.onObjCreate_EvalFields ) itemData.onObjCreate_EvalFields = [];
-		if ( !itemData.onObjCreate_EvalFields_Exceptions ) itemData.onObjCreate_EvalFields_Exceptions = [];
-
-		itemData.onObjCreate_EvalFields.forEach( itemStr => 
+		for ( var prop in itemData )
 		{
-			if ( itemData.onObjCreate_EvalFields_Exceptions.indexOf( itemStr ) >= 0 ) { }
-			else
+			var propVal = itemData[prop];
+
+			if ( Util.isTypeString( propVal ) && propVal.trim().indexOf( '[EVAL]' ) === 0 )
 			{
-				try 
-				{
-					var propStr = eval( itemStr );
-
-					if ( Util.isTypeString( propStr ) ) eval( itemStr + ' = ' + propStr );
-				}
-				catch (errMsg) {  console.log( 'ERROR in Util.onObjCreate_EvalFields, evalKey operation, errMsg: ' + errMsg);  }
+				itemData[prop] = eval( propVal.replace( '[EVAL]', '' ) );	
 			}
-		});
-
-		delete itemData.onObjCreate_EvalFields;
-
+		}
 	}
 	catch (errMsg) {  console.log('ERROR in Util.onObjCreate_EvalFields, errMsg: ' + errMsg);  }
 };
-
 
 // ---------------------------
 

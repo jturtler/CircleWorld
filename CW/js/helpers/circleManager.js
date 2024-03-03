@@ -8,16 +8,15 @@ CircleManager.colorTeamList_DEFAULT = [ "blue", "orange", "gray", "white", "blac
 // -----------------------------
 
 CircleManager.circleProp_DEFAULT = {
-	name: " CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ); ", // Could be, ideally, set like 'circle_blue_1'
-	speed: "Util.getRandomInRange(5, 8)",
-	width_half: "Util.getRandomInRange(8, 13)",
-	angle: "Util.getRandomInRange( 0, 360 )",
-	strength: " Util.getRandomInRange(8, 13); ",
-	strengthIncrease: " Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
-	color: " INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color; ",
-	team: " INFO.TempVars_color; ",
-	behaviors: { },
-	onObjCreate_EvalFields: [ "itemData.name", "itemData.speed", "itemData.width_half", "itemData.angle", "itemData.strength", "itemData.strengthIncrease", "itemData.color", "itemData.team" ]
+	name: "[EVAL] CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ); ", // Could be, ideally, set like 'circle_blue_1'
+	speed: "[EVAL] Util.getRandomInRange(5, 8)",
+	width_half: "[EVAL] Util.getRandomInRange(8, 13)",
+	angle: "[EVAL] Util.getRandomInRange( 0, 360 )",
+	strength: "[EVAL] Util.getRandomInRange(8, 13); ",
+	strengthIncrease: "[EVAL] Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
+	color: "[EVAL] INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color; ",
+	team: "[EVAL] INFO.TempVars_color; ",
+	behaviors: { }
 };
 
 // -----------------------------

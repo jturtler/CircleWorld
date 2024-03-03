@@ -7,14 +7,13 @@ function OtherObjManager() { };
 OtherObjManager.objType = 'otherObj';
 
 OtherObjManager.otherObjProp_DEFAULT = {
-	name: " CommonObjManager.getUniqueObjName( { type: OtherObjManager.objType } ); ",
+	name: "[EVAL] CommonObjManager.getUniqueObjName( { type: OtherObjManager.objType } ); ",
 	width_half: 8,
 	speed: 0,
 	strength: 0.1,
 	strengthIncrease: 0,
 	color: "black",
 	team: "",
-	onObjCreate_EvalFields: [ "itemData.name" ] //, "itemData.color", "itemData.team" ]	
 };
 
 // ------------------------------------
