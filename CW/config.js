@@ -1,0 +1,403 @@
+var CONFIG_JSON =
+{
+	"INFO_Vars": 
+	{
+		"colorTeamList": [ "blue", "orange", "gray", "white", "black", "purple" ],
+
+		"printClickedObj": false,
+
+		"ObjSettings": 
+		{
+			"NOTE": "This overrides the default setting value in code.  In code, there are default values.",
+
+			"preRunEval": [
+				" /* ShortCut INFO variables to long named ones.. */ ",
+				" INFO.CIR_SETS = INFO.ObjSettings.CircleSettings; ",
+				" INFO.C_Size = INFO.CIR_SETS.sizeChangeLogic; ",
+				" INFO.C_W4CR = INFO.CIR_SETS.innerCircle_W4CR; ",
+				" INFO.C_AgeL = INFO.CIR_SETS.ageLogic; "
+			],
+			"CircleSettings": 
+			{
+				"ageLogic": {
+					"ageIncreaseCheckInTickEval": "( StageManager.frameCount % Math.round( createjs.Ticker.framerate ) === 0 ) ? true: false;",
+					"NOTE": "Aged in every 'framerate'th time <-- which is once per second. ",
+					"ageIncreaseActionsEval": [
+						" var obj = INFO.TempVars.obj; ",
+						" var itemData = obj.itemData; ",
+
+						" /* --- float addition produce long decimal number, ignore it. --- */ ",
+						" itemData.width_half += CircleManager.adjustUpWhenMax( obj, 'width_half', INFO.C_Size.width_half_UpByAge ); ",
+						" itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', itemData.strengthIncrease ); ",
+						" itemData.behaviors.proxyDistance = CircleManager.setAgeAdjustedProxyDistance( itemData ); ",
+
+						" if ( !itemData.sizeMaxReached && itemData.width_half >= INFO.C_Size.width_halfMax ) { ", 
+						"    itemData.sizeMaxReached = true; ",
+						"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'aqua', width_half: INFO.C_W4CR.width_half + 2, shape: 'circle' } ); ",
+
+						"    if ( !INFO.appMode_portal ) {  itemData.team = '';  itemData.color = Util.getRandomColorHex();  } ",
+						" } ",
+
+						" if ( !itemData.strengthMaxReached && itemData.strength >= INFO.C_Size.strengthMax ) { ", 
+						"    itemData.strengthMaxReached = true; ",
+						"    CommonObjManager.drawShapeLine_Obj( obj, { color: 'purple', width_half: INFO.C_W4CR.width_half + 3, shape: 'circle' } ); ",
+						" } ",
+
+						" CircleManager.sizeChangeRedraw( obj ); "
+					],
+					"atAgeChanges": {
+						"5": [
+							{ "bounceActionBehaviorSet": true }
+						],
+						"10": [
+							{ "innerCircleAdd": true, "settingName": "innerCircle_W4CR" },
+							{ "proxyDetectionBehaviorSet": true },
+							{ "chaseActionBehaviorSet": true }
+						]
+					}
+				},
+				"bounceActionLogic": {
+					"collisionAgainAvoidTicks": 10,
+					"bounceLogicEval": [
+						" INFO.TempVars.movement.x = -INFO.TempVars.movement.x; ",
+						" INFO.TempVars.movement.y = -INFO.TempVars.movement.y; ",
+						" CommonObjManager.highlightForPeriod( INFO.TempVars.obj, { color: 'yellow', shape: 'circle', endCount: 6, sizeOffset: 2 } ); "
+					]
+				},
+				"innerCircle_W4CR": { 
+					"width_half": 4, 
+					"color": "[RandomColorHex]"
+				},
+				"proxyDetectionLogic": {
+					"proxyDistance": 100,
+					"proxyDistanceWidthTimes": 4.0,
+					"showDetectionLines": false,
+					"detectionLineColor": "yellow"
+				},
+				"chaseActionLogic": {
+					"angleChangeMax_perTick": 0.4,
+					"chaseTargetEval": [ " ( ( !INFO.TempVars.srcObj.itemData.team || INFO.TempVars.srcObj.itemData.team !== INFO.TempVars.trgObj.itemData.team ) ",
+						"  && ( INFO.TempVars.srcObj.itemData.width_half > INFO.TempVars.trgObj.itemData.width_half || INFO.TempVars.srcObj.itemData.width_half >= INFO.C_Size.width_halfMax ) ", 
+						"  && ( INFO.TempVars.srcObj.itemData.objType === CircleManager.objType && INFO.TempVars.trgObj.itemData.objType === CircleManager.objType ) ",
+						" ) " 
+					],
+					"chaseLineColor": "red",
+					"chaseMovementEval": " 'NOT YET IMPLEMENTED.. ' ", 
+					"onCollision": "fight"
+				},
+				"fightLogic": {
+					"fightWinSizeChange": 0.2,
+					"fightLoseSizeChange": -0.5,
+					"fightWinStrengthChange": 0.1,
+					"fightLoseStrengthChange": -0.5,
+					"winEval": [
+						" var winObjT = INFO.TempVars.winObj; ",
+						" CircleManager.winStatusChanges( winObjT ); ",
+						" CircleManager.sizeChangeRedraw( winObjT ); ",
+						" CommonObjManager.highlightForPeriod( winObjT, { color: 'red', shape: 'circle', endCount: 2, sizeOffset: 4 } ); "
+					],
+					"loseEval": [
+						" var loseObjT = INFO.TempVars.loseObj; ",
+						" CircleManager.loseStatusChanges( loseObjT ); ",
+						" CircleManager.sizeChangeRedraw( loseObjT ); ",
+						" CommonObjManager.highlightForPeriod( loseObjT, { color: 'gray', shape: 'circle', endCount: 2, sizeOffset: 4 } ); "
+					]
+				},
+				"sizeChangeLogic": {
+					"speedDownRate_bySizeUp": 0.1,
+					"speedMin": 4,
+					"width_halfMax": 30,
+					"width_half_UpByAge": 0.4,
+					"strengthMax": 150,
+					"downRateWhenMax": 0.2
+				},
+				"uiLogic": {
+					"clickHighlightColor": "green",
+					"swipeDirectionLineColor": "#8E44AD",
+					"swipeForceDirectionMS": 700,
+					"strengthShow": true
+				},
+				"endWinnerogic": {
+					"endWinCondition": [
+						" if ( !INFO.appMode_portal ) ( CircleManager.getCircleContainers().length === 1 ); ",
+						" else ( Util.getArrProp_UniqueVals( CircleManager.getCircleContainers().map( item => item.itemData ), 'team' ).length === 1 ); "
+					],
+					"winEndAction": [
+						"alert( 'End Winner!!' ); "
+					]
+				}
+			}
+		},
+
+		"circlePropMin": { 
+			"name": "[EVAL] CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ); ",
+			"speed": "[EVAL] Util.getRandomInRange(5, 8); ",
+			"width_half": "[EVAL] Util.getRandomInRange(8, 13); ",
+			"strength": "[EVAL] Util.getRandomInRange(8, 13); ",
+			"strengthIncrease": "[EVAL] Util.getRandomInRange( 1, 3 ); ",
+			"angle": "[EVAL] Util.getRandomInRange( 0, 360 ); ",
+			"color": "[EVAL] INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color; ",
+			"team": "[EVAL] INFO.TempVars_color; ",
+			"startPosition": "[EVAL] AppUtil.getPosition_Center(); ",
+			"behaviors": {	},
+			"innerCircle": { },
+			"info": { "fearObjs": [], "killCount": 0 }
+		},
+
+		"onStartRunEval_Circle": [
+			" createjs.Ticker.framerate = 20; /* 20 frames run in a seconds.. */ ",
+			" INFO.frameCount = 0; ",
+			" INFO.maxCircleSpawnNum = 30; ",
+			" INFO.circleSpawnCount = 0; ",
+
+			" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
+		],
+		"onStageFrameMoveEval_Circle": [
+			" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
+			" { ",
+			"   var circleContainer = CircleManager.createCircleObj( Util.cloneJson( INFO.circlePropMin ) ); ",
+			"   INFO.circleSpawnCount++; ",
+			"   circleContainer.itemData.onFrameChange = container => MovementHelper.moveNext( container ); ",
+			" } ",
+			" ",
+			" INFO.frameCount++; "	
+		],
+		"onAddCircleKeyClick": [
+			" var dataInfo = { color: 'black', startPosition: AppUtil.getPosition_Center(), width_half: CircleManager.getAverage( 'width_half' ), strength: CircleManager.getAverage( 'strength' ) }; ",
+			" dataInfo = Util.mergeJson( Util.cloneJson( INFO.circlePropMin ), dataInfo ); ",
+			
+			" CircleManager.createCircleObj( dataInfo ); ",
+	
+			" /* If the stage is paused, show the added circle right away by updating stage. */ ",
+			" if ( createjs.Ticker.paused ) StageManager.stage.update(); "
+		],
+		"onStageFrameMoveEval_EndWin": [
+			" if ( ( ( INFO.frameCount % createjs.Ticker.framerate ) === 0 ) ) ", 
+			" { ",
+			"    if ( Util.evalTryCatch( INFO.endWinCondition ) ) Util.evalTryCatch( INFO.winEndAction ); ",
+			" } "
+		]
+	},
+	"appModes":
+	[
+		{
+			"modeName": "c5_Chase",
+			"onStartRunEval": [
+				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
+
+				" INFO.maxCircleSpawnNum = 50; "
+			],
+			"onStageFrameMoveEval": [
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); ",
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
+			],
+			"NOTES": "MORE ONES: c6_King, c6_Spec"
+		},
+		{
+			"modeName": "portal4",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 20; ",
+				" INFO.appMode_portal = true; ",
+				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['5']; ",
+				" ",
+				" for ( var i = 0; i < 4; i++ ) PortalManager.createPortalObj( { spawnCircleProp: Util.cloneJson( INFO.circlePropMin ) } ); ",
+
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
+			],
+			"onStageFrameMoveEval": [ 
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
+			]	
+		},
+		{
+			"modeName": "c6_ZLife",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 20; ",
+				" INFO.frameCount = 0; ",
+				
+				" WorldRender.resizeCanvas( { offset_height: 60 } ); ",
+				" INFO.TempVars_distanceRange = 200; ",
+
+				" INFO.CIR_SETS.chaseActionLogic.angleChangeMax_perTick = 2; ",
+				" INFO.CIR_SETS.sizeChangeLogic.width_half_UpByAge = 0.1; ",
+				" INFO.CIR_SETS.sizeChangeLogic.width_halfMax = 15; ",
+				" INFO.CIR_SETS.uiLogic.strengthShow = false; ",
+									
+				" ",
+				" var mainObjProp = { ",
+				"    name: CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ), ",
+				"    speed: 1, ",
+				"    width_half: Util.getRandomInRange(1, 2), ",
+				"    strength: Util.getRandomInRange(1, 2), ",
+				"    strengthIncrease: Util.getRandomInRange( 1, 2 ), ",
+				"    angle: Util.getRandomInRange( 10, 80 ), ",
+				"    color: Util.getRandomInList( INFO.colorTeamList ), ",
+				"    team: 'mainCircle', ",
+				"    startPosition: AppUtil.getPosition_Type( { type: 'bottomLeft', offset: 4 } ), ",
+				"    behaviors: {}, ",
+				"    innerCircle: {}, ",
+				"    info: { fearObjs: [], killCount: 0 }, ",
+				"    k_Note: 'should remember (for a while) the obj that hurt you.  And after 10 kill, it can transform..' ",
+				" }; ",
+
+				" var shelterProp = { ",
+				"    name: CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ) + '_Shelter', ",
+				"    speed: 0, ",
+				"    width_half: 30, ",
+				"    strength: 2000, ",
+				"    strengthIncrease: 0, ",
+				"    angle: 0, ",
+				"    color: Util.getRandomInList( INFO.colorTeamList ), ",
+				"    team: 'mainCircle', ",
+				"    startPosition: AppUtil.getPosition_Type( { type: 'bottomLeft', offset: 4 } ), ",
+				"    behaviors: {}, ",
+				"    innerCircle: {}, ",
+				"    info: { fearObjs: [], killCount: 0 }, ",
+				"    k_Note: 'should remember (for a while) the obj that hurt you.  And after 10 kill, it can transform..' ",
+				" }; ",
+
+				" /* ---- Disable Features ---- */ ",
+				" INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges = ''; ",
+				" ",
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ ",
+				" ",
+				" /* Create a circle.. with some features.. */ ",
+				" INFO.mainObj = CircleManager.createCircleObj( Util.cloneJson( mainObjProp ) ); ",
+				" INFO.mainObj.itemData.onFrameChange = container => MovementHelper.moveNext( container ); ",
+
+				" INFO.shelterObj = CircleManager.createCircleObj( Util.cloneJson( shelterProp ) ); ",
+				" INFO.shelterObj.itemData.onFrameChange = container => { }; ",
+				" INFO.shelterObj.itemData.onDraw = container => { }; ",
+				" var shObjProp = { color: INFO.shelterObj.itemData.color, sizeRate: 1.0, sizeOffset: INFO.TempVars_distanceRange, shape: 'circle' }; ",
+				" INFO.shelterObj.itemData.proxyShape = CommonObjManager.drawShapeLine_Obj( INFO.shelterObj, shObjProp ); ",
+
+
+				" /* var pingShapeInfoJson = { existingContainer: pingObj, updateStage: true, color: 'red', width_half: 2 }; ",
+
+				" container.itemData.behaviors.moveTarget = { ",
+				"  targetObj: pingObj, ",
+				"  clearConditionEval: [ ' ( MovementHelper.getDistance( INFO.TempVars.container, INFO.TempVars.targetObj ) <= LocationPingManager.touchOffset( INFO.TempVars.container )  ) ' ], ",
+				"  clearActionEval: [ ' LocationPingManager.clearExistingPing( INFO.TempVars.container, INFO.TempVars.targetObj );  LocationPingManager.pingRandomLocation( { dist_min: 10, dist_max: INFO.TempVars_distanceRange }, INFO.mainObj ); ' ] ",
+				" }; */ ",
+			
+
+				" LocationPingManager.pingRandomLocation( { dist_min: 10, dist_max: INFO.TempVars_distanceRange }, INFO.mainObj ); ",
+
+				" /* TODO: Change Size Increase Logic:  */ "
+			],
+			"onStageFrameMoveEval": [
+				" if ( ( INFO.frameCount % 30 ) === 0 ) ", 
+				" { ",
+				" } ",
+				" ",
+				" INFO.frameCount++; "				
+			]
+		}
+	],
+	"appModes_OLD":
+	[
+		{
+			"modeName": "c1_Spawn30",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 20; /* 20 frames run in a seconds.. */ ",
+				" INFO.frameCount = 0; ",
+				" INFO.maxCircleSpawnNum = 30; ",
+				" INFO.circleSpawnCount = 0; ",
+				" ",
+				" /* ---- Disable Features ---- */ ",
+				" INFO.C_AgeL.atAgeChanges = ''; ",
+				" ",
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
+			],
+			"onStageFrameMoveEval": [
+				" if ( ( ( INFO.frameCount % 30 ) === 0 ) && ( INFO.circleSpawnCount < INFO.maxCircleSpawnNum ) ) ", 
+				" { ",
+				"   var circleContainer = CircleManager.createCircleObj( Util.cloneJson( INFO.circlePropMin ) ); ",
+				"   INFO.circleSpawnCount++; ",
+				"   circleContainer.itemData.onFrameChange = container => MovementHelper.moveNext( container ); ",
+				" } ",
+				" ",
+				" INFO.frameCount++; "				
+			]
+		},
+		{
+			"modeName": "c2_Bounce",
+			"onStartRunEval": [
+				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
+
+				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['10']; "
+			],
+			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "
+		},
+		{
+			"modeName": "c3_Age10",
+			"onStartRunEval": [
+				" Util.evalTryCatch( INFO.onStartRunEval_Circle ); ",
+
+				" INFO.ObjSettings.CircleSettings.proxyDetectionLogic.showDetectionLines = true; ",
+				" INFO.ObjSettings.CircleSettings.chaseActionLogic = ''; "
+			],
+			"onStageFrameMoveEval": " Util.evalTryCatch( INFO.onStageFrameMoveEval_Circle ); "			
+		},
+		{
+			"modeName": "portal2",
+			"onStartRunEval": [
+				" createjs.Ticker.framerate = 20; ",
+				" INFO.appMode_portal = true; ",
+				" delete INFO.ObjSettings.CircleSettings.ageLogic.atAgeChanges['5']; ",
+				" ",
+				" for ( var i = 0; i < 2; i++ ) PortalManager.createPortalObj( { spawnCircleProp: Util.cloneJson( INFO.circlePropMin ) } ); ",
+
+				" /* $( '#btnAddObj' ).off( 'click' ).click( () => { Util.evalTryCatch( INFO.onAddCircleKeyClick ); } ); */ "
+			],
+			"onStageFrameMoveEval": [
+				" Util.evalTryCatch( INFO.onStageFrameMoveEval_EndWin ); "
+			 ]	
+		}
+	],
+	"structureNotes":
+	{
+		"NOTE": "Below Information is OLD, OutDated..",
+		"circle_Example": 
+		{
+			"container":
+			{
+				"x": 300,
+				"y": 200,
+				"itemData": {
+					"width_half": 8,
+					"color": "blue",
+					"speed": 5,
+					"name": "circle_blue_1",
+					"angle": 127,
+					"strength": 7,
+					"strengthIncrease": 0.20,
+					"innerCircle": { "width_half": 4, "color": "black" },
+					"behaviors": { "proxyDetection": true, "bounceAction": true, "chaseAction": true }
+				},
+				"children": [],
+				"ref_Shape": "",
+				"ref_innerCircleShape": ""
+			}
+		},
+		"portal_Example": 
+		{
+			"container":
+			{
+				"x": 300,
+				"y": 200,
+				"itemData": {
+					"width_half": 7,
+					"color": "blue",
+					"speed": 0,
+					"name": "portal_blue_1",
+					"strength": 1000,
+					"strengthIncrease": 0,
+					"spawnFreqency": 3,
+					"remainSpawnNum": 15,
+					"positionFixed": false					
+				},
+				"children": []
+			}
+		}
+	}
+}

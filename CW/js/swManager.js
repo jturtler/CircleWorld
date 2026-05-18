@@ -8,7 +8,21 @@ SwManager.swInstallObj;
 
 // --------------------------------------------
 
+SwManager.isLocalDev = function () {
+	var host = location.hostname;
+	return host === 'localhost' || host === '127.0.0.1' || location.protocol === 'file:';
+};
+
 SwManager.initialSetup = function (callBack) {
+
+	// Skip service worker registration when running locally
+	if (SwManager.isLocalDev()) {
+		console.log('[SwManager] Local dev detected — skipping service worker.');
+		SwManager.registrationState = 'sw: skipped (local dev)';
+		callBack();
+		return;
+	}
+
 	// checkRegisterSW
 	if (('serviceWorker' in navigator)) {
 		SwManager.runSWregistration(callBack);
@@ -102,7 +116,7 @@ SwManager.checkNewAppFile_OnlyOnline = function (runFunction, option)
 {
 	if (!option) option = {};
 	// 'checkTypeTitle' Use on below actual msg.
-	if (!option.checkTypeTitle) ption.checkTypeTitle = 'UNKNOWN CHECK TYPE';
+	if (!option.checkTypeTitle) option.checkTypeTitle = 'UNKNOWN CHECK TYPE';
 
 	SwManager.newAppFileExists_EventCallBack = runFunction;
 	//SwManager.swUpdateCase = false;

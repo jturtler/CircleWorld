@@ -79,6 +79,7 @@
 	<script src="js/libraries/easeljs.min.js"></script>
 	<script src="js/libraries/jquery-3.4.1.min.js"></script>
 
+	<script src="config.js"></script>
 	<script src="js/helpers/util.js"></script>
 	<script src="js/helpers/configManager.js"></script>
 	<script src="js/helpers/appUtil.js"></script>
@@ -144,14 +145,14 @@
 
 				WorldRender.setInfoJson( { canvasName: 'demoCanvas', winTag: $( window ) } );
 
+				INFO.configJson = CONFIG_JSON; // Set 'configJson' under 'INFO' for global access.
+				WorldRender.startUp();
 
-				ConfigManager.loadConfigFile( 'config.json', ( configJson ) => 
-				{
-					INFO.configJson = configJson; // Set 'configJson' under 'INFO' for global access.
-
-					// StartUp WorldRender - the main class.
-					WorldRender.startUp();
-				});
+				//ConfigManager.loadConfigFile( 'config.json', ( configJson ) => 
+				// {   INFO.configJson = configJson; // Set 'configJson' under 'INFO' for global access.
+				//	    // StartUp WorldRender - the main class.
+				//	    WorldRender.startUp();
+				// });
 			});
 		});
 
