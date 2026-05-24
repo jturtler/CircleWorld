@@ -5,17 +5,37 @@ CircleManager.objType = 'circle';
 
 CircleManager.colorTeamList_DEFAULT = [ "blue", "orange", "gray", "white", "black", "purple" ];
 
+// Archetypes determine starting adjustments to basic stats
+CircleManager.archetypeList = [ 'aggressive', 'cautious', 'fast_small', 'slow_large', 'scavenger' ];
+
+CircleManager.archetypeTraits = {
+	aggressive:    { strengthMul: 1.25, speedMul: 1.0, sizeMul: 1.0, energyMul: 1.0 },
+	cautious:      { strengthMul: 0.9,  speedMul: 0.8, sizeMul: 1.0, energyMul: 1.1 },
+	fast_small:    { strengthMul: 0.8,  speedMul: 1.5, sizeMul: 0.7, energyMul: 0.9 },
+	slow_large:    { strengthMul: 1.1,  speedMul: 0.7, sizeMul: 1.4, energyMul: 1.2 },
+	scavenger:     { strengthMul: 0.85, speedMul: 0.95,sizeMul: 0.9, energyMul: 1.4 }
+};
+
 // -----------------------------
 
 CircleManager.circleProp_DEFAULT = {
-	name: "[EVAL] CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ); ", // Could be, ideally, set like 'circle_blue_1'
-	speed: "[EVAL] Util.getRandomInRange(5, 8)",
-	width_half: "[EVAL] Util.getRandomInRange(8, 13)",
-	angle: "[EVAL] Util.getRandomInRange( 0, 360 )",
-	strength: "[EVAL] Util.getRandomInRange(8, 13); ",
-	strengthIncrease: "[EVAL] Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); ",
-	color: "[EVAL] INFO.TempVars_color = Util.getRandomInList( INFO.colorTeamList ); INFO.TempVars_color; ",
-	team: "[EVAL] INFO.TempVars_color; ",
+	name: function() { return CommonObjManager.getUniqueObjName( { type: CircleManager.objType } ); },
+	// Basic physical traits - use functions so they are generated safely without eval strings
+	speed: function() { return Util.getRandomInRange(5, 8); },
+	width_half: function() { return Util.getRandomInRange(8, 13); },
+	angle: function() { return Util.getRandomInRange( 0, 360 ); },
+	strength: function() { return Util.getRandomInRange(8, 13); },
+	strengthIncrease: function() { return Util.getRandomInRange( 0.10, 0.25, { decimal: 2}); },
+	color: function() { var c = Util.getRandomInList( INFO.colorTeamList || CircleManager.colorTeamList_DEFAULT ); return c; },
+	team: function(item){ return item.color; },
+	// Archetype and energy
+	archetype: function() { return Util.getRandomInList( CircleManager.archetypeList ); },
+	energy: function(item){
+		// base energy depends on size and strength; functions may be resolved in multiple passes
+		var size = (typeof item.width_half === 'number') ? item.width_half : 10;
+		var str = (typeof item.strength === 'number') ? item.strength : 10;
+		return Math.round( (size * 2) + (str * 1.2) );
+	},
 	behaviors: { }
 };
 
@@ -49,6 +69,22 @@ CircleManager.createCircleObj = function ( inputObjProp )
 
 	var itemData = container.itemData;
 	itemData.objType = CircleManager.objType;
+
+	// Initialize archetype-based adjustments
+	if ( itemData.archetype && CircleManager.archetypeTraits[itemData.archetype] )
+	{
+		var t = CircleManager.archetypeTraits[itemData.archetype];
+		itemData.strength = Math.round( itemData.strength * (t.strengthMul || 1) );
+		itemData.speed = Util.decimalSet( itemData.speed * (t.speedMul || 1), 2 );
+		itemData.width_half = Util.decimalSet( itemData.width_half * (t.sizeMul || 1), 2 );
+		itemData.energy = Math.round( itemData.energy * (t.energyMul || 1) );
+	}
+
+	// initialize memory and learning stats
+	if ( !itemData.memory ) itemData.memory = { beaten: [], feared: [], wins: 0, losses: 0 };
+	if ( itemData.energy === undefined ) itemData.energy = Math.round( (itemData.width_half * 2) + (itemData.strength * 1.2) );
+	// record energy max for ratio-based slowdowns
+	itemData.energyMax = itemData.energy;
 
 	
 	// -- SET EVENTS SECTION ---
@@ -196,6 +232,27 @@ CircleManager.fightObjStatusChange = function( winObj, loseObj )
 	var fightLogic = cSettings.fightLogic;
 	// var sizeChangeLogic = cSettings.sizeChangeLogic;
 
+	// Update memory / learning and win/loss counters
+	if ( winObj && winObj.itemData ) {
+		winObj.itemData.memory = winObj.itemData.memory || { beaten: [], feared: [], wins:0, losses:0 };
+		winObj.itemData.memory.beaten.push( loseObj.itemData.name || loseObj.id );
+		winObj.itemData.memory.wins = (winObj.itemData.memory.wins || 0) + 1;
+	}
+	if ( loseObj && loseObj.itemData ) {
+		loseObj.itemData.memory = loseObj.itemData.memory || { beaten: [], feared: [], wins:0, losses:0 };
+		loseObj.itemData.memory.feared.push( winObj.itemData.name || winObj.id );
+		loseObj.itemData.memory.losses = (loseObj.itemData.memory.losses || 0) + 1;
+	}
+
+	// Energy transfer / consumption: winner gains a portion of loser's size/strength as energy
+	try {
+		var energyGain = Math.round( (loseObj.itemData.width_half * 1.5) + (loseObj.itemData.strength * 0.5) );
+		if ( winObj.itemData.energy === undefined ) winObj.itemData.energy = 0;
+		winObj.itemData.energy += energyGain;
+	}
+	catch(e) { console.error('ERROR calculating energyGain: ' + e); }
+
+	// Allow config-driven custom evals (legacy support)
 	if ( fightLogic.winEval ) Util.evalTryCatch( fightLogic.winEval, { INFO_TempVars: { winObj: winObj } } );
 	if ( fightLogic.loseEval ) Util.evalTryCatch( fightLogic.loseEval, { INFO_TempVars: { loseObj: loseObj } } );
 };
@@ -236,6 +293,13 @@ CircleManager.winStatusChanges = function( obj )
 	obj.itemData.width_half += sizeUp;
 	obj.itemData.strength += CircleManager.adjustUpWhenMax( obj, 'strength', FightLG.fightWinStrengthChange);
 
+	// Learning/adaptation: increment wins and slightly increase future strength growth
+	obj.itemData.memory = obj.itemData.memory || { beaten:[], feared:[], wins:0, losses:0 };
+	obj.itemData.memory.wins = (obj.itemData.memory.wins || 0) + 1;
+
+	// Small adaptation: winning increases strengthIncrease marginally
+	obj.itemData.strengthIncrease = (obj.itemData.strengthIncrease || 0) + (0.01 * Math.min(5, obj.itemData.memory.wins));
+
 	CircleManager.decreaseSpeed( obj, Util.decimalSet( sizeUp * SizeCL.speedDownRate_bySizeUp, 2 ) );
 };
 
@@ -247,6 +311,12 @@ CircleManager.loseStatusChanges = function( obj )
 
 	CircleManager.decreseStrength( obj, FightLG.fightLoseStrengthChange );
 	CircleManager.decreaseSize( obj, FightLG.fightLoseSizeChange );
+
+	obj.itemData.memory = obj.itemData.memory || { beaten:[], feared:[], wins:0, losses:0 };
+	obj.itemData.memory.losses = (obj.itemData.memory.losses || 0) + 1;
+
+	// Losing makes them more cautious: reduce speed slightly
+	CircleManager.decreaseSpeed( obj, Util.decimalSet( (obj.itemData.speed || 1) * 0.05, 2 ) );
 };
 
 CircleManager.adjustUpWhenMax = function( obj, type, amount )

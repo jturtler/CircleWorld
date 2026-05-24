@@ -66,14 +66,44 @@ Util.onObjCreate_EvalFields = function( itemData )
 {
 	try
 	{
-		for ( var prop in itemData )
+		// Resolve generator functions and legacy [EVAL] strings.
+		// Multiple passes allow generator functions to depend on other generated fields.
+		var maxPass = 6;
+		for ( var pass = 0; pass < maxPass; pass++ )
 		{
-			var propVal = itemData[prop];
+			var anyChange = false;
 
-			if ( Util.isTypeString( propVal ) && propVal.trim().indexOf( '[EVAL]' ) === 0 )
+			for ( var prop in itemData )
 			{
-				itemData[prop] = eval( propVal.replace( '[EVAL]', '' ) );	
+				var propVal = itemData[prop];
+
+				// If value is a function, call it with the current itemData so it
+				// can reference other fields. Replace with returned value.
+				if ( typeof propVal === 'function' )
+				{
+					try {
+						itemData[prop] = propVal( itemData );
+						anyChange = true;
+					}
+					catch(err) { console.error('ERROR in Util.onObjCreate_EvalFields (func), ' + err); }
+				}
+				else if ( Util.isTypeString( propVal ) && propVal.trim().indexOf( '[EVAL]' ) === 0 )
+				{
+					// legacy fallback for configs that still use [EVAL] strings
+					try {
+						itemData[prop] = eval( propVal.replace( '[EVAL]', '' ) );
+						anyChange = true;
+					}
+					catch(err) { console.error('ERROR in Util.onObjCreate_EvalFields (eval), ' + err); }
+				}
+				else if ( Util.isTypeObject( propVal ) )
+				{
+					// Recurse into nested objects
+					Util.onObjCreate_EvalFields( propVal );
+				}
 			}
+
+			if ( !anyChange ) break;
 		}
 	}
 	catch (errMsg) {  console.log('ERROR in Util.onObjCreate_EvalFields, errMsg: ' + errMsg);  }

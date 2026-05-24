@@ -167,9 +167,27 @@ MovementHelper.moveNext = function (container)
 	}
 	else
 	{
-		// Set the new movements..
-		container.x += movement.x;
-		container.y += movement.y;	
+		// Energy-based movement: drain energy per tick and slow when low
+		try {
+			if ( itemData.energy !== undefined )
+			{
+				var drain = Util.decimalSet( (itemData.speed || 0) * ( (itemData.width_half || 1) / 10 ) * 0.5, 2 );
+				itemData.energy -= drain;
+
+				if ( itemData.energy < 0 ) itemData.energy = 0;
+
+				var energyRatio = (itemData.energyMax && itemData.energyMax > 0) ? (itemData.energy / itemData.energyMax) : 1;
+				var scale = Math.max(0.2, energyRatio);
+
+				container.x += movement.x * scale;
+				container.y += movement.y * scale;
+			}
+			else {
+				container.x += movement.x;
+				container.y += movement.y;
+			}
+		}
+		catch(e) { container.x += movement.x; container.y += movement.y; }
 	}
 
 	// Section: decrement turns of various lists
@@ -354,21 +372,32 @@ MovementHelper.getNearestChaseTarget = function( container, chaseActionLogic )
 
 	if ( itemData.behaviors?.proxyDetection && itemData.distances )
 	{
+		// Collect candidates and prefer previously beaten targets (learning)
+		var beatenCandidates = [];
+		var normalCandidates = [];
+
 		for ( var i = 0; i < itemData.distances.length; i++ )
 		{
 			var distanceJson = itemData.distances[i];
 
-			// Get nearest object with attack condition. (size equal or smaller)
 			if ( distanceJson.proxyDetected && MovementHelper.checkChaseTarget( container, distanceJson.ref_target ) )
 			{
-				distanceJson.chasable = true;
-				chaseTarget = distanceJson.ref_target;
-
-				if ( !distanceJson.ref_line ) distanceJson.ref_line = MovementHelper.drawProxyLine( container, distanceJson.ref_target, chaseActionLogic.chaseLineColor );				
-				else CommonObjManager.drawLine( { from: container, to: distanceJson.ref_target, color: chaseActionLogic.chaseLineColor, lineShape: distanceJson.ref_line, clear: true } );
-				
-				break;
+				var target = distanceJson.ref_target;
+				var beaten = (container.itemData.memory && container.itemData.memory.beaten && container.itemData.memory.beaten.indexOf( target.itemData?.name || target.id ) !== -1);
+				if ( beaten ) beatenCandidates.push( distanceJson );
+				else normalCandidates.push( distanceJson );
 			}
+		}
+
+		var pick = null;
+		if ( beatenCandidates.length > 0 ) pick = beatenCandidates.reduce( (a,b) => a.distance < b.distance ? a : b );
+		else if ( normalCandidates.length > 0 ) pick = normalCandidates.reduce( (a,b) => a.distance < b.distance ? a : b );
+
+		if ( pick ) {
+			pick.chasable = true;
+			chaseTarget = pick.ref_target;
+			if ( !pick.ref_line ) pick.ref_line = MovementHelper.drawProxyLine( container, pick.ref_target, chaseActionLogic.chaseLineColor );
+			else CommonObjManager.drawLine( { from: container, to: pick.ref_target, color: chaseActionLogic.chaseLineColor, lineShape: pick.ref_line, clear: true } );
 		}
 	}
 
@@ -504,19 +533,19 @@ MovementHelper.setDirection_moveTowardTarget = function( sourceObj, targetObj, s
 
 MovementHelper.getAngleTowardTarget = function( targetAngle, currAngle, maxAngle )
 {
-  // 1. Get simple angle diff number;
-  var angleDiff = targetAngle - currAngle;
-  
+  // 1. Get simple angle diff number; // var angleDiff = targetAngle - currAngle;
+  // 2. Switch angle diff direction (if large) to smaller angle diff direction. //  if ( angleDiff > 180 ) angleDiff = angleDiff - 360;
+  // 3. Limit the angle diff to max angle. //  if ( angleDiff > 0 && angleDiff > maxAngle ) angleDiff = maxAngle;
 
-  // 2. Switch angle diff direction (if large) to smaller angle diff direction.
-  if ( angleDiff > 180 ) angleDiff = angleDiff - 360;
-  else if ( angleDiff < -180 ) angleDiff = angleDiff + 360;
+	var diff = targetAngle - currAngle;
 
-  // 3. Limit the angle diff to max angle.
-  if ( angleDiff > 0 && angleDiff > maxAngle ) angleDiff = maxAngle;
-  if ( angleDiff < 0 && angleDiff > (-maxAngle) ) angleDiff = (-maxAngle);
+	if (diff > 180)  diff -= 360;
+	if (diff < -180) diff += 360;
 
-  return angleDiff;
+	if (diff >  maxAngle) diff =  maxAngle;
+	if (diff < -maxAngle) diff = -maxAngle;
+
+	return diff;  
 };
 
 // ---------------------------------------
